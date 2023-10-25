@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 
+import home.office.spring.domain.pessoa.model.PessoaModel;
+import home.office.spring.domain.pessoa.repository.PessoaRepository;
 import home.office.spring.domain.usuario.model.UsuarioModel;
 
 @Service
@@ -23,12 +26,17 @@ public class TokenService {
 	@Value("${api.security.token.issuer}")
 	private String issuer ;
 	
+	@Autowired
+	private PessoaRepository pessoaRepository;
+	
 	public String gerarToken(UsuarioModel usuario) {
+		PessoaModel pessoa = pessoaRepository.buscaPessoaUsuario(usuario.getId());
 		try {
 		    Algorithm algoritimo = Algorithm.HMAC256(secret);
 		    return JWT.create()
 		        .withIssuer(issuer)
 		        .withSubject(usuario.getEmail())
+		        .withClaim("id", pessoa.getId())
 		        .withExpiresAt(dataExpiracao())
 		        .sign(algoritimo);
 		} catch (JWTCreationException exception){
