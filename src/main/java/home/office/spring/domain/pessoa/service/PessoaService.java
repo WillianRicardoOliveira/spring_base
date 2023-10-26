@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import home.office.spring.domain.endereco.model.EnderecoModel;
-import home.office.spring.domain.endereco.model.EstadoModel;
 import home.office.spring.domain.endereco.repository.EnderecoRepository;
-import home.office.spring.domain.endereco.repository.EstadoRepository;
 import home.office.spring.domain.pessoa.model.PessoaModel;
 import home.office.spring.domain.pessoa.record.AtualizaPessoaRecord;
 import home.office.spring.domain.pessoa.record.DetalhePessoaRecord;
@@ -27,9 +25,6 @@ public class PessoaService {
 	private PessoaRepository repository;
 
 	@Autowired
-	private EstadoRepository estadoRepository;
-	
-	@Autowired
 	private EnderecoRepository enderecoRepository;
 	
 	@Autowired
@@ -37,9 +32,7 @@ public class PessoaService {
 	
 	@Transactional
 	public PessoaModel cadastrar(PessoaRecord dados) {		
-		var estado = new EstadoModel(dados.endereco().estado());
-		estadoRepository.save(estado);		
-		var endereco = new EnderecoModel(dados.endereco(), estado);
+		var endereco = new EnderecoModel(dados.endereco());
 		enderecoRepository.save(endereco);		
 		var usuario = new UsuarioModel(dados.usuario());
 		usuarioRepository.save(usuario);		

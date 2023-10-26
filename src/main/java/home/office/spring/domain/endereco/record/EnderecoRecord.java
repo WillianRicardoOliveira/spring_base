@@ -7,32 +7,33 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public record EnderecoRecord(	
-	@NotBlank(message="{logradouro.obrigatorio}")
-	String logradouro,
-	@NotBlank(message="{bairro.obrigatorio}")
-	String bairro,
 	@NotBlank(message="{cep.obrigatorio}")
 	@Pattern(regexp = "\\d{8}", message = "{cep.invalido}")
-	String cep,	
-	@NotNull(message="{estado.obrigatorio}")
+	String cep,
+	@NotBlank(message="{logradouro.obrigatorio}")
+	String logradouro,
+	String complemento,
+	@NotBlank(message="{bairro.obrigatorio}")
+	String bairro,
+	@NotNull(message="{localidade.obrigatorio}")
 	@Valid
-	EstadoRecord estado,
-	@NotBlank(message="{cidade.obrigatorio}")
-    String cidade,
+	String localidade,
+	@NotBlank(message="{uf.obrigatorio}")
+    String uf,
 	@NotBlank(message="{numero.obrigatorio}")
-	String numero,
-	String complemento
+	String numero
+	
 ) {
 	public EnderecoRecord(EnderecoModel dados) {
 		
 		this(
-				dados.getLogradouro(),
-				dados.getBairro(),
 				dados.getCep(),
-				new EstadoRecord(dados.getEstado()),
-				dados.getCidade(),
-				dados.getNumero(),
-				dados.getComplemento()
+				dados.getLogradouro(),
+				dados.getComplemento(),
+				dados.getBairro(),
+				dados.getLocalidade(),
+				dados.getUf(),
+				dados.getNumero()				
 				);
 		
 	}

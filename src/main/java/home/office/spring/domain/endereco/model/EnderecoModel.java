@@ -24,48 +24,48 @@ public class EnderecoModel {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String logradouro;
-    private String bairro;
-    private String cep;
-    @OneToOne(cascade = CascadeType.DETACH)
-	@JoinColumn(name = "id_estado")
-    private EstadoModel estado;
-    private String cidade;
-    private String numero;
-    private String complemento;
+	private String cep = "";
+	private String logradouro = "";
+	private String complemento = "";
+    private String bairro = "";    
+    private String localidade = "";
+    private String uf = "";
+    private String numero = "";    
     
-    public EnderecoModel(EnderecoRecord dados, EstadoModel estado) {
-    	this.logradouro = dados.logradouro();
-    	this.bairro = dados.bairro();
+    public EnderecoModel(EnderecoRecord dados) {
     	this.cep = dados.cep();
-    	this.estado = estado;
-    	this.cidade = dados.cidade();
-    	this.numero = dados.numero();
+    	this.logradouro = dados.logradouro();
     	this.complemento = dados.complemento();
+    	this.bairro = dados.bairro();
+    	this.localidade = dados.localidade();
+    	this.uf = dados.uf();
+    	this.numero = dados.numero();
     }
     
     public void atualizar(EnderecoRecord dados) {
-    	if(dados.logradouro() != null) {
-    		this.logradouro = dados.logradouro();
-    	}
-    	if(dados.bairro() != null) {
-    		this.bairro = dados.bairro();
-    	}
     	if(dados.cep() != null) {
     		this.cep = dados.cep();
     	}
-    	if(dados.estado() != null) {
-    		this.estado.atualizar(dados.estado());
-    	}
-    	if(dados.cidade() != null) {
-    		this.cidade = dados.cidade();
-    	}
-    	if(dados.numero() != null) {
-    		this.numero = dados.numero();
+    	if(dados.logradouro() != null) {
+    		this.logradouro = dados.logradouro();
     	}
     	if(dados.complemento() != null) {
     		this.complemento = dados.complemento();
     	}
+    	if(dados.bairro() != null) {
+    		this.bairro = dados.bairro();
+    	}
+    	
+    	if(dados.localidade() != null) {
+    		this.localidade = dados.localidade();
+    	}
+    	if(dados.uf() != null) {
+    		this.uf = dados.uf();
+    	}
+    	if(dados.numero() != null) {
+    		this.numero = dados.numero();
+    	}
+    	
     }
     
 }

@@ -5,24 +5,16 @@ create table usuario(
     primary key(id)
 );
 
-create table estado(
-    id bigint not null auto_increment,
-    nome varchar(100) not null,
-    sigla char(2) not null,
-    primary key(id)
-);
-
 create table endereco(
     id bigint not null auto_increment,
-    logradouro varchar(100) not null,
-    bairro varchar(100) not null,
     cep varchar(9) not null,
-    id_estado bigint not null,
-    cidade varchar(100) not null,
-    numero varchar(20) not null,
+    logradouro varchar(100) not null,
     complemento varchar(100),
-    primary key(id),
-    constraint fk_endereco_estado_id foreign key(id_estado) references estado(id)
+    bairro varchar(100) not null,
+    localidade varchar(100) not null,
+    uf varchar(2) not null,
+    numero varchar(20) not null,
+    primary key(id)
 );
 
 create table pessoa(
