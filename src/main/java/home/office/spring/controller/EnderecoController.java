@@ -18,7 +18,7 @@ public class EnderecoController {
 	private EnderecoService service;
 		
 	@GetMapping("/buscar/{cep}")
-	public ResponseEntity<EnderecoRecord> buscaDadosEndereco(@PathVariable String cep) throws Exception {
+	public ResponseEntity<EnderecoRecord> buscaDadosEndereco(@PathVariable Long cep) throws Exception {
 		return ResponseEntity.ok(service.buscaDadosEndereco(cep));	
 	}
 
