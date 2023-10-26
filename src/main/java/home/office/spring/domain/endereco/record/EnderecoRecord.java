@@ -1,5 +1,6 @@
 package home.office.spring.domain.endereco.record;
 
+import home.office.spring.domain.endereco.model.EnderecoModel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,4 +22,18 @@ public record EnderecoRecord(
 	@NotBlank(message="{numero.obrigatorio}")
 	String numero,
 	String complemento
-) {}
+) {
+	public EnderecoRecord(EnderecoModel dados) {
+		
+		this(
+				dados.getLogradouro(),
+				dados.getBairro(),
+				dados.getCep(),
+				new EstadoRecord(dados.getEstado()),
+				dados.getCidade(),
+				dados.getNumero(),
+				dados.getComplemento()
+				);
+		
+	}
+}
