@@ -30,7 +30,7 @@ public class PessoaController {
 	@Autowired
 	private PessoaService service;
 	
-	@PostMapping
+	@PostMapping("/cadastrar")
 	@Transactional
 	public ResponseEntity cadastrar(@RequestBody @Valid PessoaRecord dados, UriComponentsBuilder uriBuilder) {
 		PessoaModel pessoa = service.cadastrar(dados);
