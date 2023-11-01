@@ -20,16 +20,46 @@ create table endereco(
 create table pessoa(
     id bigint not null auto_increment,
     nome varchar(100) not null,
-    nascimento varchar(10) not null,
+    nascimento date not null,
     genero varchar(50) not null,
     cpf varchar(20) not null,
     telefone varchar(20) not null,
     id_endereco bigint not null,
     id_usuario bigint not null,
-    aceite_termo TINYINT(1) not null,
+    aceitar_termos TINYINT(1) not null,
     tipo_pessoa varchar(50) not null,
     ativo TINYINT(1) not null,
     primary key(id),
     constraint fk_pessoa_endereco_id foreign key(id_endereco) references endereco(id),
     constraint fk_pessoa_usuario_id foreign key(id_usuario) references usuario(id)
+);
+
+
+
+
+create table produto(
+    id bigint not null auto_increment,
+    nome varchar(100) not null,
+    descricao varchar(250),
+    quantidade int not null,
+    minimo int not null,
+    maximo int not null,
+    ativo tinyint not null,
+    primary key(id)
+);
+create table fornecedor(
+    id bigint not null auto_increment,
+    cnpj varchar(14) not null,
+    nome varchar(100) not null,
+    ativo TINYINT(1) not null,
+    primary key(id)    
+);
+create table representante(
+    id bigint not null auto_increment,
+    nome varchar(100) not null,
+    celular varchar(15) not null,
+    ativo TINYINT(1) not null,
+    id_fornecedor bigint not null,
+    primary key(id),
+    constraint fk_representante_fornecedor_id foreign key(id_fornecedor) references fornecedor(id)
 );

@@ -15,7 +15,7 @@ public record DetalhePessoaRecord(
 		String telefone,
 		EnderecoRecord endereco
 		//UsuarioModel usuario,
-		//Boolean aceiteTermo,
+		//Boolean aceitarTermos,
 		//TipoPessoa tipoPessoa,
 		//Boolean ativo
 		) {
@@ -30,7 +30,7 @@ public record DetalhePessoaRecord(
 				dados.getTelefone(),				
 				new EnderecoRecord(dados.getEndereco())
 				//dados.getUsuario(),
-				//dados.getAceiteTermo(),
+				//dados.getAceitarTermos(),
 				//dados.getTipoPessoa(),
 				//dados.getAtivo()
 		);

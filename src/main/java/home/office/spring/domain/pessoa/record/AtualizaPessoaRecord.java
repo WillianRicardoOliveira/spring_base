@@ -26,8 +26,8 @@ public record AtualizaPessoaRecord(
 	@NotNull(message="{usuario.obrigatorio}")
 	@Valid
 	UsuarioRecord usuario,
-	@NotNull(message="{aceiteTermo.obrigatorio}")
-	Boolean aceiteTermo,
+	@NotNull(message="{aceitarTermos.obrigatorio}")
+	Boolean aceitarTermos,
 	@NotNull(message = "{tipoPessoa.obrigatorio}")
 	TipoPessoa tipoPessoa
 ) {}

@@ -41,7 +41,7 @@ public class PessoaModel {
 	@OneToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_usuario")
 	private UsuarioModel usuario;
-	private Boolean aceiteTermo;
+	private Boolean aceitarTermos;
 	@Enumerated(EnumType.STRING)
 	private TipoPessoa tipoPessoa;
 	private Boolean ativo;
@@ -54,7 +54,7 @@ public class PessoaModel {
 		this.telefone = dados.telefone();
 		this.endereco = endereco;
 		this.usuario = usuario;
-		this.aceiteTermo = dados.aceiteTermo();
+		this.aceitarTermos = dados.aceitarTermos();
 		this.tipoPessoa = dados.tipoPessoa();
 		this.ativo = true;
 	}
