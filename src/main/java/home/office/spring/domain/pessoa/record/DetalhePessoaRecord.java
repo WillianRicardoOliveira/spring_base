@@ -1,10 +1,7 @@
 package home.office.spring.domain.pessoa.record;
 
-import home.office.spring.domain.endereco.model.EnderecoModel;
 import home.office.spring.domain.endereco.record.EnderecoRecord;
-import home.office.spring.domain.pessoa.constante.TipoPessoa;
 import home.office.spring.domain.pessoa.model.PessoaModel;
-import home.office.spring.domain.usuario.model.UsuarioModel;
 
 public record DetalhePessoaRecord(	
 		//Long id,

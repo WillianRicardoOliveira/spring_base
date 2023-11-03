@@ -9,7 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -28,7 +28,7 @@ public class RepresentanteModel {
 	private Long id;
 	private String nome;
 	private String celular;
-	@OneToMany(cascade = CascadeType.DETACH)
+	@ManyToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_fornecedor")
 	private FornecedorModel fornecedor;
 	private Boolean ativo;
@@ -46,6 +46,9 @@ public class RepresentanteModel {
 		}
 		if(dados.celular() != null) {
 			this.celular = dados.celular();
+		}
+		if(dados.fornecedor() != null) {
+			this.fornecedor.atualizar(dados.fornecedor());
 		}
 	}
 

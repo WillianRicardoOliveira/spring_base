@@ -19,33 +19,12 @@ public class FornecedorService {
 	
 	@Autowired
 	private FornecedorRepository repository;
-	
+		
 	@Transactional
-	public FornecedorModel cadastrar(FornecedorRecord dados) {		
+	public FornecedorModel cadastrar(FornecedorRecord dados) {	
 		var fornecedor = new FornecedorModel(dados);
-		repository.save(fornecedor);			
+		repository.save(fornecedor);
 		return fornecedor;
 	}
 	
-	public Page<ListaFornecedorRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
-		return repository.findAllByAtivoTrue(paginacao).map(ListaFornecedorRecord::new);
-	}
-	
-	@Transactional
-	public DetalheFornecedorRecord atualizar(AtualizaFornecedorRecord dados) {
-		FornecedorModel fornecedor = repository.getReferenceById(dados.id());
-		fornecedor.atualizar(dados);
-		return new DetalheFornecedorRecord(fornecedor);
-	}
-	
-	@Transactional
-	public void excluir(Long id) {
-		repository.getReferenceById(id).inativar();
-	}
-	
-	public DetalheFornecedorRecord detalhar(Long id) {
-		FornecedorModel fornecedor = repository.getReferenceById(id);
-		return new DetalheFornecedorRecord(fornecedor);
-	}
-
 }

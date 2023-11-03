@@ -2,7 +2,7 @@ package home.office.spring.domain.estoque.fornecedor.record;
 
 import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
 
-	public record DetalheFornecedorRecord(			
+	public record DetalheFornecedorRecord(	
 			String cnpj,
 			String nome,
 			Boolean ativo		
