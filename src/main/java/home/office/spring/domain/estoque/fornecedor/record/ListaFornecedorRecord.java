@@ -1,12 +1,13 @@
 package home.office.spring.domain.estoque.fornecedor.record;
 
 import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
-import home.office.spring.domain.pessoa.model.PessoaModel;
 
 public record ListaFornecedorRecord(				
 		Long id,
 		String cnpj,
 		String nome,
+		String telefone,
+		String descricao,
 		Boolean ativo
 ) {
 	
@@ -15,6 +16,8 @@ public record ListaFornecedorRecord(
 				dados.getId(), 
 				dados.getCnpj(), 
 				dados.getNome(),
+				dados.getTelefone(),
+				dados.getDescricao(),
 				dados.getAtivo()
 		);
 	}	

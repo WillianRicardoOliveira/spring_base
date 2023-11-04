@@ -24,22 +24,31 @@ public class FornecedorModel {
 	private Long id;
 	private String cnpj;
 	private String nome;
+	private String telefone;
+	private String descricao;	
 	private Boolean ativo;
 	
 	public FornecedorModel(FornecedorRecord dados) {	
 		this.cnpj = dados.cnpj();
 		this.nome = dados.nome();
+		this.telefone = dados.telefone();
+		this.descricao = dados.descricao();
 		this.ativo = true;			
 	}
 	
 	public void atualizar(AtualizaFornecedorRecord dados) { 		
 		if(dados.cnpj() != null) {
 			this.cnpj = dados.cnpj();
-		}
-		
+		}		
 		if(dados.nome() != null) {
 			this.nome = dados.nome();
-		}	
+		}
+		if(dados.telefone() != null) {
+			this.telefone = dados.telefone();
+		}
+		if(dados.descricao() != null) {
+			this.descricao = dados.descricao();
+		}
 	}
 	
 	public void inativar() {

@@ -36,7 +36,9 @@ create table pessoa(
 
 
 
-
+-- ########## --
+-- ESTOQUE    --
+-- ########## --
 create table produto(
     id bigint not null auto_increment,
     nome varchar(100) not null,
@@ -51,15 +53,8 @@ create table fornecedor(
     id bigint not null auto_increment,
     cnpj varchar(14) not null,
     nome varchar(100) not null,
+    telefone varchar(15) not null,
+    descricao varchar(250),    
     ativo TINYINT(1) not null,
-    primary key(id)    
-);
-create table representante(
-    id bigint not null auto_increment,
-    nome varchar(100) not null,
-    celular varchar(15) not null,
-    ativo TINYINT(1) not null,
-    id_fornecedor bigint not null,
-    primary key(id),
-    constraint fk_representante_fornecedor_id foreign key(id_fornecedor) references fornecedor(id)
+    primary key(id)
 );
