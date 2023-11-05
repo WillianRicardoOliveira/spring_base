@@ -36,9 +36,9 @@ create table pessoa(
 
 
 
--- ########## --
--- ESTOQUE    --
--- ########## --
+-- #################### --
+-- ESTOQUE              --
+-- #################### --
 create table produto(
     id bigint not null auto_increment,
     nome varchar(100) not null,
@@ -55,6 +55,16 @@ create table fornecedor(
     nome varchar(100) not null,
     telefone varchar(15) not null,
     descricao varchar(250),    
+    ativo TINYINT(1) not null,
+    primary key(id)
+);
+-- #################### --
+-- ATENDIMENTO          --
+-- #################### --
+create table cliente(
+    id bigint not null auto_increment,
+    nome varchar(100) not null,
+    telefone varchar(15) not null,
     ativo TINYINT(1) not null,
     primary key(id)
 );
