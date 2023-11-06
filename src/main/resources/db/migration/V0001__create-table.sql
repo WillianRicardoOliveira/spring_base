@@ -58,6 +58,15 @@ create table fornecedor(
     ativo TINYINT(1) not null,
     primary key(id)
 );
+create table compra(
+    id bigint not null auto_increment,
+    descricao varchar(250) not null,
+    status varchar(30) not null,
+    data date not null,
+    ativo TINYINT(1) not null,
+    primary key(id)
+);
+
 -- #################### --
 -- ATENDIMENTO          --
 -- #################### --
