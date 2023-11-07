@@ -9,6 +9,8 @@ import home.office.spring.domain.estoque.movimentacao.record.MovimentacaoRecord;
 import home.office.spring.domain.estoque.produto.model.ProdutoModel;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +32,7 @@ public class MovimentacaoModel {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	@Enumerated(EnumType.STRING)
 	private TipoMovimentacao tipoMovimentacao;
 	@ManyToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_compra")

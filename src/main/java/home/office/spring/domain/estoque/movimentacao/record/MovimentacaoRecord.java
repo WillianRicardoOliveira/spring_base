@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record MovimentacaoRecord(
-		@NotBlank(message = "{tipo_movimentacao.obrigatorio}")
+		@NotNull(message = "{tipo_movimentacao.obrigatorio}")
 		TipoMovimentacao tipoMovimentacao,
 		Long compra,
 		Long cliente,
 		@NotNull(message = "{produto.obrigatorio}")
 		Long produto,
-		@NotBlank(message = "{quantidade.obrigatorio}")
+		@NotNull(message = "{quantidade.obrigatorio}")
 		Integer quantidade
 ) {}

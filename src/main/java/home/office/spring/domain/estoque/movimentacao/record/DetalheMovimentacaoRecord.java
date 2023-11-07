@@ -23,8 +23,11 @@ import home.office.spring.domain.estoque.produto.record.DetalheProdutoRecord;
 		
 			this(	
 					dados.getTipoMovimentacao(),
-					new DetalheCompraRecord(dados.getCompra()),
-					new DetalheClienteRecord(dados.getCliente()),
+					
+					dados.getCompra() != null ? new DetalheCompraRecord(dados.getCompra()) : new DetalheCompraRecord(),
+					
+					dados.getCliente() != null ? new DetalheClienteRecord(dados.getCliente()) : new DetalheClienteRecord(),
+										
 					new DetalheProdutoRecord(dados.getProduto()),
 					dados.getQuantidade(),
 					dados.getTotal(),

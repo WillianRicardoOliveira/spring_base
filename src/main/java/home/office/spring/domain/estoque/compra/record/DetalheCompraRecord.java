@@ -20,5 +20,9 @@ import home.office.spring.domain.estoque.compra.model.CompraModel;
 			);
 				
 	}
+	
+	public DetalheCompraRecord() {
+		this(null, null, null, null);
+	}
 
 }

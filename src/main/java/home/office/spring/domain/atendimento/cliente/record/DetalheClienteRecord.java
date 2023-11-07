@@ -17,5 +17,11 @@ import home.office.spring.domain.atendimento.cliente.model.ClienteModel;
 			);
 				
 	}
+	
+	public DetalheClienteRecord() {
+		
+		this(null, null, null);
+			
+	}
 
 }

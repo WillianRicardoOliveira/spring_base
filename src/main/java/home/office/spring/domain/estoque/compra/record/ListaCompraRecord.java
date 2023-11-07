@@ -19,4 +19,8 @@ public record ListaCompraRecord(
 		);
 	}	
 
+	public ListaCompraRecord() {
+		this(null, null, null, null);
+	}	
+	
 }

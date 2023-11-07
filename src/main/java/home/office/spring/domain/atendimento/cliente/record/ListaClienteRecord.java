@@ -16,6 +16,10 @@ public record ListaClienteRecord(
 				dados.getTelefone(),
 				dados.getAtivo()
 		);
-	}	
+	}
+	
+	public ListaClienteRecord() {
+		this(null, null, null, null);
+	}
 
 }

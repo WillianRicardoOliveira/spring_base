@@ -11,6 +11,7 @@ import home.office.spring.domain.atendimento.cliente.model.ClienteModel;
 import home.office.spring.domain.atendimento.cliente.repository.ClienteRepository;
 import home.office.spring.domain.estoque.compra.model.CompraModel;
 import home.office.spring.domain.estoque.compra.repository.CompraRepository;
+import home.office.spring.domain.estoque.movimentacao.constante.TipoMovimentacao;
 import home.office.spring.domain.estoque.movimentacao.model.MovimentacaoModel;
 import home.office.spring.domain.estoque.movimentacao.record.DetalheMovimentacaoRecord;
 import home.office.spring.domain.estoque.movimentacao.record.ListaMovimentacaoRecord;
@@ -40,7 +41,7 @@ public class MovimentacaoService {
 		ClienteModel cliente = null;	
 		var total = 0;		
 		var produto = produtoRepository.getReferenceById(dados.produto());
-		if(dados.tipoMovimentacao().equals("INVENTARIO")) {
+		if(dados.tipoMovimentacao().equals(TipoMovimentacao.INVENTARIO)) {
 			total = dados.quantidade();
 		}
 		if(dados.tipoMovimentacao().equals("DANOS")) {			
