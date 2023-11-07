@@ -75,6 +75,21 @@ create table compra(
     ativo TINYINT(1) not null,
     primary key(id)
 );
+create table compra_item(
+    id bigint not null auto_increment,
+    id_compra bigint not null,
+    id_fornecedor bigint not null,
+    id_produto bigint not null,
+    quantidade integer not null,
+    valor decimal(8, 2) not null,
+    total decimal(8, 2) not null,
+    controle integer not null,
+    ativo TINYINT(1) not null,
+    primary key(id),
+    constraint fk_compra_item_compra_id foreign key(id_compra) references compra(id),
+    constraint fk_compra_item_fornecedor_id foreign key(id_fornecedor) references fornecedor(id),
+    constraint fk_compra_item_produto_id foreign key(id_produto) references produto(id)
+);
 create table movimentacao(
     id bigint not null auto_increment,
     tipo_movimentacao varchar(20) not null,
@@ -86,7 +101,7 @@ create table movimentacao(
     data datetime not null,
     ativo TINYINT(1) not null,
     primary key(id),
-    constraint fk_pessoa_compra_id foreign key(id_compra) references compra(id),
-    constraint fk_pessoa_cliente_id foreign key(id_cliente) references cliente(id),
-    constraint fk_pessoa_produto_id foreign key(id_produto) references produto(id)
+    constraint fk_movimentacao_compra_id foreign key(id_compra) references compra(id),
+    constraint fk_movimentacao_cliente_id foreign key(id_cliente) references cliente(id),
+    constraint fk_movimentacao_produto_id foreign key(id_produto) references produto(id)
 );
