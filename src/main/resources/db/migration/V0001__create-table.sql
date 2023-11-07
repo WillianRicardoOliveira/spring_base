@@ -35,7 +35,16 @@ create table pessoa(
 );
 
 
-
+-- #################### --
+-- ATENDIMENTO          --
+-- #################### --
+create table cliente(
+    id bigint not null auto_increment,
+    nome varchar(100) not null,
+    telefone varchar(15) not null,
+    ativo TINYINT(1) not null,
+    primary key(id)
+);
 -- #################### --
 -- ESTOQUE              --
 -- #################### --
@@ -66,7 +75,7 @@ create table compra(
     ativo TINYINT(1) not null,
     primary key(id)
 );
-create table pessoa(
+create table movimentacao(
     id bigint not null auto_increment,
     tipo_movimentacao varchar(20) not null,
     id_compra bigint,
@@ -80,14 +89,4 @@ create table pessoa(
     constraint fk_pessoa_compra_id foreign key(id_compra) references compra(id),
     constraint fk_pessoa_cliente_id foreign key(id_cliente) references cliente(id),
     constraint fk_pessoa_produto_id foreign key(id_produto) references produto(id)
-);
--- #################### --
--- ATENDIMENTO          --
--- #################### --
-create table cliente(
-    id bigint not null auto_increment,
-    nome varchar(100) not null,
-    telefone varchar(15) not null,
-    ativo TINYINT(1) not null,
-    primary key(id)
 );
