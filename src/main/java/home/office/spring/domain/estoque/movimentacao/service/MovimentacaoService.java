@@ -43,25 +43,22 @@ public class MovimentacaoService {
 		var produto = produtoRepository.getReferenceById(dados.produto());
 		if(dados.tipoMovimentacao().equals(TipoMovimentacao.INVENTARIO)) {
 			total = dados.quantidade();
-		}
-		if(dados.tipoMovimentacao().equals("DANOS")) {			
+		} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.DANOS)) {			
 			if(produto.getQuantidade() >= dados.quantidade()) {
 				total = produto.getQuantidade() - dados.quantidade();			
 			} else {
 				throw new ValidacaoException("O produto não possuí quantidade disponível em estoque.");
 			}
-		}
-		if(dados.tipoMovimentacao().equals("DEVOLUCAO")) {
+		} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.DEVOLUCAO)) {
 			total = produto.getQuantidade() + dados.quantidade();
-		}
-		if(dados.tipoMovimentacao().equals("ENTRADA")) {
+		} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.ENTRADA)) {
 			if(dados.compra() != null) {
 				compra = compraRepository.getReferenceById(dados.compra());
 				total = produto.getQuantidade() + dados.quantidade();
 			} else {
 				throw new ValidacaoException("A compra não foi identificada.");	
 			}
-		} else if(dados.tipoMovimentacao().equals("SAIDA")) {
+		} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.SAIDA)) {
 			if(dados.cliente() != null) {
 				cliente = clienteRepository.getReferenceById(dados.cliente());
 			}
@@ -70,6 +67,8 @@ public class MovimentacaoService {
 			} else {
 				throw new ValidacaoException("O produto não possuí quantidade disponível em estoque.");
 			}
+		} else {
+			throw new ValidacaoException("O tipo da movimentação não foi identificado.");
 		}		
 		produto.setQuantidade(total);
 		produtoRepository.save(produto);
