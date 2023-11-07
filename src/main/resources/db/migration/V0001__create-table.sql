@@ -66,7 +66,21 @@ create table compra(
     ativo TINYINT(1) not null,
     primary key(id)
 );
-
+create table pessoa(
+    id bigint not null auto_increment,
+    tipo_movimentacao varchar(20) not null,
+    id_compra bigint,
+    id_cliente bigint,
+    id_produto bigint not null,
+    quantidade integer not null,
+    total integer not null,
+    data datetime not null,
+    ativo TINYINT(1) not null,
+    primary key(id),
+    constraint fk_pessoa_compra_id foreign key(id_compra) references compra(id),
+    constraint fk_pessoa_cliente_id foreign key(id_cliente) references cliente(id),
+    constraint fk_pessoa_produto_id foreign key(id_produto) references produto(id)
+);
 -- #################### --
 -- ATENDIMENTO          --
 -- #################### --

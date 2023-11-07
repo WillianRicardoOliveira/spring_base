@@ -45,13 +45,13 @@ public class MovimentacaoModel {
 	private LocalDateTime data;
 	private Boolean ativo;
 	
-	public MovimentacaoModel(MovimentacaoRecord dados, CompraModel compra, ClienteModel cliente, ProdutoModel produto) {	
+	public MovimentacaoModel(MovimentacaoRecord dados, CompraModel compra, ClienteModel cliente, ProdutoModel produto, Integer total) {	
 		this.tipoMovimentacao = dados.tipoMovimentacao();
 		this.compra = compra;
 		this.cliente = cliente;
 		this.produto = produto;
 		this.quantidade = dados.quantidade();
-		this.total = dados.total();	
+		this.total = total;	
 		this.data = LocalDateTime.now();
 		this.ativo = true;
 	}

@@ -12,7 +12,5 @@ public record MovimentacaoRecord(
 		@NotNull(message = "{produto.obrigatorio}")
 		Long produto,
 		@NotBlank(message = "{quantidade.obrigatorio}")
-		Integer quantidade,
-		@NotNull(message = "{total.obrigatorio}")
-		Integer total
+		Integer quantidade
 ) {}

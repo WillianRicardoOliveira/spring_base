@@ -17,6 +17,7 @@ import home.office.spring.domain.estoque.movimentacao.record.ListaMovimentacaoRe
 import home.office.spring.domain.estoque.movimentacao.record.MovimentacaoRecord;
 import home.office.spring.domain.estoque.movimentacao.repository.MovimentacaoRepository;
 import home.office.spring.domain.estoque.produto.repository.ProdutoRepository;
+import home.office.spring.infra.exception.ValidacaoException;
 
 @Service
 public class MovimentacaoService {
@@ -35,25 +36,43 @@ public class MovimentacaoService {
 	
 	@Transactional
 	public MovimentacaoModel cadastrar(MovimentacaoRecord dados) {	
-		CompraModel nCompra = null;
-		ClienteModel nCliente = null;		
+		CompraModel compra = null;
+		ClienteModel cliente = null;	
+		var total = 0;		
+		var produto = produtoRepository.getReferenceById(dados.produto());
+		if(dados.tipoMovimentacao().equals("INVENTARIO")) {
+			total = dados.quantidade();
+		}
+		if(dados.tipoMovimentacao().equals("DANOS")) {			
+			if(produto.getQuantidade() >= dados.quantidade()) {
+				total = produto.getQuantidade() - dados.quantidade();			
+			} else {
+				throw new ValidacaoException("O produto não possuí quantidade disponível em estoque.");
+			}
+		}
+		if(dados.tipoMovimentacao().equals("DEVOLUCAO")) {
+			total = produto.getQuantidade() + dados.quantidade();
+		}
 		if(dados.tipoMovimentacao().equals("ENTRADA")) {
 			if(dados.compra() != null) {
-				nCompra = compraRepository.getReferenceById(dados.compra());
+				compra = compraRepository.getReferenceById(dados.compra());
+				total = produto.getQuantidade() + dados.quantidade();
 			} else {
-			 // VALIDAR 	
+				throw new ValidacaoException("A compra não foi identificada.");	
 			}
 		} else if(dados.tipoMovimentacao().equals("SAIDA")) {
 			if(dados.cliente() != null) {
-				nCliente = clienteRepository.getReferenceById(dados.cliente());
+				cliente = clienteRepository.getReferenceById(dados.cliente());
 			}
-		}
-		
-		// calcular o total
-		// salvar o total no produto
-		var nProduto = produtoRepository.getReferenceById(dados.produto());
-		
-		var movimentacao = new MovimentacaoModel(dados, nCompra, nCliente, nProduto);
+			if(produto.getQuantidade() >= dados.quantidade()) {
+				total = produto.getQuantidade() - dados.quantidade();			
+			} else {
+				throw new ValidacaoException("O produto não possuí quantidade disponível em estoque.");
+			}
+		}		
+		produto.setQuantidade(total);
+		produtoRepository.save(produto);
+		var movimentacao = new MovimentacaoModel(dados, compra, cliente, produto, total);
 		repository.save(movimentacao);		
 		return movimentacao;
 	}
