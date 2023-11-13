@@ -13,6 +13,7 @@ import home.office.spring.domain.atendimento.cliente.record.ClienteRecord;
 import home.office.spring.domain.atendimento.cliente.record.DetalheClienteRecord;
 import home.office.spring.domain.atendimento.cliente.record.ListaClienteRecord;
 import home.office.spring.domain.atendimento.cliente.repository.ClienteRepository;
+import home.office.spring.infra.exception.ValidacaoException;
 
 @Service
 public class ClienteService {
@@ -22,30 +23,50 @@ public class ClienteService {
 	
 	@Transactional
 	public ClienteModel cadastrar(ClienteRecord dados) {		
-		var cliente = new ClienteModel(dados);
-		repository.save(cliente);		
-		return cliente;
+		try {
+			var cliente = new ClienteModel(dados);
+			repository.save(cliente);		
+			return cliente;
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+		}
 	}
 	
 	public Page<ListaClienteRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
-		return repository.findAllByAtivoTrue(paginacao).map(ListaClienteRecord::new);
+		try {
+			return repository.findAllByAtivoTrue(paginacao).map(ListaClienteRecord::new);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a listagem.");
+		}
 	}
 	
 	@Transactional
 	public DetalheClienteRecord atualizar(AtualizaClienteRecord dados) {
-		ClienteModel cliente = repository.getReferenceById(dados.id());
-		cliente.atualizar(dados);
-		return new DetalheClienteRecord(cliente);
+		try {
+			ClienteModel cliente = repository.getReferenceById(dados.id());
+			cliente.atualizar(dados);
+			return new DetalheClienteRecord(cliente);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a atualização.");
+		}
 	}
 	
 	@Transactional
 	public void excluir(Long id) {
-		repository.getReferenceById(id).inativar();
+		try {
+			repository.getReferenceById(id).inativar();
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a exclusão.");
+		}
 	}
 	
 	public DetalheClienteRecord detalhar(Long id) {
-		ClienteModel cliente = repository.getReferenceById(id);
-		return new DetalheClienteRecord(cliente);
+		try {
+			ClienteModel cliente = repository.getReferenceById(id);
+			return new DetalheClienteRecord(cliente);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+		}
 	}
 	
 }

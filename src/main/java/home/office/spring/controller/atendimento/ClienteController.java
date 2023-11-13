@@ -20,6 +20,7 @@ import home.office.spring.domain.atendimento.cliente.record.ClienteRecord;
 import home.office.spring.domain.atendimento.cliente.record.DetalheClienteRecord;
 import home.office.spring.domain.atendimento.cliente.record.ListaClienteRecord;
 import home.office.spring.domain.atendimento.cliente.service.ClienteService;
+import home.office.spring.infra.exception.ValidacaoException;
 import jakarta.validation.Valid;
 
 @RestController
@@ -32,32 +33,52 @@ public class ClienteController {
 	@PostMapping
 	@Transactional
 	public ResponseEntity cadastrar(@RequestBody @Valid ClienteRecord dados, UriComponentsBuilder uriBuilder) {
-		var cliente = service.cadastrar(dados);
-		var uri = uriBuilder.path("/cliente/{id}").buildAndExpand(cliente.getId()).toUri();
-		return ResponseEntity.created(uri).body(new DetalheClienteRecord(cliente));
+		try {
+			var cliente = service.cadastrar(dados);
+			var uri = uriBuilder.path("/cliente/{id}").buildAndExpand(cliente.getId()).toUri();
+			return ResponseEntity.created(uri).body(new DetalheClienteRecord(cliente));
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+		}
 	}	
 	
 	@GetMapping
 	public ResponseEntity<Page<ListaClienteRecord>> listar(Pageable paginacao){
-		return ResponseEntity.ok(service.listar(paginacao));
+		try {
+			return ResponseEntity.ok(service.listar(paginacao));
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a listagem.");
+		}
 	}
 		
 	@PutMapping
 	@Transactional
 	public ResponseEntity atualizar(@RequestBody @Valid AtualizaClienteRecord dados) {
-		return ResponseEntity.ok(service.atualizar(dados));
+		try {
+			return ResponseEntity.ok(service.atualizar(dados));
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a atualização.");
+		}
 	}
 	
 	@DeleteMapping("/{id}")
 	@Transactional
 	public ResponseEntity excluir(@PathVariable Long id) {
-		service.excluir(id);
-		return ResponseEntity.noContent().build();
+		try {
+			service.excluir(id);
+			return ResponseEntity.noContent().build();
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a exclusão.");
+		}
 	}	
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<DetalheClienteRecord> detalhar(@PathVariable Long id) {
-		return ResponseEntity.ok(service.detalhar(id));	
+		try {
+			return ResponseEntity.ok(service.detalhar(id));
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+		}
 	}
 
 }

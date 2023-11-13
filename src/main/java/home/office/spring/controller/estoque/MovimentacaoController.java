@@ -17,6 +17,7 @@ import home.office.spring.domain.estoque.movimentacao.record.DetalheMovimentacao
 import home.office.spring.domain.estoque.movimentacao.record.ListaMovimentacaoRecord;
 import home.office.spring.domain.estoque.movimentacao.record.MovimentacaoRecord;
 import home.office.spring.domain.estoque.movimentacao.service.MovimentacaoService;
+import home.office.spring.infra.exception.ValidacaoException;
 import jakarta.validation.Valid;
 
 @RestController
@@ -29,19 +30,31 @@ public class MovimentacaoController {
 	@PostMapping
 	@Transactional
 	public ResponseEntity cadastrar(@RequestBody @Valid MovimentacaoRecord dados, UriComponentsBuilder uriBuilder) {
-		var movimentacao = service.cadastrar(dados);
-		var uri = uriBuilder.path("/movimentacao/{id}").buildAndExpand(movimentacao.getId()).toUri();
-		return ResponseEntity.created(uri).body(new DetalheMovimentacaoRecord(movimentacao));
+		try {
+			var movimentacao = service.cadastrar(dados);
+			var uri = uriBuilder.path("/movimentacao/{id}").buildAndExpand(movimentacao.getId()).toUri();
+			return ResponseEntity.created(uri).body(new DetalheMovimentacaoRecord(movimentacao));
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+		}
 	}	
 	
 	@GetMapping
 	public ResponseEntity<Page<ListaMovimentacaoRecord>> listar(Pageable paginacao){
-		return ResponseEntity.ok(service.listar(paginacao));
+		try {
+			return ResponseEntity.ok(service.listar(paginacao));
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a listagem.");
+		}
 	}
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<DetalheMovimentacaoRecord> detalhar(@PathVariable Long id) {
-		return ResponseEntity.ok(service.detalhar(id));	
+		try {
+			return ResponseEntity.ok(service.detalhar(id));
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+		}
 	}
 
 }

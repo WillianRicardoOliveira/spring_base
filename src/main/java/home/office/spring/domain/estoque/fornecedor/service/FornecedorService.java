@@ -13,6 +13,7 @@ import home.office.spring.domain.estoque.fornecedor.record.DetalheFornecedorReco
 import home.office.spring.domain.estoque.fornecedor.record.FornecedorRecord;
 import home.office.spring.domain.estoque.fornecedor.record.ListaFornecedorRecord;
 import home.office.spring.domain.estoque.fornecedor.repository.FornecedorRepository;
+import home.office.spring.infra.exception.ValidacaoException;
 
 @Service
 public class FornecedorService {
@@ -22,30 +23,50 @@ public class FornecedorService {
 	
 	@Transactional
 	public FornecedorModel cadastrar(FornecedorRecord dados) {		
-		var fornecedor = new FornecedorModel(dados);
-		repository.save(fornecedor);		
-		return fornecedor;
+		try {
+			var fornecedor = new FornecedorModel(dados);
+			repository.save(fornecedor);		
+			return fornecedor;
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+		}
 	}
 	
 	public Page<ListaFornecedorRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
-		return repository.findAllByAtivoTrue(paginacao).map(ListaFornecedorRecord::new);
+		try {
+			return repository.findAllByAtivoTrue(paginacao).map(ListaFornecedorRecord::new);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a listagem.");
+		}
 	}
 	
 	@Transactional
 	public DetalheFornecedorRecord atualizar(AtualizaFornecedorRecord dados) {
-		FornecedorModel fornecedor = repository.getReferenceById(dados.id());
-		fornecedor.atualizar(dados);
-		return new DetalheFornecedorRecord(fornecedor);
+		try {
+			FornecedorModel fornecedor = repository.getReferenceById(dados.id());
+			fornecedor.atualizar(dados);
+			return new DetalheFornecedorRecord(fornecedor);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a atualização.");
+		}
 	}
 	
 	@Transactional
 	public void excluir(Long id) {
-		repository.getReferenceById(id).inativar();
+		try {
+			repository.getReferenceById(id).inativar();
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a exclusão.");
+		}
 	}
 	
 	public DetalheFornecedorRecord detalhar(Long id) {
-		FornecedorModel fornecedor = repository.getReferenceById(id);
-		return new DetalheFornecedorRecord(fornecedor);
+		try {
+			FornecedorModel fornecedor = repository.getReferenceById(id);
+			return new DetalheFornecedorRecord(fornecedor);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+		}
 	}
 	
 }

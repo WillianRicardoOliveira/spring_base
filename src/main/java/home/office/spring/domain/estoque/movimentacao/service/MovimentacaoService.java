@@ -37,53 +37,65 @@ public class MovimentacaoService {
 	
 	@Transactional
 	public MovimentacaoModel cadastrar(MovimentacaoRecord dados) {	
-		CompraModel compra = null;
-		ClienteModel cliente = null;	
-		var total = 0;		
-		var produto = produtoRepository.getReferenceById(dados.produto());
-		if(dados.tipoMovimentacao().equals(TipoMovimentacao.INVENTARIO)) {
-			total = dados.quantidade();
-		} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.DANOS)) {			
-			if(produto.getQuantidade() >= dados.quantidade()) {
-				total = produto.getQuantidade() - dados.quantidade();			
-			} else {
-				throw new ValidacaoException("O produto não possuí quantidade disponível em estoque.");
-			}
-		} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.DEVOLUCAO)) {
-			total = produto.getQuantidade() + dados.quantidade();
-		} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.ENTRADA)) {
-			if(dados.compra() != null) {
-				compra = compraRepository.getReferenceById(dados.compra());
+		try {
+			CompraModel compra = null;
+			ClienteModel cliente = null;	
+			var total = 0;		
+			var produto = produtoRepository.getReferenceById(dados.produto());
+			if(dados.tipoMovimentacao().equals(TipoMovimentacao.INVENTARIO)) {
+				total = dados.quantidade();
+			} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.DANOS)) {			
+				if(produto.getQuantidade() >= dados.quantidade()) {
+					total = produto.getQuantidade() - dados.quantidade();			
+				} else {
+					throw new ValidacaoException("O produto não possuí quantidade disponível em estoque.");
+				}
+			} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.DEVOLUCAO)) {
 				total = produto.getQuantidade() + dados.quantidade();
+			} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.ENTRADA)) {
+				if(dados.compra() != null) {
+					compra = compraRepository.getReferenceById(dados.compra());
+					total = produto.getQuantidade() + dados.quantidade();
+				} else {
+					throw new ValidacaoException("A compra não foi identificada.");	
+				}
+			} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.SAIDA)) {
+				if(dados.cliente() != null) {
+					cliente = clienteRepository.getReferenceById(dados.cliente());
+				}
+				if(produto.getQuantidade() >= dados.quantidade()) {
+					total = produto.getQuantidade() - dados.quantidade();			
+				} else {
+					throw new ValidacaoException("O produto não possuí quantidade disponível em estoque.");
+				}
 			} else {
-				throw new ValidacaoException("A compra não foi identificada.");	
-			}
-		} else if(dados.tipoMovimentacao().equals(TipoMovimentacao.SAIDA)) {
-			if(dados.cliente() != null) {
-				cliente = clienteRepository.getReferenceById(dados.cliente());
-			}
-			if(produto.getQuantidade() >= dados.quantidade()) {
-				total = produto.getQuantidade() - dados.quantidade();			
-			} else {
-				throw new ValidacaoException("O produto não possuí quantidade disponível em estoque.");
-			}
-		} else {
-			throw new ValidacaoException("O tipo da movimentação não foi identificado.");
-		}		
-		produto.setQuantidade(total);
-		produtoRepository.save(produto);
-		var movimentacao = new MovimentacaoModel(dados, compra, cliente, produto, total);
-		repository.save(movimentacao);		
-		return movimentacao;
+				throw new ValidacaoException("O tipo da movimentação não foi identificado.");
+			}	
+			produto.setQuantidade(total);
+			produtoRepository.save(produto);
+			var movimentacao = new MovimentacaoModel(dados, compra, cliente, produto, total);
+			repository.save(movimentacao);		
+			return movimentacao;
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+		}
 	}
 	
 	public Page<ListaMovimentacaoRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"id"}) Pageable paginacao) {
-		return repository.findAllByAtivoTrue(paginacao).map(ListaMovimentacaoRecord::new);
+		try {
+			return repository.findAllByAtivoTrue(paginacao).map(ListaMovimentacaoRecord::new);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a listagem.");
+		}
 	}
 	
 	public DetalheMovimentacaoRecord detalhar(Long id) {
-		MovimentacaoModel movimentacao = repository.getReferenceById(id);
-		return new DetalheMovimentacaoRecord(movimentacao);
+		try {
+			MovimentacaoModel movimentacao = repository.getReferenceById(id);
+			return new DetalheMovimentacaoRecord(movimentacao);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+		}
 	}
 	
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import home.office.spring.domain.endereco.record.EnderecoRecord;
 import home.office.spring.domain.endereco.service.EnderecoService;
+import home.office.spring.infra.exception.ValidacaoException;
 
 @RestController
 @RequestMapping("/endereco")
@@ -19,7 +20,11 @@ public class EnderecoController {
 		
 	@GetMapping("/buscar/{cep}")
 	public ResponseEntity<EnderecoRecord> buscaDadosEndereco(@PathVariable Long cep) throws Exception {
-		return ResponseEntity.ok(service.buscaDadosEndereco(cep));	
+		try {
+			return ResponseEntity.ok(service.buscaDadosEndereco(cep));
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a busca do endereço.");
+		}
 	}
 
 }

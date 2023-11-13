@@ -17,6 +17,7 @@ import home.office.spring.domain.pessoa.record.PessoaRecord;
 import home.office.spring.domain.pessoa.repository.PessoaRepository;
 import home.office.spring.domain.usuario.model.UsuarioModel;
 import home.office.spring.domain.usuario.repository.UsuarioRepository;
+import home.office.spring.infra.exception.ValidacaoException;
 
 @Service
 public class PessoaService {
@@ -32,34 +33,54 @@ public class PessoaService {
 	
 	@Transactional
 	public PessoaModel cadastrar(PessoaRecord dados) {		
-		var endereco = new EnderecoModel(dados.endereco());
-		enderecoRepository.save(endereco);		
-		var usuario = new UsuarioModel(dados.usuario());
-		usuarioRepository.save(usuario);		
-		var pessoa = new PessoaModel(dados, endereco, usuario);
-		repository.save(pessoa);		
-		return pessoa;
+		try {
+			var endereco = new EnderecoModel(dados.endereco());
+			enderecoRepository.save(endereco);		
+			var usuario = new UsuarioModel(dados.usuario());
+			usuarioRepository.save(usuario);		
+			var pessoa = new PessoaModel(dados, endereco, usuario);
+			repository.save(pessoa);		
+			return pessoa;
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+		}
 	}
 	
 	public Page<ListaPessoaRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
-		return repository.findAllByAtivoTrue(paginacao).map(ListaPessoaRecord::new);
+		try {
+			return repository.findAllByAtivoTrue(paginacao).map(ListaPessoaRecord::new);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a listagem.");
+		}
 	}
 	
 	@Transactional
 	public DetalhePessoaRecord atualizar(AtualizaPessoaRecord dados) {
-		PessoaModel pessoa = repository.getReferenceById(dados.id());
-		pessoa.atualizar(dados);
-		return new DetalhePessoaRecord(pessoa);
+		try {
+			PessoaModel pessoa = repository.getReferenceById(dados.id());
+			pessoa.atualizar(dados);
+			return new DetalhePessoaRecord(pessoa);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a atualização.");
+		}
 	}
 	
 	@Transactional
 	public void excluir(Long id) {
-		repository.getReferenceById(id).inativar();
+		try {
+			repository.getReferenceById(id).inativar();
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a exclusão.");
+		}
 	}
 	
 	public DetalhePessoaRecord detalhar(Long id) {
-		PessoaModel pessoa = repository.getReferenceById(id);
-		return new DetalhePessoaRecord(pessoa);
+		try {
+			PessoaModel pessoa = repository.getReferenceById(id);
+			return new DetalhePessoaRecord(pessoa);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+		}
 	}
 	
 }

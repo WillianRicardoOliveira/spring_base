@@ -13,6 +13,7 @@ import home.office.spring.domain.estoque.produto.record.DetalheProdutoRecord;
 import home.office.spring.domain.estoque.produto.record.ListaProdutoRecord;
 import home.office.spring.domain.estoque.produto.record.ProdutoRecord;
 import home.office.spring.domain.estoque.produto.repository.ProdutoRepository;
+import home.office.spring.infra.exception.ValidacaoException;
 
 @Service
 public class ProdutoService {
@@ -22,30 +23,50 @@ public class ProdutoService {
 	
 	@Transactional
 	public ProdutoModel cadastrar(ProdutoRecord dados) {		
-		var produto = new ProdutoModel(dados);
-		repository.save(produto);		
-		return produto;
+		try {
+			var produto = new ProdutoModel(dados);
+			repository.save(produto);		
+			return produto;
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+		}
 	}
 	
 	public Page<ListaProdutoRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
-		return repository.findAllByAtivoTrue(paginacao).map(ListaProdutoRecord::new);
+		try {
+			return repository.findAllByAtivoTrue(paginacao).map(ListaProdutoRecord::new);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a listagem.");
+		}
 	}
 	
 	@Transactional
 	public DetalheProdutoRecord atualizar(AtualizaProdutoRecord dados) {
-		ProdutoModel produto = repository.getReferenceById(dados.id());
-		produto.atualizar(dados);
-		return new DetalheProdutoRecord(produto);
+		try {
+			ProdutoModel produto = repository.getReferenceById(dados.id());
+			produto.atualizar(dados);
+			return new DetalheProdutoRecord(produto);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a atualização.");
+		}
 	}
 	
 	@Transactional
 	public void excluir(Long id) {
-		repository.getReferenceById(id).inativar();
+		try {
+			repository.getReferenceById(id).inativar();
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar a exclusão.");
+		}
 	}
 	
 	public DetalheProdutoRecord detalhar(Long id) {
-		ProdutoModel produto = repository.getReferenceById(id);
-		return new DetalheProdutoRecord(produto);
+		try {
+			ProdutoModel produto = repository.getReferenceById(id);
+			return new DetalheProdutoRecord(produto);
+		} catch (ValidacaoException e) {
+			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+		}
 	}
 	
 }
