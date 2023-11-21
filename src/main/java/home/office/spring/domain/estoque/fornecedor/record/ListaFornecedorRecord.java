@@ -6,8 +6,7 @@ public record ListaFornecedorRecord(
 		Long id,
 		String cnpj,
 		String nome,
-		String telefone,
-		Boolean ativo
+		String telefone		
 ) {
 	
 	
@@ -16,8 +15,7 @@ public record ListaFornecedorRecord(
 				dados.getId(), 
 				dados.cnpjFormatado(),				 
 				dados.getNome(),
-				dados.telefoneFormatado(),
-				dados.getAtivo()
+				dados.telefoneFormatado()				
 		);
 	}	
 
