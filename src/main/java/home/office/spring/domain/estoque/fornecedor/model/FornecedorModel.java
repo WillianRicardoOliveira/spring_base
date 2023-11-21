@@ -2,6 +2,7 @@ package home.office.spring.domain.estoque.fornecedor.model;
 
 import home.office.spring.domain.estoque.fornecedor.record.AtualizaFornecedorRecord;
 import home.office.spring.domain.estoque.fornecedor.record.FornecedorRecord;
+import home.office.spring.util.Formatacao;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -55,4 +56,12 @@ public class FornecedorModel {
 		this.ativo = false;
 	}
 		
+	public String cnpjFormatado() {
+		return Formatacao.formataCnpj(getCnpj());
+	}
+	
+	public String telefoneFormatado() {
+		return Formatacao.formataTelefone(getTelefone());
+	}
+	
 }

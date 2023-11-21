@@ -2,7 +2,8 @@ package home.office.spring.domain.estoque.fornecedor.record;
 
 import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
 
-	public record DetalheFornecedorRecord(	
+	public record DetalheFornecedorRecord(
+			Long id,
 			String cnpj,
 			String nome,
 			String telefone,
@@ -12,7 +13,8 @@ import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
 		
 	public DetalheFornecedorRecord(FornecedorModel dados) {
 		
-			this(	
+			this(
+					dados.getId(),
 					dados.getCnpj(),
 					dados.getNome(),
 					dados.getTelefone(),

@@ -7,17 +7,16 @@ public record ListaFornecedorRecord(
 		String cnpj,
 		String nome,
 		String telefone,
-		String descricao,
 		Boolean ativo
 ) {
+	
 	
 	public ListaFornecedorRecord(FornecedorModel dados) {
 		this(
 				dados.getId(), 
-				dados.getCnpj(), 
+				dados.cnpjFormatado(),				 
 				dados.getNome(),
-				dados.getTelefone(),
-				dados.getDescricao(),
+				dados.telefoneFormatado(),
 				dados.getAtivo()
 		);
 	}	
