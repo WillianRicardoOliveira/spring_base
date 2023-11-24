@@ -3,6 +3,7 @@ package home.office.spring.controller.estoque;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -42,14 +44,19 @@ public class FornecedorController {
 		}
 	}	
 	
-	@GetMapping
-	public ResponseEntity<Page<ListaFornecedorRecord>> listar(Pageable paginacao){
+	@GetMapping // @PageableDefault(sort = "nome", direction = Sort.Direction.DESC) 
+	public ResponseEntity<Page<ListaFornecedorRecord>> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao){
 		try {
 			return ResponseEntity.ok(service.listar(paginacao));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}
 	}
+	/*
+	@GetMapping // ?size=5&page=1&sort=nome,desc
+	public Page<ListaCaixa> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao){
+		return repository.findAllByAtivoTrue(paginacao).map(ListaCaixa::new);
+	}*/
 		
 	@PutMapping
 	@Transactional

@@ -32,7 +32,7 @@ public class ClienteService {
 		}
 	}
 	
-	public Page<ListaClienteRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
+	public Page<ListaClienteRecord> listar(Pageable paginacao) {
 		try {
 			return repository.findAllByAtivoTrue(paginacao).map(ListaClienteRecord::new);
 		} catch (ValidacaoException e) {

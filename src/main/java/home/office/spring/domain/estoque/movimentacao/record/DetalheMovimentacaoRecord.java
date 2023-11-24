@@ -8,31 +8,28 @@ import home.office.spring.domain.estoque.movimentacao.constante.TipoMovimentacao
 import home.office.spring.domain.estoque.movimentacao.model.MovimentacaoModel;
 import home.office.spring.domain.estoque.produto.record.DetalheProdutoRecord;
 
-	public record DetalheMovimentacaoRecord(	
+	public record DetalheMovimentacaoRecord(
+			Long id,
 			TipoMovimentacao tipoMovimentacao,
 			DetalheCompraRecord compra,
 			DetalheClienteRecord cliente,
 			DetalheProdutoRecord produto,
 			Integer quantidade,
 			Integer total,
-			LocalDateTime data,
-			Boolean ativo		
+			LocalDateTime data
 			) {
 		
 	public DetalheMovimentacaoRecord(MovimentacaoModel dados) {
 		
 			this(	
-					dados.getTipoMovimentacao(),
-					
+					dados.getId(),
+					dados.getTipoMovimentacao(),					
 					dados.getCompra() != null ? new DetalheCompraRecord(dados.getCompra()) : new DetalheCompraRecord(),
-					
 					dados.getCliente() != null ? new DetalheClienteRecord(dados.getCliente()) : new DetalheClienteRecord(),
-										
 					new DetalheProdutoRecord(dados.getProduto()),
 					dados.getQuantidade(),
 					dados.getTotal(),
-					dados.getData(),
-					dados.getAtivo()
+					dados.getData()
 			);
 				
 	}

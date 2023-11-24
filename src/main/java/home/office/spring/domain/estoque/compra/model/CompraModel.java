@@ -1,5 +1,7 @@
 package home.office.spring.domain.estoque.compra.model;
 
+import java.time.LocalDateTime;
+
 import home.office.spring.domain.estoque.compra.constante.Status;
 import home.office.spring.domain.estoque.compra.record.AtualizaCompraRecord;
 import home.office.spring.domain.estoque.compra.record.CompraRecord;
@@ -28,25 +30,19 @@ public class CompraModel {
 	private String descricao;
 	@Enumerated(EnumType.STRING)
 	private Status status;
-	private String data;	
+	private LocalDateTime data;
 	private Boolean ativo;
 	
 	public CompraModel(CompraRecord dados) {	
 		this.descricao = dados.descricao();
-		this.status = dados.status();
-		this.data = dados.data();
+		this.status = Status.AGUARDANDO;
+		this.data = LocalDateTime.now();
 		this.ativo = true;			
 	}
 	
 	public void atualizar(AtualizaCompraRecord dados) { 		
 		if(dados.descricao() != null) {
 			this.descricao = dados.descricao();
-		}		
-		if(dados.status() != null) {
-			this.status = dados.status();
-		}
-		if(dados.data() != null) {
-			this.data = dados.data();
 		}
 	}
 	

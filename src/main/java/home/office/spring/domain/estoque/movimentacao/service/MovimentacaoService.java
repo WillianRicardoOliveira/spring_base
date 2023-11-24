@@ -81,7 +81,7 @@ public class MovimentacaoService {
 		}
 	}
 	
-	public Page<ListaMovimentacaoRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"id"}) Pageable paginacao) {
+	public Page<ListaMovimentacaoRecord> listar(Pageable paginacao) {
 		try {
 			return repository.findAllByAtivoTrue(paginacao).map(ListaMovimentacaoRecord::new);
 		} catch (ValidacaoException e) {

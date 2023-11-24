@@ -7,24 +7,23 @@ import home.office.spring.domain.estoque.fornecedor.record.DetalheFornecedorReco
 import home.office.spring.domain.estoque.produto.record.DetalheProdutoRecord;
 
 	public record DetalheCompraItemRecord(	
-			
+			Long id,
 			DetalheFornecedorRecord fornecedor,
 			DetalheProdutoRecord produto,
 			Integer quantidade,
 			BigDecimal valor,
-			BigDecimal total,
-			Boolean ativo		
+			BigDecimal total
 			) {
 		
 	public DetalheCompraItemRecord(CompraItemModel dados) {
 		
 			this(	
+					dados.getId(),
 					new DetalheFornecedorRecord(dados.getFornecedor()),
 					new DetalheProdutoRecord(dados.getProduto()),
 					dados.getQuantidade(),
 					dados.getValor(),
-					dados.getTotal(),
-					dados.getAtivo()
+					dados.getTotal()
 			);
 				
 	}

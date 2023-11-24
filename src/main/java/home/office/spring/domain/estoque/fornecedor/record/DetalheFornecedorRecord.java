@@ -7,8 +7,7 @@ import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
 			String cnpj,
 			String nome,
 			String telefone,
-			String descricao,
-			Boolean ativo		
+			String descricao
 			) {
 		
 	public DetalheFornecedorRecord(FornecedorModel dados) {
@@ -18,8 +17,7 @@ import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
 					dados.getCnpj(),
 					dados.getNome(),
 					dados.getTelefone(),
-					dados.getDescricao(),
-					dados.getAtivo()
+					dados.getDescricao()
 			);
 				
 	}

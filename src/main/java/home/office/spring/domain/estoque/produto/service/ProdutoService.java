@@ -32,7 +32,7 @@ public class ProdutoService {
 		}
 	}
 	
-	public Page<ListaProdutoRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
+	public Page<ListaProdutoRecord> listar(Pageable paginacao) {
 		try {
 			return repository.findAllByAtivoTrue(paginacao).map(ListaProdutoRecord::new);
 		} catch (ValidacaoException e) {

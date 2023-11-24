@@ -32,7 +32,7 @@ public class CompraService {
 		}
 	}
 	
-	public Page<ListaCompraRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
+	public Page<ListaCompraRecord> listar(Pageable paginacao) {
 		try {
 			return repository.findAllByAtivoTrue(paginacao).map(ListaCompraRecord::new);
 		} catch (ValidacaoException e) {

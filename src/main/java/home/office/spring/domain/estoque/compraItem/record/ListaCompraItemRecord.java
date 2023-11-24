@@ -12,8 +12,7 @@ public record ListaCompraItemRecord(
 		ListaProdutoRecord produto,
 		Integer quantidade,
 		BigDecimal valor,
-		BigDecimal total,
-		Boolean ativo	
+		BigDecimal total
 ) {
 	
 	public ListaCompraItemRecord(CompraItemModel dados) {
@@ -23,8 +22,7 @@ public record ListaCompraItemRecord(
 				new ListaProdutoRecord(dados.getProduto()),
 				dados.getQuantidade(),
 				dados.getValor(),
-				dados.getTotal(),
-				dados.getAtivo()
+				dados.getTotal()
 		);
 	}	
 	

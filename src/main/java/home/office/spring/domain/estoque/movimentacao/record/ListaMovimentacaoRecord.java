@@ -18,24 +18,19 @@ public record ListaMovimentacaoRecord(
 		ListaProdutoRecord produto,
 		Integer quantidade,
 		Integer total,
-		LocalDateTime data,
-		Boolean ativo
+		LocalDateTime data
 ) {
 	
 	public ListaMovimentacaoRecord(MovimentacaoModel dados) {
 		this(
 				dados.getId(),
 				dados.getTipoMovimentacao(),				
-				
 				dados.getCompra() != null ? new ListaCompraRecord(dados.getCompra()) : new ListaCompraRecord(),
-				
 				dados.getCliente() != null ? new ListaClienteRecord(dados.getCliente()) : new ListaClienteRecord(),
-				
 				new ListaProdutoRecord(dados.getProduto()),				
 				dados.getQuantidade(),
 				dados.getTotal(),
-				dados.getData(),
-				dados.getAtivo()
+				dados.getData()
 		);
 	}	
 

@@ -8,8 +8,7 @@ public record ListaProdutoRecord(
 		String descricao,
 		Integer quantidade,
 		Integer minimo,
-		Integer maximo,
-		Boolean ativo
+		Integer maximo
 ) {
 	
 	public ListaProdutoRecord(ProdutoModel dados) {
@@ -19,8 +18,7 @@ public record ListaProdutoRecord(
 				dados.getDescricao(),
 				dados.getQuantidade(),
 				dados.getMinimo(),
-				dados.getMaximo(),
-				dados.getAtivo()
+				dados.getMaximo()
 			);
 	}	
 

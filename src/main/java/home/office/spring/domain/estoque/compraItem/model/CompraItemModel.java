@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "compra_item")
+@Table(name = "compraItem")
 @Entity(name = "CompraItemModel")
 @Getter
 @NoArgsConstructor

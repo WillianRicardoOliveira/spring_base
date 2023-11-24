@@ -46,7 +46,7 @@ public class PessoaService {
 		}
 	}
 	
-	public Page<ListaPessoaRecord> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao) {
+	public Page<ListaPessoaRecord> listar(Pageable paginacao) {
 		try {
 			return repository.findAllByAtivoTrue(paginacao).map(ListaPessoaRecord::new);
 		} catch (ValidacaoException e) {
