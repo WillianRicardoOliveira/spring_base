@@ -1,6 +1,7 @@
 package home.office.spring.domain.estoque.compraItem.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import home.office.spring.domain.estoque.compra.model.CompraModel;
 import home.office.spring.domain.estoque.compraItem.record.AtualizaCompraItemRecord;
@@ -51,7 +52,7 @@ public class CompraItemModel {
 		this.fornecedor = fornecedor;
 		this.produto = produto;
 		this.quantidade = dados.quantidade();
-		this.valor = dados.valor();
+		this.valor = dados.valor().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 		this.total = total;
 		this.controle = controle;
 		this.ativo = true;			
@@ -68,7 +69,7 @@ public class CompraItemModel {
 			this.quantidade = dados.quantidade();
 		}
 		if(dados.valor() != null) {
-			this.valor = dados.valor();
+			this.valor = dados.valor().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 		}
 		if(total != null) {
 			this.total = total;
@@ -81,5 +82,5 @@ public class CompraItemModel {
 	public void inativar() {
 		this.ativo = false;
 	}
-		
+	
 }

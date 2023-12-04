@@ -27,5 +27,5 @@ public class Formatacao {
             throw new ValidacaoException("Erro ao formatar o telefone.");
         }
     }
-	
+		
 }

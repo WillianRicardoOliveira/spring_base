@@ -3,6 +3,7 @@ package home.office.spring.controller.atendimento;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,7 @@ public class ClienteController {
 	}	
 	
 	@GetMapping
-	public ResponseEntity<Page<ListaClienteRecord>> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao){
+	public ResponseEntity<Page<ListaClienteRecord>> listar(@PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao){
 		try {
 			return ResponseEntity.ok(service.listar(paginacao));
 		} catch (ValidacaoException e) {
