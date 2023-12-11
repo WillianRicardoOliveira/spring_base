@@ -7,6 +7,7 @@ import home.office.spring.domain.estoque.compra.model.CompraModel;
 import home.office.spring.domain.estoque.movimentacao.constante.TipoMovimentacao;
 import home.office.spring.domain.estoque.movimentacao.record.MovimentacaoRecord;
 import home.office.spring.domain.estoque.produto.model.ProdutoModel;
+import home.office.spring.util.Formatacao;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -57,6 +58,10 @@ public class MovimentacaoModel {
 		this.total = total;	
 		this.data = LocalDateTime.now();
 		this.ativo = true;
+	}
+	
+	public String dataFormatada() {
+		return Formatacao.formataData(getData().toString());
 	}
 	
 }

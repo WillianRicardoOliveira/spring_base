@@ -94,7 +94,6 @@ create table movimentacao(
     id bigint not null auto_increment,
     tipo_movimentacao varchar(20) not null,
     id_compra bigint,
-    id_cliente bigint,
     id_produto bigint not null,
     quantidade integer not null,
     total integer not null,
@@ -102,6 +101,5 @@ create table movimentacao(
     ativo TINYINT(1) not null,
     primary key(id),
     constraint fk_movimentacao_compra_id foreign key(id_compra) references compra(id),
-    constraint fk_movimentacao_cliente_id foreign key(id_cliente) references cliente(id),
     constraint fk_movimentacao_produto_id foreign key(id_produto) references produto(id)
 );

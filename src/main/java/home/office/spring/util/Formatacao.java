@@ -1,6 +1,8 @@
 package home.office.spring.util;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.text.MaskFormatter;
 
@@ -27,5 +29,12 @@ public class Formatacao {
             throw new ValidacaoException("Erro ao formatar o telefone.");
         }
     }
+	
+	public static String formataData(String data) {
+        LocalDateTime localDateTime = LocalDateTime.parse(data);
+        DateTimeFormatter novoFormato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String dataFormatada = localDateTime.format(novoFormato);
+        return dataFormatada;
+	}
 		
 }
