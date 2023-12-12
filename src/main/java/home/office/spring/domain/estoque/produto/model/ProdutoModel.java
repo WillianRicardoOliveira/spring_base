@@ -34,7 +34,7 @@ public class ProdutoModel {
 	public ProdutoModel(ProdutoRecord dados) {
 		this.nome = dados.nome();
 		this.descricao = dados.descricao();
-		this.quantidade = dados.quantidade();
+		this.quantidade = 0;
 		this.minimo = dados.minimo();
 		this.maximo = dados.maximo();
 		this.ativo = true;
@@ -46,9 +46,6 @@ public class ProdutoModel {
 		}
 		if(dados.descricao() != null) {
 			this.descricao = dados.descricao();
-		}
-		if(dados.quantidade() != null) {
-			this.quantidade = dados.quantidade();
 		}
 		if(dados.minimo() != null) {
 			this.minimo = dados.minimo();
