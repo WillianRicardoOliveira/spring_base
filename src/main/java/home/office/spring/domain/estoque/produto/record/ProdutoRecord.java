@@ -9,8 +9,6 @@ public record ProdutoRecord(
 	@NotBlank(message = "{descricao.obrigatorio}")
 	String descricao,
 	@NotNull(message = "{quantidade.obrigatorio}")
-	Integer quantidade,
-	@NotNull(message = "{minimo.obrigatorio}")
 	Integer minimo,
 	@NotNull(message = "{maxino.obrigatorio}")
 	Integer maximo
