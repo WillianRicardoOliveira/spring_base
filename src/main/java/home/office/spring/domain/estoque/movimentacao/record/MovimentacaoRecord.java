@@ -1,15 +1,15 @@
 package home.office.spring.domain.estoque.movimentacao.record;
 
-import home.office.spring.domain.estoque.movimentacao.constante.TipoMovimentacao;
+import home.office.spring.domain.estoque.movimentacao.tipoMovimentacao.record.DetalheTipoMovimentacaoRecord;
+import home.office.spring.domain.estoque.produto.record.DetalheProdutoRecord;
 import jakarta.validation.constraints.NotNull;
 
 public record MovimentacaoRecord(
 		@NotNull(message = "{tipo_movimentacao.obrigatorio}")
-		TipoMovimentacao tipoMovimentacao,
+		DetalheTipoMovimentacaoRecord tipoMovimentacao,
 		Long compra,
-		Long cliente,
 		@NotNull(message = "{produto.obrigatorio}")
-		Long produto,
+		DetalheProdutoRecord produto,
 		@NotNull(message = "{quantidade.obrigatorio}")
 		Integer quantidade
 ) {}

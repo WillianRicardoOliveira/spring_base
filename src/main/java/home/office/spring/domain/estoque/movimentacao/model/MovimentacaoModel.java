@@ -2,16 +2,13 @@ package home.office.spring.domain.estoque.movimentacao.model;
 
 import java.time.LocalDateTime;
 
-import home.office.spring.domain.atendimento.cliente.model.ClienteModel;
 import home.office.spring.domain.estoque.compra.model.CompraModel;
-import home.office.spring.domain.estoque.movimentacao.constante.TipoMovimentacao;
 import home.office.spring.domain.estoque.movimentacao.record.MovimentacaoRecord;
+import home.office.spring.domain.estoque.movimentacao.tipoMovimentacao.model.TipoMovimentacaoModel;
 import home.office.spring.domain.estoque.produto.model.ProdutoModel;
 import home.office.spring.util.Formatacao;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,14 +30,12 @@ public class MovimentacaoModel {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Enumerated(EnumType.STRING)
-	private TipoMovimentacao tipoMovimentacao;
+	@ManyToOne(cascade = CascadeType.DETACH)
+	@JoinColumn(name = "id_tipo_movimentacao")
+	private TipoMovimentacaoModel tipoMovimentacao;
 	@ManyToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_compra")
 	private CompraModel compra;
-	@ManyToOne(cascade = CascadeType.DETACH)
-	@JoinColumn(name = "id_cliente")
-	private ClienteModel cliente;
 	@ManyToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_produto")
 	private ProdutoModel produto;
@@ -49,10 +44,9 @@ public class MovimentacaoModel {
 	private LocalDateTime data;
 	private Boolean ativo;
 	
-	public MovimentacaoModel(MovimentacaoRecord dados, CompraModel compra, ClienteModel cliente, ProdutoModel produto, Integer total) {	
-		this.tipoMovimentacao = dados.tipoMovimentacao();
+	public MovimentacaoModel(MovimentacaoRecord dados, CompraModel compra, ProdutoModel produto, Integer total, TipoMovimentacaoModel tipoMovimentacao) {	
+		this.tipoMovimentacao = tipoMovimentacao;
 		this.compra = compra;
-		this.cliente = cliente;
 		this.produto = produto;
 		this.quantidade = dados.quantidade();
 		this.total = total;	

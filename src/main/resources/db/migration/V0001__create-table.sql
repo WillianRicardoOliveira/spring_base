@@ -92,7 +92,7 @@ create table compra_item(
 );
 create table movimentacao(
     id bigint not null auto_increment,
-    tipo_movimentacao varchar(20) not null,
+    id_tipo_movimentacao bigint not null,
     id_compra bigint,
     id_produto bigint not null,
     quantidade integer not null,
@@ -100,6 +100,13 @@ create table movimentacao(
     data datetime not null,
     ativo TINYINT(1) not null,
     primary key(id),
+    constraint fk_movimentacao_tipo_movimentacao_id foreign key(id_tipo_movimentacao) references tipo_movimentacao(id),
     constraint fk_movimentacao_compra_id foreign key(id_compra) references compra(id),
     constraint fk_movimentacao_produto_id foreign key(id_produto) references produto(id)
+);
+create table tipo_movimentacao(
+    id bigint not null auto_increment,
+    nome varchar(20) not null,
+    ativo TINYINT(1) not null,
+    primary key(id)
 );
