@@ -45,7 +45,7 @@ public class CompraItemController {
 	}	
 	
 	@GetMapping
-	public ResponseEntity<Page<ListaCompraItemRecord>> listar(@PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao){
+	public ResponseEntity<Page<ListaCompraItemRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao){
 		try {
 			return ResponseEntity.ok(service.listar(paginacao));
 		} catch (ValidacaoException e) {

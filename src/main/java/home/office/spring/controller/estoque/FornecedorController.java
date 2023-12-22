@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -45,19 +44,14 @@ public class FornecedorController {
 		}
 	}	
 	
-	@GetMapping // @PageableDefault(sort = "nome", direction = Sort.Direction.DESC) 
-	public ResponseEntity<Page<ListaFornecedorRecord>> listar(@PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao){
+	@GetMapping 
+	public ResponseEntity<Page<ListaFornecedorRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
 		try {
-			return ResponseEntity.ok(service.listar(paginacao));
+			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}
 	}
-	/*
-	@GetMapping // ?size=5&page=1&sort=nome,desc
-	public Page<ListaCaixa> listar(@PageableDefault(page = 0, size = 5, sort = {"nome"}) Pageable paginacao){
-		return repository.findAllByAtivoTrue(paginacao).map(ListaCaixa::new);
-	}*/
 		
 	@PutMapping
 	@Transactional

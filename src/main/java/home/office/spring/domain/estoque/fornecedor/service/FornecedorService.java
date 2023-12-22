@@ -31,9 +31,13 @@ public class FornecedorService {
 		}
 	}
 	
-	public Page<ListaFornecedorRecord> listar(Pageable paginacao) {
+	public Page<ListaFornecedorRecord> listar(Pageable paginacao, String filtro) {
 		try {
-			return repository.findAllByAtivoTrue(paginacao).map(ListaFornecedorRecord::new);
+			if(filtro != null) {
+				return repository.findByNomeContaining(paginacao, filtro).map(ListaFornecedorRecord::new);
+			} else {			
+				return repository.findAllByAtivoTrue(paginacao).map(ListaFornecedorRecord::new);
+			}
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}
