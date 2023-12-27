@@ -76,9 +76,14 @@ public class MovimentacaoService {
 		}
 	}
 	
-	public Page<ListaMovimentacaoRecord> listar(Pageable paginacao) {
+	public Page<ListaMovimentacaoRecord> listar(Pageable paginacao, String filtro) {
 		try {
-			return repository.findAllByAtivoTrue(paginacao).map(ListaMovimentacaoRecord::new);
+			
+			if(filtro != null) {
+				return repository.findByProdutoNomeContaining(paginacao, filtro).map(ListaMovimentacaoRecord::new);
+			} else {
+				return repository.findAllByAtivoTrue(paginacao).map(ListaMovimentacaoRecord::new);
+			}
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}

@@ -27,6 +27,7 @@ public class CompraModel {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private String nome;
 	private String descricao;
 	@Enumerated(EnumType.STRING)
 	private Status status;
@@ -35,12 +36,16 @@ public class CompraModel {
 	
 	public CompraModel(CompraRecord dados) {	
 		this.descricao = dados.descricao();
+		this.nome = dados.nome();
 		this.status = Status.AGUARDANDO;
 		this.data = LocalDateTime.now();
 		this.ativo = true;			
 	}
 	
-	public void atualizar(AtualizaCompraRecord dados) { 		
+	public void atualizar(AtualizaCompraRecord dados) {
+		if(dados.nome() != null) {
+			this.nome = dados.nome();
+		}
 		if(dados.descricao() != null) {
 			this.descricao = dados.descricao();
 		}

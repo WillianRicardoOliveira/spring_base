@@ -8,6 +8,8 @@ import home.office.spring.domain.estoque.compra.model.CompraModel;
 
 public interface CompraRepository extends JpaRepository<CompraModel, Long> {
 	
+	Page<CompraModel> findByNomeContaining(Pageable paginacao, String filtro);
+	
 	Page<CompraModel> findAllByAtivoTrue(Pageable paginacao);
 	
 }

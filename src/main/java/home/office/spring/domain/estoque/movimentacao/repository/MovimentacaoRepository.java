@@ -8,6 +8,8 @@ import home.office.spring.domain.estoque.movimentacao.model.MovimentacaoModel;
 
 public interface MovimentacaoRepository extends JpaRepository<MovimentacaoModel, Long> {
 	
+	Page<MovimentacaoModel> findByProdutoNomeContaining(Pageable paginacao, String filtro);
+	
 	Page<MovimentacaoModel> findAllByAtivoTrue(Pageable paginacao);
 	
 }

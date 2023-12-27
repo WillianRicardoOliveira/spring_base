@@ -3,7 +3,6 @@ package home.office.spring.domain.estoque.produto.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +31,13 @@ public class ProdutoService {
 		}
 	}
 	
-	public Page<ListaProdutoRecord> listar(Pageable paginacao) {
+	public Page<ListaProdutoRecord> listar(Pageable paginacao, String filtro) {
 		try {
-			return repository.findAllByAtivoTrue(paginacao).map(ListaProdutoRecord::new);
+			if(filtro != null) {
+				return repository.findByNomeContaining(paginacao, filtro).map(ListaProdutoRecord::new);
+			} else {
+				return repository.findAllByAtivoTrue(paginacao).map(ListaProdutoRecord::new);
+			}
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}

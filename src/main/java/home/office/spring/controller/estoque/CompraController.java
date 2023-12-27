@@ -45,9 +45,9 @@ public class CompraController {
 	}	
 	
 	@GetMapping
-	public ResponseEntity<Page<ListaCompraRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao){
+	public ResponseEntity<Page<ListaCompraRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
 		try {
-			return ResponseEntity.ok(service.listar(paginacao));
+			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}

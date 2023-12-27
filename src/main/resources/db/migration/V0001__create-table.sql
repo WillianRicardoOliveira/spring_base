@@ -69,6 +69,7 @@ create table fornecedor(
 );
 create table compra(
     id bigint not null auto_increment,
+    nome varchar(100) not null,
     descricao varchar(250) not null,
     status varchar(30) not null,
     data date not null,

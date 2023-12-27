@@ -56,9 +56,13 @@ public class CompraItemService {
 		}
 	}
 	
-	public Page<ListaCompraItemRecord> listar(Pageable paginacao) {
+	public Page<ListaCompraItemRecord> listar(Pageable paginacao, String filtro) {
 		try {
-			return repository.findAllByAtivoTrue(paginacao).map(ListaCompraItemRecord::new);
+			if(filtro != null) {
+				return repository.findByProdutoNomeContaining(paginacao, filtro).map(ListaCompraItemRecord::new);
+			} else {
+				return repository.findAllByAtivoTrue(paginacao).map(ListaCompraItemRecord::new);
+			}
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}

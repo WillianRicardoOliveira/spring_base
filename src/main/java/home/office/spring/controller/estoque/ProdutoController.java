@@ -1,4 +1,4 @@
-package home.office.spring.controller;
+package home.office.spring.controller.estoque;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,9 +46,9 @@ public class ProdutoController {
 	}	
 	
 	@GetMapping
-	public ResponseEntity<Page<ListaProdutoRecord>> listar(@PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao){
+	public ResponseEntity<Page<ListaProdutoRecord>> listar(@PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
 		try {
-			return ResponseEntity.ok(service.listar(paginacao));
+			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}

@@ -8,6 +8,8 @@ import home.office.spring.domain.estoque.compraItem.model.CompraItemModel;
 
 public interface CompraItemRepository extends JpaRepository<CompraItemModel, Long> {
 	
+	Page<CompraItemModel> findByProdutoNomeContaining(Pageable paginacao, String filtro);
+	
 	Page<CompraItemModel> findAllByAtivoTrue(Pageable paginacao);
 	
 }
