@@ -111,3 +111,42 @@ create table tipo_movimentacao(
     ativo TINYINT(1) not null,
     primary key(id)
 );
+-- #################### --
+-- FINANCEIRO           --
+-- #################### --
+create table categoria_conta (
+  id bigint NOT NULL AUTO_INCREMENT,
+  nome varchar(100) NOT NULL,
+  primary key(id)
+);
+create table sub_categoria_conta (
+  id bigint NOT NULL AUTO_INCREMENT,
+  nome varchar(100) NOT NULL,
+  id_categoria_conta bigint NOT NULL,
+  primary key(id),
+  constraint fk_sub_categoria_conta_categoria_id foreign key(id_categoria_conta) references categoria_conta(id)
+);
+create table conta_pagar (
+  id bigint NOT NULL AUTO_INCREMENT,
+  id_fornecedor bigint NOT NULL,
+  id_sub_categoria bigint NOT NULL,
+  descricao varchar(250) DEFAULT NULL,
+  valor decimal(8,2) NOT NULL,
+  parcelas int NOT NULL,
+  status varchar(30) NOT NULL DEFAULT 'pendente',
+  primary key(id),
+  constraint fk_conta_pagar_fornecedor_id foreign key(id_fornecedor) references fornecedor(id),
+  constraint fk_conta_pagar_sub_categoria foreign key(id_sub_categoria) references sub_categoria_conta(id)
+);
+create table conta_pagar_parcelas (
+  id bigint NOT NULL AUTO_INCREMENT,
+  id_conta_pagar bigint NOT NULL,
+  parcela int NOT NULL,
+  vencimento date NOT NULL,
+  pagamento datetime DEFAULT NULL,
+  valor decimal(8,2) NOT NULL,
+  status varchar(30) NOT NULL,
+  metodo_pagamento varchar(30) NOT NULL,
+  primary key(id),
+  constraint fk_conta_pagar_parcelas_conta_pagar_id foreign key(id_conta_pagar) references conta_pagar(id)
+)
