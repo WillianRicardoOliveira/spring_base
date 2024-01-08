@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import home.office.spring.domain.financeiro.contaPagar.categoriaConta.model.CategoriaContaModel;
+import home.office.spring.domain.financeiro.contaPagar.categoriaConta.repository.CategoriaContaRepository;
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.model.SubCategoriaContaModel;
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.record.AtualizaSubCategoriaContaRecord;
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.record.DetalheSubCategoriaContaRecord;
@@ -19,13 +21,16 @@ public class SubCategoriaContaService {
 	
 	@Autowired
 	private SubCategoriaContaRepository repository;
+	@Autowired
+	private CategoriaContaRepository categoriaContaRepository;
 	
 	@Transactional
 	public SubCategoriaContaModel cadastrar(SubCategoriaContaRecord dados) {		
 		try {
-			var SubCategoriaConta = new SubCategoriaContaModel(dados);
-			repository.save(SubCategoriaConta);		
-			return SubCategoriaConta;
+			CategoriaContaModel categoriaConta = categoriaContaRepository.getReferenceById(dados.categoriaConta());
+			var subCategoriaConta = new SubCategoriaContaModel(dados,categoriaConta);
+			repository.save(subCategoriaConta);		
+			return subCategoriaConta;
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar o cadastro.");
 		}

@@ -32,8 +32,9 @@ public class SubCategoriaContaModel {
 	private CategoriaContaModel categoriaConta;
 	private Boolean ativo;
 	
-	public SubCategoriaContaModel(SubCategoriaContaRecord dados) {	
+	public SubCategoriaContaModel(SubCategoriaContaRecord dados, CategoriaContaModel categoriaConta) {	
 		this.nome = dados.nome();
+		this.categoriaConta = categoriaConta;
 		this.ativo = true;			
 	}
 	
