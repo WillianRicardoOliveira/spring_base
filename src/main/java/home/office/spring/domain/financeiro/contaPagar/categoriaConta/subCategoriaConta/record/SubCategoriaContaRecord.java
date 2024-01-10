@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record SubCategoriaContaRecord(		
 		@NotBlank(message = "{nome.obrigatorio}")
-		String nome,
-		
+		String nome,		
 		@NotNull(message = "{obrigatorio}")
-		Long categoriaConta
-		
+		Long categoriaConta		
 ) {}

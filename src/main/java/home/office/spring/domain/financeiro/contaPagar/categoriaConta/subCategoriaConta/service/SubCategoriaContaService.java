@@ -28,7 +28,7 @@ public class SubCategoriaContaService {
 	public SubCategoriaContaModel cadastrar(SubCategoriaContaRecord dados) {		
 		try {
 			CategoriaContaModel categoriaConta = categoriaContaRepository.getReferenceById(dados.categoriaConta());
-			var subCategoriaConta = new SubCategoriaContaModel(dados,categoriaConta);
+			var subCategoriaConta = new SubCategoriaContaModel(dados, categoriaConta);
 			repository.save(subCategoriaConta);		
 			return subCategoriaConta;
 		} catch (ValidacaoException e) {

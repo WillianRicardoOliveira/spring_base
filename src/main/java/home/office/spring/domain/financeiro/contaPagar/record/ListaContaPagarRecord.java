@@ -1,16 +1,28 @@
 package home.office.spring.domain.financeiro.contaPagar.record;
 
-import home.office.spring.domain.financeiro.contaPagar.categoriaConta.model.CategoriaContaModel;
+import java.math.BigDecimal;
+
+import home.office.spring.domain.financeiro.contaPagar.model.ContaPagarModel;
 
 public record ListaContaPagarRecord(				
 		Long id,
-		String nome
+		String fornecedor,
+		String subCategoriaConta,
+		BigDecimal valor,
+		Integer parcelar,
+		String statusPagamento,
+		String formaPagamento
 ) {
 	
-	public ListaContaPagarRecord(CategoriaContaModel dados) {
+	public ListaContaPagarRecord(ContaPagarModel dados) {
 		this(
-				dados.getId(), 
-				dados.getNome()
+				dados.getId(),
+				dados.getFornecedor().getNome(),
+				dados.getSubCategoriaConta().getNome(),
+				dados.getValor(),
+				dados.getParcelas(),
+				dados.getStatusPagamento().getNome(),
+				dados.getFormaPagamento().getNome()
 		);
 	}	
 	
