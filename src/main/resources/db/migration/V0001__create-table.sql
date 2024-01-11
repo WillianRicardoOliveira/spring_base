@@ -2,6 +2,7 @@ create table usuario(
     id bigint not null auto_increment,
     email varchar(100) not null,
     senha varchar(255) not null,
+    ativo TINYINT(1) not null,
     primary key(id)
 );
 
@@ -168,4 +169,19 @@ create table conta_pagar_parcelas (
   primary key(id),
   constraint fk_conta_pagar_parcelas_conta_pagar_id foreign key(id_conta_pagar) references conta_pagar(id),
   constraint fk_conta_pagar_parcelas_status_pagamento_id foreign key(id_status_pagamento) references status_pagamento(id)
-)
+);
+-- #################### --
+-- DADOS BASICOS        --
+-- #################### --
+insert into usuario (id, email, senha, ativo) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 1);
+
+insert into categoria_conta (id, nome, ativo) values (1, 'Despesas Operacionais', 1);
+insert into sub_categoria_conta (id, nome, id_categoria_conta, ativo) values (1, 'Água', 1, 1);
+insert into sub_categoria_conta (id, nome, id_categoria_conta, ativo) values (2, 'Luz', 1, 1);
+
+insert into status_pagamento (id, nome, ativo) values (1, 'Pendente', 1);
+insert into status_pagamento (id, nome, ativo) values (2, 'Pago', 1);
+
+insert into status_pagamento (id, nome, ativo) values (1, 'Débito', 1);
+insert into status_pagamento (id, nome, ativo) values (2, 'Crédito', 1);
+insert into status_pagamento (id, nome, ativo) values (3, 'Pix', 1);
