@@ -12,8 +12,8 @@ import home.office.spring.domain.financeiro.contaPagar.banco.cartao.record.Carta
 import home.office.spring.domain.financeiro.contaPagar.banco.cartao.record.DetalheCartaoRecord;
 import home.office.spring.domain.financeiro.contaPagar.banco.cartao.record.ListaCartaoRecord;
 import home.office.spring.domain.financeiro.contaPagar.banco.cartao.repository.CartaoRepository;
-import home.office.spring.domain.financeiro.contaPagar.banco.model.BancoModel;
-import home.office.spring.domain.financeiro.contaPagar.banco.repository.BancoRepository;
+import home.office.spring.domain.financeiro.contaPagar.banco.conta.model.ContaModel;
+import home.office.spring.domain.financeiro.contaPagar.banco.conta.repository.ContaRepository;
 import home.office.spring.domain.financeiro.contaPagar.formaPagamento.model.FormaPagamentoModel;
 import home.office.spring.domain.financeiro.contaPagar.formaPagamento.repository.FormaPagamentoRepository;
 import home.office.spring.infra.exception.ValidacaoException;
@@ -25,7 +25,7 @@ public class CartaoService {
 	private CartaoRepository repository;
 	
 	@Autowired
-	private BancoRepository bancoRepository;
+	private ContaRepository contaRepository;
 	
 	@Autowired
 	private FormaPagamentoRepository formaPagamentoRepository;
@@ -33,9 +33,9 @@ public class CartaoService {
 	@Transactional
 	public CartaoModel cadastrar(CartaoRecord dados) {		
 		try {
-			BancoModel banco = bancoRepository.getReferenceById(dados.banco());			
+			ContaModel conta = contaRepository.getReferenceById(dados.conta());			
 			FormaPagamentoModel formaPagamento = formaPagamentoRepository.getReferenceById(dados.formaPagamento().id());
-			var cartao = new CartaoModel(dados, banco, formaPagamento);
+			var cartao = new CartaoModel(dados, conta, formaPagamento);
 			repository.save(cartao);		
 			return cartao;
 		} catch (ValidacaoException e) {
@@ -58,10 +58,10 @@ public class CartaoService {
 	@Transactional
 	public DetalheCartaoRecord atualizar(AtualizaCartaoRecord dados) {
 		try {
-			BancoModel banco = bancoRepository.getReferenceById(dados.banco());			
+			ContaModel conta = contaRepository.getReferenceById(dados.conta());	
 			FormaPagamentoModel formaPagamento = formaPagamentoRepository.getReferenceById(dados.formaPagamento().id());
 			CartaoModel cartao = repository.getReferenceById(dados.id());
-			cartao.atualizar(dados, banco, formaPagamento);
+			cartao.atualizar(dados, conta, formaPagamento);
 			return new DetalheCartaoRecord(cartao);
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a atualização.");

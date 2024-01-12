@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CartaoRecord(
-		@NotNull(message = "{banco.obrigatorio}")
-		Long banco,
+		@NotNull(message = "{conta.obrigatorio}")
+		Long conta,
 		@NotNull(message = "{formaPagamento.obrigatorio}")
 		DetalheFormaPagamentoRecord formaPagamento,		
 		@NotBlank(message = "{numeroCartao.obrigatorio}")

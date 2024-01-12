@@ -2,7 +2,7 @@ package home.office.spring.domain.financeiro.contaPagar.banco.cartao.model;
 
 import home.office.spring.domain.financeiro.contaPagar.banco.cartao.record.AtualizaCartaoRecord;
 import home.office.spring.domain.financeiro.contaPagar.banco.cartao.record.CartaoRecord;
-import home.office.spring.domain.financeiro.contaPagar.banco.model.BancoModel;
+import home.office.spring.domain.financeiro.contaPagar.banco.conta.model.ContaModel;
 import home.office.spring.domain.financeiro.contaPagar.formaPagamento.model.FormaPagamentoModel;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -28,8 +28,8 @@ public class CartaoModel {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	@ManyToOne(cascade = CascadeType.DETACH)
-	@JoinColumn(name = "id_banco")
-	private BancoModel banco;
+	@JoinColumn(name = "id_conta")
+	private ContaModel conta;
 	@ManyToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_forma_pagamento")
 	private FormaPagamentoModel formaPagamento;
@@ -38,9 +38,8 @@ public class CartaoModel {
 	private String validadeAno;
 	private Boolean ativo;
 	
-	public CartaoModel(CartaoRecord dados, BancoModel banco, FormaPagamentoModel formaPagamento) {	
-		
-		this.banco = banco;		
+	public CartaoModel(CartaoRecord dados, ContaModel conta, FormaPagamentoModel formaPagamento) {	
+		this.conta = conta;		
 		this.formaPagamento = formaPagamento;		
 		this.numeroCartao = dados.numeroCartao();
 		this.validadeMes = dados.validadeMes();
@@ -48,9 +47,9 @@ public class CartaoModel {
 		this.ativo = true;			
 	}
 	
-	public void atualizar(AtualizaCartaoRecord dados, BancoModel banco, FormaPagamentoModel formaPagamento) {
-		if(banco != null) {
-			this.banco = banco;
+	public void atualizar(AtualizaCartaoRecord dados, ContaModel conta, FormaPagamentoModel formaPagamento) {
+		if(conta != null) {
+			this.conta = conta;
 		}
 		if(formaPagamento != null) {
 			this.formaPagamento = formaPagamento;

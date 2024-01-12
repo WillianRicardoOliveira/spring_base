@@ -8,7 +8,7 @@ public record AtualizaCartaoRecord(
 		@NotNull
 		Long id,
 		@NotNull(message = "{banco.obrigatorio}")
-		Long banco,
+		Long conta,
 		@NotNull(message = "{formaPagamento.obrigatorio}")
 		DetalheFormaPagamentoRecord formaPagamento,		
 		@NotBlank(message = "{numeroCartao.obrigatorio}")

@@ -133,6 +133,35 @@ create table status_pagamento (
   ativo TINYINT(1) not null,
   primary key(id)
 );
+create table banco (
+  id bigint NOT NULL AUTO_INCREMENT,
+  nome varchar(100) NOT NULL,
+  ativo TINYINT(1) NOT NULL,
+  primary key(id)
+);
+create table conta (
+  id bigint NOT NULL AUTO_INCREMENT,
+  id_banco bigint NOT NULL,
+  agencia varchar(5) NOT NULL,
+  conta varchar(6) NOT NULL,
+  digito varchar(2) NOT NULL,
+  pix varchar(50),
+  ativo TINYINT(1) NOT NULL,
+  primary key(id),
+  constraint fk_conta_banco_id foreign key(id_banco) references banco(id)
+);
+create table cartao (
+  id bigint NOT NULL AUTO_INCREMENT,
+  id_conta bigint NOT NULL,
+  id_forma_pagamento bigint NOT NULL,
+  numero_cartao varchar(20) NOT NULL,
+  validade_mes varchar(2) NOT NULL,
+  validade_ano varchar(4) NOT NULL,
+  ativo TINYINT(1) not null,  
+  primary key(id),
+  constraint fk_cartao_conta_id foreign key(id_conta) references conta(id),
+  constraint fk_cartao_forma_pagamento_id foreign key(id_forma_pagamento) references forma_pagamento(id)
+);
 create table sub_categoria_conta (
   id bigint NOT NULL AUTO_INCREMENT,
   nome varchar(100) NOT NULL,
