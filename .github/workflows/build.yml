@@ -1,0 +1,89 @@
+name: Maven Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    outputs:
+      jar_name: ${{ steps.set_jar_name.outputs.jar_name }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Versao da JDK - 20
+      uses: actions/setup-java@v2
+      with:
+        java-version: '18'
+        distribution: 'adopt'
+
+    - name: Build com Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Criando o diretório para o Build do JAR
+      run: mkdir ./jar-upload
+
+    - name: Copiando JAR gerado para a pasta jar-upload
+      run: cp ./target/*.jar ./jar-upload
+
+    - name: Definir nome do arquivo JAR sem extensão
+      id: jar_name
+      run: echo "::set-output name=jar_name::$(basename $(ls ./jar-upload/*.jar) .jar)"
+
+    - name: Usar o nome do JAR em outra etapa
+      run: echo "O nome do arquivo JAR é ${{ steps.jar_name.outputs.jar_name }}"
+        
+    - name: Enviando os JAR por FTP
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+        server: ${{ secrets.HOST }}
+        username: ${{ secrets.USUARIOCPANEL }}
+        password: ${{ secrets.SENHACPANEL }}
+        local-dir: ./jar-upload/
+        server-dir: ~/appservers/standalone/
+
+    - name: Instalar o SSH Client
+      run: sudo apt-get install openssh-client sshpass expect
+
+    - name: Parar o Spring Boot
+      env:
+        USUARIOCPANEL: ${{ secrets.USUARIOCPANEL }}
+        HOST: ${{ secrets.HOST }}
+        SENHACPANEL: ${{ secrets.SENHACPANEL }}
+      run: |
+        expect -c "
+        set timeout 20
+        spawn ssh -o StrictHostKeyChecking=no $USUARIOCPANEL@$HOST
+        expect \"password:\"
+        send \"$SENHACPANEL\r\"
+        expect \"$ \"
+        send \"bash appservers/tmp/${{ steps.jar_name.outputs.jar_name }}.sh stop\r\"
+        expect \"$ \"
+        send \"exit\r\"
+        expect eof
+        "
+
+    - name: Iniciar o Spring Boot
+      env:
+        USUARIOCPANEL: ${{ secrets.USUARIOCPANEL }}
+        HOST: ${{ secrets.HOST }}
+        SENHACPANEL: ${{ secrets.SENHACPANEL }}
+      run: |
+        expect -c "
+        set timeout 20
+        spawn ssh -o StrictHostKeyChecking=no $USUARIOCPANEL@$HOST
+        expect \"password:\"
+        send \"$SENHACPANEL\r\"
+        expect \"$ \"
+        send \"bash appservers/tmp/${{ steps.jar_name.outputs.jar_name }}.sh start\r\"
+        expect \"$ \"
+        send \"exit\r\"
+        expect eof
+        "
+
+
+        
