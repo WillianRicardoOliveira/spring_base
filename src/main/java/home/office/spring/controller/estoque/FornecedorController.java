@@ -40,7 +40,7 @@ public class FornecedorController {
 			var uri = uriBuilder.path("/fornecedor/{id}").buildAndExpand(fornecedor.getId()).toUri();
 			return ResponseEntity.created(uri).body(new DetalheFornecedorRecord(fornecedor));
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+			throw new ValidacaoException("Não foi possível realizar o cadastro do fornecedor.");
 		}
 	}	
 	
@@ -49,7 +49,7 @@ public class FornecedorController {
 		try {
 			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a listagem.");
+			throw new ValidacaoException("Não foi possível realizar a listagem do fornecedor.");
 		}
 	}
 		
@@ -59,7 +59,7 @@ public class FornecedorController {
 		try {
 			return ResponseEntity.ok(service.atualizar(dados));
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a atualização.");
+			throw new ValidacaoException("Não foi possível realizar a atualização do fornecedor.");
 		}
 	}
 	
@@ -70,7 +70,7 @@ public class FornecedorController {
 			service.excluir(id);
 			return ResponseEntity.noContent().build();
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a exclusão.");
+			throw new ValidacaoException("Não foi possível realizar a exclusão do fornecedor.");
 		}
 	}	
 	
@@ -79,7 +79,7 @@ public class FornecedorController {
 		try {
 			return ResponseEntity.ok(service.detalhar(id));
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+			throw new ValidacaoException("Não foi possível realizar o detalhamento do fornecedor.");
 		}
 	}
 

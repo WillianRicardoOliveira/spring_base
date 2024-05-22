@@ -6,11 +6,9 @@ import jakarta.validation.constraints.NotNull;
 public record AtualizaFornecedorRecord(
 		@NotNull
 		Long id,
-		@NotBlank(message = "{cnpj.obrigatorio}")
+		@NotBlank(message = "{fornecedor.cnpj}")
 		String cnpj,
-		@NotBlank(message = "{nome.obrigatorio}")
-		String nome,
-		@NotBlank(message = "{telefone.obrigatorio}")
-		String telefone,
-		String descricao
+		@NotBlank(message = "{fornecedor.razao_social}")
+		String razaoSocial,
+		String nomeFantasia
 ) {}

@@ -16,7 +16,7 @@ public record ListaCompraItemRecord(
 	public ListaCompraItemRecord(CompraItemModel dados) {
 		this(
 				dados.getId(),
-				dados.getFornecedor().getNome(),
+				dados.getFornecedor().getRazaoSocial(),
 				dados.getProduto().getNome(),
 				dados.getQuantidade(),
 				dados.getValor(),

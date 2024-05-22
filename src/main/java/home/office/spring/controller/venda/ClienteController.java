@@ -1,4 +1,4 @@
-package home.office.spring.controller.atendimento;
+package home.office.spring.controller.venda;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import home.office.spring.domain.atendimento.cliente.record.AtualizaClienteRecord;
-import home.office.spring.domain.atendimento.cliente.record.ClienteRecord;
-import home.office.spring.domain.atendimento.cliente.record.DetalheClienteRecord;
-import home.office.spring.domain.atendimento.cliente.record.ListaClienteRecord;
-import home.office.spring.domain.atendimento.cliente.service.ClienteService;
+import home.office.spring.domain.venda.cliente.record.AtualizaClienteRecord;
+import home.office.spring.domain.venda.cliente.record.ClienteRecord;
+import home.office.spring.domain.venda.cliente.record.DetalheClienteRecord;
+import home.office.spring.domain.venda.cliente.record.ListaClienteRecord;
+import home.office.spring.domain.venda.cliente.service.ClienteService;
 import home.office.spring.infra.exception.ValidacaoException;
 import jakarta.validation.Valid;
 

@@ -1,3 +1,17 @@
+create table fornecedor(
+    id bigint not null auto_increment,
+    cnpj varchar(14) not null,
+    razao_social varchar(100) not null,
+    nome_fantasia varchar(100),
+    ativo tinyint(1) not null,
+    primary key(id)
+);
+
+
+
+
+
+
 create table usuario(
     id bigint not null auto_increment,
     email varchar(100) not null,
@@ -5,6 +19,9 @@ create table usuario(
     ativo TINYINT(1) not null,
     primary key(id)
 );
+
+insert into usuario (id, email, senha, ativo) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 1);
+
 
 create table endereco(
     id bigint not null auto_increment,
@@ -17,6 +34,8 @@ create table endereco(
     numero varchar(20) not null,
     primary key(id)
 );
+
+INSERT INTO endereco (id, cep, logradouro, complemento, bairro, localidade, uf, numero) VALUES (1, 00000000, 'abc', 'abc', 'abc', 'abc', 'ab', 0);
 
 create table pessoa(
     id bigint not null auto_increment,
@@ -35,6 +54,9 @@ create table pessoa(
     constraint fk_pessoa_usuario_id foreign key(id_usuario) references usuario(id)
 );
 
+
+INSERT INTO pessoa (id, nome, nascimento, genero, cpf, telefone, id_endereco, id_usuario, aceitar_termos, tipo_pessoa, ativo)
+VALUES (1, 'adm', '19900212', 'masculino', '06488383906', '988755471', 1, 1, 1, 'C', 1);
 
 -- #################### --
 -- ATENDIMENTO          --
@@ -59,15 +81,7 @@ create table produto(
     ativo tinyint not null,
     primary key(id)
 );
-create table fornecedor(
-    id bigint not null auto_increment,
-    cnpj varchar(14) not null,
-    nome varchar(100) not null,
-    telefone varchar(15) not null,
-    descricao varchar(250),    
-    ativo TINYINT(1) not null,
-    primary key(id)
-);
+
 create table compra(
     id bigint not null auto_increment,
     nome varchar(100) not null,
@@ -202,15 +216,10 @@ create table conta_pagar_parcelas (
 -- #################### --
 -- DADOS BASICOS        --
 -- #################### --
-insert into usuario (id, email, senha, ativo) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 1);
+
 
 insert into categoria_conta (id, nome, ativo) values (1, 'Despesas Operacionais', 1);
 insert into sub_categoria_conta (id, nome, id_categoria_conta, ativo) values (1, 'Água', 1, 1);
 insert into sub_categoria_conta (id, nome, id_categoria_conta, ativo) values (2, 'Luz', 1, 1);
 
-insert into status_pagamento (id, nome, ativo) values (1, 'Pendente', 1);
-insert into status_pagamento (id, nome, ativo) values (2, 'Pago', 1);
 
-insert into status_pagamento (id, nome, ativo) values (1, 'Débito', 1);
-insert into status_pagamento (id, nome, ativo) values (2, 'Crédito', 1);
-insert into status_pagamento (id, nome, ativo) values (3, 'Pix', 1);

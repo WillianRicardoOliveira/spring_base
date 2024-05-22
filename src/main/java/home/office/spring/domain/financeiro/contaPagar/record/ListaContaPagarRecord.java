@@ -17,7 +17,7 @@ public record ListaContaPagarRecord(
 	public ListaContaPagarRecord(ContaPagarModel dados) {
 		this(
 				dados.getId(),
-				dados.getFornecedor().getNome(),
+				dados.getFornecedor().getRazaoSocial(),
 				dados.getSubCategoriaConta().getNome(),
 				dados.getValor(),
 				dados.getParcelas(),

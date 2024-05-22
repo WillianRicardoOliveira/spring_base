@@ -2,7 +2,6 @@ package home.office.spring.domain.estoque.fornecedor.model;
 
 import home.office.spring.domain.estoque.fornecedor.record.AtualizaFornecedorRecord;
 import home.office.spring.domain.estoque.fornecedor.record.FornecedorRecord;
-import home.office.spring.util.Formatacao;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,16 +23,14 @@ public class FornecedorModel {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String cnpj;
-	private String nome;
-	private String telefone;
-	private String descricao;	
+	private String razaoSocial;	
+	private String nomeFantasia;
 	private Boolean ativo;
 	
 	public FornecedorModel(FornecedorRecord dados) {	
 		this.cnpj = dados.cnpj();
-		this.nome = dados.nome();
-		this.telefone = dados.telefone();
-		this.descricao = dados.descricao();
+		this.razaoSocial = dados.razaoSocial();
+		this.nomeFantasia = dados.nomeFantasia();
 		this.ativo = true;			
 	}
 	
@@ -41,21 +38,19 @@ public class FornecedorModel {
 		if(dados.cnpj() != null) {
 			this.cnpj = dados.cnpj();
 		}		
-		if(dados.nome() != null) {
-			this.nome = dados.nome();
+		if(dados.razaoSocial() != null) {
+			this.razaoSocial = dados.razaoSocial();
 		}
-		if(dados.telefone() != null) {
-			this.telefone = dados.telefone();
-		}
-		if(dados.descricao() != null) {
-			this.descricao = dados.descricao();
+		if(dados.nomeFantasia() != null) {
+			this.nomeFantasia = dados.nomeFantasia();
 		}
 	}
 	
 	public void inativar() {
 		this.ativo = false;
 	}
-		
+	
+	/*	
 	public String cnpjFormatado() {
 		return Formatacao.formataCnpj(getCnpj());
 	}
@@ -63,5 +58,5 @@ public class FornecedorModel {
 	public String telefoneFormatado() {
 		return Formatacao.formataTelefone(getTelefone());
 	}
-	
+	*/
 }

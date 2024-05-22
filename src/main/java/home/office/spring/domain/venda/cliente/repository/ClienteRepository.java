@@ -1,10 +1,10 @@
-package home.office.spring.domain.atendimento.cliente.repository;
+package home.office.spring.domain.venda.cliente.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import home.office.spring.domain.atendimento.cliente.model.ClienteModel;
+import home.office.spring.domain.venda.cliente.model.ClienteModel;
 
 public interface ClienteRepository extends JpaRepository<ClienteModel, Long> {
 	

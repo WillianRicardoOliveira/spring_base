@@ -27,7 +27,7 @@ public class FornecedorService {
 			repository.save(fornecedor);		
 			return fornecedor;
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar o cadastro.");
+			throw new ValidacaoException("Não foi possível realizar o cadastro do fornecedor.");
 		}
 	}
 	
@@ -39,7 +39,7 @@ public class FornecedorService {
 				return repository.findAllByAtivoTrue(paginacao).map(ListaFornecedorRecord::new);
 			}
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a listagem.");
+			throw new ValidacaoException("Não foi possível realizar a listagem dos fornecedores.");
 		}
 	}
 	
@@ -50,7 +50,7 @@ public class FornecedorService {
 			fornecedor.atualizar(dados);
 			return new DetalheFornecedorRecord(fornecedor);
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a atualização.");
+			throw new ValidacaoException("Não foi possível realizar a atualização do fornecedor.");
 		}
 	}
 	
@@ -59,7 +59,7 @@ public class FornecedorService {
 		try {
 			repository.getReferenceById(id).inativar();
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a exclusão.");
+			throw new ValidacaoException("Não foi possível realizar a exclusão do fornecedor.");
 		}
 	}
 	
@@ -68,7 +68,7 @@ public class FornecedorService {
 			FornecedorModel fornecedor = repository.getReferenceById(id);
 			return new DetalheFornecedorRecord(fornecedor);
 		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar o detalhamento.");
+			throw new ValidacaoException("Não foi possível realizar o detalhamento do fornecedor.");
 		}
 	}
 	
