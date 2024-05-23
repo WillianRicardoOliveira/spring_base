@@ -8,7 +8,7 @@ import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
 
 public interface FornecedorRepository extends JpaRepository<FornecedorModel, Long> {
 
-	Page<FornecedorModel> findByNomeContaining(Pageable paginacao, String filtro);
+	Page<FornecedorModel> findByRazaoSocialContaining(Pageable paginacao, String filtro);
 	
 	Page<FornecedorModel> findAllByAtivoTrue(Pageable paginacao);
 	

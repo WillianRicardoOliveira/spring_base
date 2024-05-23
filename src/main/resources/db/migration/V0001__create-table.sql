@@ -1,11 +1,40 @@
+create table regime_tributacao_federal(
+    id bigint not null auto_increment,
+    nome varchar(30) not null,
+    ativo tinyint(1) not null,
+    primary key(id)
+);
+
+create table setor_atividade(
+    id bigint not null auto_increment,
+    nome varchar(50) not null,
+    ativo tinyint(1) not null,
+    primary key(id)
+);
+
 create table fornecedor(
     id bigint not null auto_increment,
     cnpj varchar(14) not null,
     razao_social varchar(100) not null,
     nome_fantasia varchar(100),
+    inscricao_estadual varchar(14),
+    inscricao_municipal varchar(14),
+    id_regime_tributacao_federal bigint not null,
+    id_setor_atividade bigint not null,    
     ativo tinyint(1) not null,
-    primary key(id)
+    primary key(id),    
+    constraint fk_fornecedor_regime_tributacao_federal_id foreign key(id_regime_tributacao_federal) references regime_tributacao_federal(id),    
+    constraint fk_fornecedor_setor_atividade_id foreign key(id_setor_atividade) references setor_atividade(id)    
 );
+
+
+
+
+
+
+
+
+
 
 
 

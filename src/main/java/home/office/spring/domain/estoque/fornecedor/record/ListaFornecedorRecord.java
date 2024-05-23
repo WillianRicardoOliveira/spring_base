@@ -6,7 +6,11 @@ public record ListaFornecedorRecord(
 		Long id,
 		String cnpj,
 		String razaoSocial,
-		String nomeFantasia
+		String nomeFantasia,
+		String inscricaoEstadual,
+		String inscricaoMunicipal,
+		String regimeTributacaoFederal,
+		String setorAtividade
 ) {
 	
 	public ListaFornecedorRecord(FornecedorModel dados) {
@@ -15,7 +19,11 @@ public record ListaFornecedorRecord(
 				dados.getId(),
 				dados.getCnpj(),
 				dados.getRazaoSocial(),
-				dados.getNomeFantasia()				
+				dados.getNomeFantasia(),
+				dados.getInscricaoEstadual(),
+				dados.getInscricaoMunicipal(),
+				dados.getRegimeTributacaoFederal().getNome(),
+				dados.getSetorAtividade().getNome()
 		);
 		
 	}	
