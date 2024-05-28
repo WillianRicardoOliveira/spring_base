@@ -1,7 +1,7 @@
 package home.office.spring.domain.estoque.fornecedor.record;
 
-import home.office.spring.domain.estoque.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
-import home.office.spring.domain.estoque.setorAtividade.record.DetalheSetorAtividadeRecord;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
+import home.office.spring.domain.fiscal.setorAtividade.record.DetalheSetorAtividadeRecord;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

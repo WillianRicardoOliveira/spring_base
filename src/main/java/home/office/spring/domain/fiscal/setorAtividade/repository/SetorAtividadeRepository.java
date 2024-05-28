@@ -1,10 +1,10 @@
-package home.office.spring.domain.estoque.setorAtividade.repository;
+package home.office.spring.domain.fiscal.setorAtividade.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import home.office.spring.domain.estoque.setorAtividade.model.SetorAtividadeModel;
+import home.office.spring.domain.fiscal.setorAtividade.model.SetorAtividadeModel;
 
 public interface SetorAtividadeRepository extends JpaRepository<SetorAtividadeModel, Long> {
 

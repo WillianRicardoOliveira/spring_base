@@ -1,6 +1,6 @@
-package home.office.spring.domain.estoque.regimeTributacaoFederal.record;
+package home.office.spring.domain.fiscal.regimeTributacaoFederal.record;
 
-import home.office.spring.domain.estoque.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
 
 public record ListaRegimeTributacaoFederalRecord(				
 		Long id,

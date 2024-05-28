@@ -2,8 +2,8 @@ package home.office.spring.domain.estoque.fornecedor.model;
 
 import home.office.spring.domain.estoque.fornecedor.record.AtualizaFornecedorRecord;
 import home.office.spring.domain.estoque.fornecedor.record.FornecedorRecord;
-import home.office.spring.domain.estoque.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
-import home.office.spring.domain.estoque.setorAtividade.model.SetorAtividadeModel;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
+import home.office.spring.domain.fiscal.setorAtividade.model.SetorAtividadeModel;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -1,4 +1,4 @@
-package home.office.spring.domain.estoque.setorAtividade.record;
+package home.office.spring.domain.fiscal.setorAtividade.record;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

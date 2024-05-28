@@ -8,7 +8,7 @@ import home.office.spring.domain.financeiro.contaPagar.model.ContaPagarModel;
 
 public interface ContaPagarRepository extends JpaRepository<ContaPagarModel, Long> {
 	
-	Page<ContaPagarModel> findByFornecedorNomeContaining(Pageable paginacao, String filtro);
+	//Page<ContaPagarModel> findByFornecedorNomeContaining(Pageable paginacao, String filtro);
 		
 	Page<ContaPagarModel> findAllByAtivoTrue(Pageable paginacao);
 	

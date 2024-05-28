@@ -1,6 +1,6 @@
 create table regime_tributacao_federal(
     id bigint not null auto_increment,
-    nome varchar(30) not null,
+    nome varchar(50) not null,
     ativo tinyint(1) not null,
     primary key(id)
 );
@@ -85,7 +85,7 @@ create table pessoa(
 
 
 INSERT INTO pessoa (id, nome, nascimento, genero, cpf, telefone, id_endereco, id_usuario, aceitar_termos, tipo_pessoa, ativo)
-VALUES (1, 'adm', '19900212', 'masculino', '06488383906', '988755471', 1, 1, 1, 'C', 1);
+VALUES (1, 'adm', '19900212', 'masculino', '06488383906', '988755471', 1, 1, 1, 'CLIENTE', 1);
 
 -- #################### --
 -- ATENDIMENTO          --

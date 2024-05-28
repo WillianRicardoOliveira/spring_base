@@ -1,7 +1,7 @@
-package home.office.spring.domain.estoque.regimeTributacaoFederal.model;
+package home.office.spring.domain.fiscal.regimeTributacaoFederal.model;
 
-import home.office.spring.domain.estoque.regimeTributacaoFederal.record.AtualizaRegimeTributacaoFederalRecord;
-import home.office.spring.domain.estoque.regimeTributacaoFederal.record.RegimeTributacaoFederalRecord;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.record.AtualizaRegimeTributacaoFederalRecord;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.record.RegimeTributacaoFederalRecord;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

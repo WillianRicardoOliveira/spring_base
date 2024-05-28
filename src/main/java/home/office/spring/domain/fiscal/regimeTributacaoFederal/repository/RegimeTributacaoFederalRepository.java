@@ -1,10 +1,10 @@
-package home.office.spring.domain.estoque.regimeTributacaoFederal.repository;
+package home.office.spring.domain.fiscal.regimeTributacaoFederal.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import home.office.spring.domain.estoque.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
 
 public interface RegimeTributacaoFederalRepository extends JpaRepository<RegimeTributacaoFederalModel, Long> {
 

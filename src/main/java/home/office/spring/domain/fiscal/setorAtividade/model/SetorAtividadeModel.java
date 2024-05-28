@@ -1,7 +1,7 @@
-package home.office.spring.domain.estoque.setorAtividade.model;
+package home.office.spring.domain.fiscal.setorAtividade.model;
 
-import home.office.spring.domain.estoque.setorAtividade.record.AtualizaSetorAtividadeRecord;
-import home.office.spring.domain.estoque.setorAtividade.record.SetorAtividadeRecord;
+import home.office.spring.domain.fiscal.setorAtividade.record.AtualizaSetorAtividadeRecord;
+import home.office.spring.domain.fiscal.setorAtividade.record.SetorAtividadeRecord;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

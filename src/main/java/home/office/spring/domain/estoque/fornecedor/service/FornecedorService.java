@@ -11,10 +11,10 @@ import home.office.spring.domain.estoque.fornecedor.record.DetalheFornecedorReco
 import home.office.spring.domain.estoque.fornecedor.record.FornecedorRecord;
 import home.office.spring.domain.estoque.fornecedor.record.ListaFornecedorRecord;
 import home.office.spring.domain.estoque.fornecedor.repository.FornecedorRepository;
-import home.office.spring.domain.estoque.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
-import home.office.spring.domain.estoque.regimeTributacaoFederal.repository.RegimeTributacaoFederalRepository;
-import home.office.spring.domain.estoque.setorAtividade.model.SetorAtividadeModel;
-import home.office.spring.domain.estoque.setorAtividade.repository.SetorAtividadeRepository;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.repository.RegimeTributacaoFederalRepository;
+import home.office.spring.domain.fiscal.setorAtividade.model.SetorAtividadeModel;
+import home.office.spring.domain.fiscal.setorAtividade.repository.SetorAtividadeRepository;
 import home.office.spring.infra.exception.ValidacaoException;
 import jakarta.transaction.Transactional;
 

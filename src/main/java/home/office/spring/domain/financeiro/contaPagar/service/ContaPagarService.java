@@ -58,11 +58,11 @@ public class ContaPagarService {
 	
 	public Page<ListaContaPagarRecord> listar(Pageable paginacao, String filtro) {
 		try {
-			if(filtro != null) {
-				return repository.findByFornecedorNomeContaining(paginacao, filtro).map(ListaContaPagarRecord::new);
-			} else {		
+			//if(filtro != null) {
+			//	return repository.findByFornecedorNomeContaining(paginacao, filtro).map(ListaContaPagarRecord::new);
+			//} else {		
 				return repository.findAllByAtivoTrue(paginacao).map(ListaContaPagarRecord::new);
-			}
+			//}
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}

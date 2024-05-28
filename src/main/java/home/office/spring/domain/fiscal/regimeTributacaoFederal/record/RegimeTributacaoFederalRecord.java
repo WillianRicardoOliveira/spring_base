@@ -1,4 +1,4 @@
-package home.office.spring.domain.estoque.regimeTributacaoFederal.record;
+package home.office.spring.domain.fiscal.regimeTributacaoFederal.record;
 
 import jakarta.validation.constraints.NotBlank;
 

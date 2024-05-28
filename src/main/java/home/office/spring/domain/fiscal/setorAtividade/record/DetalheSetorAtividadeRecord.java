@@ -1,6 +1,6 @@
-package home.office.spring.domain.estoque.setorAtividade.record;
+package home.office.spring.domain.fiscal.setorAtividade.record;
 
-import home.office.spring.domain.estoque.setorAtividade.model.SetorAtividadeModel;
+import home.office.spring.domain.fiscal.setorAtividade.model.SetorAtividadeModel;
 
 public record DetalheSetorAtividadeRecord(
 		Long id,

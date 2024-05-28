@@ -1,8 +1,8 @@
 package home.office.spring.domain.estoque.fornecedor.record;
 
 import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
-import home.office.spring.domain.estoque.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
-import home.office.spring.domain.estoque.setorAtividade.record.DetalheSetorAtividadeRecord;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
+import home.office.spring.domain.fiscal.setorAtividade.record.DetalheSetorAtividadeRecord;
 
 public record DetalheFornecedorRecord(
 		Long id,
