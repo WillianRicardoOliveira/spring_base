@@ -1,13 +1,11 @@
-package home.office.spring.domain.endereco.model;
+package home.office.spring.domain.fiscal.endereco.model;
 
-import home.office.spring.domain.endereco.record.EnderecoRecord;
-import jakarta.persistence.CascadeType;
+import home.office.spring.domain.fiscal.endereco.record.AtualizaEnderecoRecord;
+import home.office.spring.domain.fiscal.endereco.record.EnderecoRecord;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -24,48 +22,52 @@ public class EnderecoModel {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String cep = "";
-	private String logradouro = "";
-	private String complemento = "";
-    private String bairro = "";    
-    private String localidade = "";
-    private String uf = "";
-    private String numero = "";    
-    
+	private String cep;
+	private String localidade;
+	private String uf;
+	private String bairro;
+	private String logradouro;
+	private String numero = "";
+	private String complemento;
+	private Boolean ativo;
+	
     public EnderecoModel(EnderecoRecord dados) {
     	this.cep = dados.cep();
-    	this.logradouro = dados.logradouro();
-    	this.complemento = dados.complemento();
-    	this.bairro = dados.bairro();
     	this.localidade = dados.localidade();
     	this.uf = dados.uf();
+    	this.bairro = dados.bairro();
+    	this.logradouro = dados.logradouro();
     	this.numero = dados.numero();
+    	this.complemento = dados.complemento();
+    	this.ativo = true;
     }
     
-    public void atualizar(EnderecoRecord dados) {
+    public void atualizar(AtualizaEnderecoRecord dados) {
     	if(dados.cep() != null) {
     		this.cep = dados.cep();
     	}
-    	if(dados.logradouro() != null) {
-    		this.logradouro = dados.logradouro();
-    	}
-    	if(dados.complemento() != null) {
-    		this.complemento = dados.complemento();
-    	}
-    	if(dados.bairro() != null) {
-    		this.bairro = dados.bairro();
-    	}
-    	
     	if(dados.localidade() != null) {
     		this.localidade = dados.localidade();
     	}
     	if(dados.uf() != null) {
     		this.uf = dados.uf();
     	}
+    	if(dados.bairro() != null) {
+    		this.bairro = dados.bairro();
+    	}
+    	if(dados.logradouro() != null) {
+    		this.logradouro = dados.logradouro();
+    	}
     	if(dados.numero() != null) {
     		this.numero = dados.numero();
     	}
-    	
+    	if(dados.complemento() != null) {
+    		this.complemento = dados.complemento();
+    	}
     }
+    
+    public void inativar() {
+		this.ativo = false;
+	}
     
 }

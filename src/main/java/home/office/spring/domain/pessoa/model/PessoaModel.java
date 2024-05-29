@@ -1,6 +1,6 @@
 package home.office.spring.domain.pessoa.model;
 
-import home.office.spring.domain.endereco.model.EnderecoModel;
+import home.office.spring.domain.fiscal.endereco.model.EnderecoModel;
 import home.office.spring.domain.pessoa.constante.TipoPessoa;
 import home.office.spring.domain.pessoa.record.AtualizaPessoaRecord;
 import home.office.spring.domain.pessoa.record.PessoaRecord;
@@ -75,9 +75,9 @@ public class PessoaModel {
 		if(dados.telefone() != null) {
 			this.telefone = dados.telefone();
 		}
-		if(dados.endereco() != null) {
-			this.endereco.atualizar(dados.endereco());
-		}
+		//if(dados.endereco() != null) {
+			//this.endereco.atualizar(dados.endereco());
+		//}
 		if(dados.usuario() != null) {
 			this.usuario.atualizar(dados.usuario());
 		}

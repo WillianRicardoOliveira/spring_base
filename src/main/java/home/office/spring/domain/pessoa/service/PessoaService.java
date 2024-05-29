@@ -3,12 +3,11 @@ package home.office.spring.domain.pessoa.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import home.office.spring.domain.endereco.model.EnderecoModel;
-import home.office.spring.domain.endereco.repository.EnderecoRepository;
+import home.office.spring.domain.fiscal.endereco.model.EnderecoModel;
+import home.office.spring.domain.fiscal.endereco.repository.EnderecoRepository;
 import home.office.spring.domain.pessoa.model.PessoaModel;
 import home.office.spring.domain.pessoa.record.AtualizaPessoaRecord;
 import home.office.spring.domain.pessoa.record.DetalhePessoaRecord;

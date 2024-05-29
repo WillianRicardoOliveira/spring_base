@@ -12,6 +12,35 @@ create table setor_atividade(
     primary key(id)
 );
 
+create table endereco(
+    id bigint not null auto_increment,
+    cep varchar(10) not null,
+    localidade varchar(50) not null,
+    uf varchar(2) not null,
+    bairro varchar(50) not null,
+    logradouro varchar(50) not null,
+    numero varchar(10) not null,
+    complemento varchar(100),
+    ativo tinyint(1) not null,
+    primary key(id)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+INSERT INTO endereco (id, cep, localidade, uf, bairro, logradouro, numero, complemento, ativo) VALUES (1, '00000000', 'abc', 'PR', 'abc', 'abc', 'ab', 'ab', 1);
+
+
+
 create table fornecedor(
     id bigint not null auto_increment,
     cnpj varchar(14) not null,
@@ -51,20 +80,6 @@ create table usuario(
 
 insert into usuario (id, email, senha, ativo) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 1);
 
-
-create table endereco(
-    id bigint not null auto_increment,
-    cep varchar(9) not null,
-    logradouro varchar(100) not null,
-    complemento varchar(100),
-    bairro varchar(100) not null,
-    localidade varchar(100) not null,
-    uf varchar(2) not null,
-    numero varchar(20) not null,
-    primary key(id)
-);
-
-INSERT INTO endereco (id, cep, logradouro, complemento, bairro, localidade, uf, numero) VALUES (1, 00000000, 'abc', 'abc', 'abc', 'abc', 'ab', 0);
 
 create table pessoa(
     id bigint not null auto_increment,

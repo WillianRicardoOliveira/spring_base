@@ -1,6 +1,6 @@
 package home.office.spring.domain.pessoa.record;
 
-import home.office.spring.domain.endereco.record.EnderecoRecord;
+import home.office.spring.domain.fiscal.endereco.record.EnderecoRecord;
 import home.office.spring.domain.pessoa.model.PessoaModel;
 
 public record DetalhePessoaRecord(	
@@ -9,8 +9,8 @@ public record DetalhePessoaRecord(
 		String nascimento,
 		String genero,
 		String cpf,
-		String telefone,
-		EnderecoRecord endereco
+		String telefone
+		//EnderecoRecord endereco
 		//UsuarioModel usuario,
 		//Boolean aceitarTermos,
 		//TipoPessoa tipoPessoa,
@@ -24,8 +24,8 @@ public record DetalhePessoaRecord(
 				dados.getNascimento(),
 				dados.getGenero(),
 				dados.getCpf(),
-				dados.getTelefone(),				
-				new EnderecoRecord(dados.getEndereco())
+				dados.getTelefone()				
+				//new EnderecoRecord(dados.getEndereco())
 				//dados.getUsuario(),
 				//dados.getAceitarTermos(),
 				//dados.getTipoPessoa(),
