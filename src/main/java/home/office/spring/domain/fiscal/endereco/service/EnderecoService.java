@@ -51,6 +51,7 @@ public class EnderecoService {
 		}
 	}
 	
+	/*
 	@Transactional
 	public DetalheEnderecoRecord atualizar(AtualizaEnderecoRecord dados) {
 		try {
@@ -61,11 +62,11 @@ public class EnderecoService {
 			throw new ValidacaoException("Não foi possível realizar a atualização do Endereço.");
 		}
 	}
-	
+	*/
 	@Transactional
-	public void excluir(Long id) {
+	public void excluir(Long id, Boolean ativo) {
 		try {
-			repository.getReferenceById(id).inativar();
+			repository.getReferenceById(id).ativo(ativo);
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a exclusão do Endereço.");
 		}

@@ -2,12 +2,12 @@ package home.office.spring.domain.financeiro.contaPagar.model;
 
 import java.math.BigDecimal;
 
-import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.model.SubCategoriaContaModel;
 import home.office.spring.domain.financeiro.contaPagar.formaPagamento.model.FormaPagamentoModel;
 import home.office.spring.domain.financeiro.contaPagar.record.AtualizaContaPagarRecord;
 import home.office.spring.domain.financeiro.contaPagar.record.ContaPagarRecord;
 import home.office.spring.domain.financeiro.contaPagar.statusPagamento.model.StatusPagamentoModel;
+import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

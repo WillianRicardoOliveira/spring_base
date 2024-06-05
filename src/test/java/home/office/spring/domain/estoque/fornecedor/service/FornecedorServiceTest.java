@@ -11,12 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
-import home.office.spring.domain.estoque.fornecedor.record.AtualizaFornecedorRecord;
-import home.office.spring.domain.estoque.fornecedor.record.DetalheFornecedorRecord;
-import home.office.spring.domain.estoque.fornecedor.record.FornecedorRecord;
-import home.office.spring.domain.estoque.fornecedor.record.ListaFornecedorRecord;
-import home.office.spring.domain.estoque.fornecedor.repository.FornecedorRepository;
+import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
+import home.office.spring.domain.fiscal.fornecedor.record.AtualizaFornecedorRecord;
+import home.office.spring.domain.fiscal.fornecedor.record.DetalheFornecedorRecord;
+import home.office.spring.domain.fiscal.fornecedor.record.FornecedorRecord;
+import home.office.spring.domain.fiscal.fornecedor.record.ListaFornecedorRecord;
+import home.office.spring.domain.fiscal.fornecedor.repository.FornecedorRepository;
+import home.office.spring.domain.fiscal.fornecedor.service.FornecedorService;
 
 @ExtendWith(MockitoExtension.class)
 class FornecedorServiceTest {

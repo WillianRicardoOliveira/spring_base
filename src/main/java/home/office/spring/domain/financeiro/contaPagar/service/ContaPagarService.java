@@ -6,8 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
-import home.office.spring.domain.estoque.fornecedor.repository.FornecedorRepository;
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.model.SubCategoriaContaModel;
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.repository.SubCategoriaContaRepository;
 import home.office.spring.domain.financeiro.contaPagar.formaPagamento.model.FormaPagamentoModel;
@@ -20,6 +18,8 @@ import home.office.spring.domain.financeiro.contaPagar.record.ListaContaPagarRec
 import home.office.spring.domain.financeiro.contaPagar.repository.ContaPagarRepository;
 import home.office.spring.domain.financeiro.contaPagar.statusPagamento.model.StatusPagamentoModel;
 import home.office.spring.domain.financeiro.contaPagar.statusPagamento.repository.StatusPagamentoRepository;
+import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
+import home.office.spring.domain.fiscal.fornecedor.repository.FornecedorRepository;
 import home.office.spring.infra.exception.ValidacaoException;
 
 @Service

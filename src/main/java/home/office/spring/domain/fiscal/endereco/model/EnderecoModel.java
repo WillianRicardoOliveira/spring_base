@@ -1,6 +1,5 @@
 package home.office.spring.domain.fiscal.endereco.model;
 
-import home.office.spring.domain.fiscal.endereco.record.AtualizaEnderecoRecord;
 import home.office.spring.domain.fiscal.endereco.record.EnderecoRecord;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,7 +41,7 @@ public class EnderecoModel {
     	this.ativo = true;
     }
     
-    public void atualizar(AtualizaEnderecoRecord dados) {
+    public void atualizar(EnderecoRecord dados) {
     	if(dados.cep() != null) {
     		this.cep = dados.cep();
     	}
@@ -66,8 +65,10 @@ public class EnderecoModel {
     	}
     }
     
-    public void inativar() {
-		this.ativo = false;
+    public void ativo(Boolean ativo) {
+		
+		this.ativo = ativo;
+		
 	}
     
 }

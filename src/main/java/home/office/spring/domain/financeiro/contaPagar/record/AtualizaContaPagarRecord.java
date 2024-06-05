@@ -2,10 +2,10 @@ package home.office.spring.domain.financeiro.contaPagar.record;
 
 import java.math.BigDecimal;
 
-import home.office.spring.domain.estoque.fornecedor.record.DetalheFornecedorRecord;
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.record.DetalheSubCategoriaContaRecord;
 import home.office.spring.domain.financeiro.contaPagar.formaPagamento.record.DetalheFormaPagamentoRecord;
 import home.office.spring.domain.financeiro.contaPagar.statusPagamento.record.DetalheStatusPagamentoRecord;
+import home.office.spring.domain.fiscal.fornecedor.record.DetalheFornecedorRecord;
 import jakarta.validation.constraints.NotNull;
 
 public record AtualizaContaPagarRecord(

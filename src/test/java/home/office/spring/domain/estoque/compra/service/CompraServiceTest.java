@@ -17,7 +17,7 @@ import home.office.spring.domain.estoque.compra.record.CompraRecord;
 import home.office.spring.domain.estoque.compra.record.DetalheCompraRecord;
 import home.office.spring.domain.estoque.compra.record.ListaCompraRecord;
 import home.office.spring.domain.estoque.compra.repository.CompraRepository;
-import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
+import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
 
 @ExtendWith(MockitoExtension.class)
 class CompraServiceTest {

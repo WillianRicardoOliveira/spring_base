@@ -52,7 +52,7 @@ public class EnderecoController {
 			throw new ValidacaoException("Não foi possível realizar a listagem dos Endereços.");
 		}
 	}
-		
+	/*	
 	@PutMapping
 	@Transactional
 	public ResponseEntity atualizar(@RequestBody @Valid AtualizaEnderecoRecord dados) {
@@ -62,12 +62,12 @@ public class EnderecoController {
 			throw new ValidacaoException("Não foi possível realizar a atualização do Endereço.");
 		}
 	}
-	
+	*/
 	@DeleteMapping("/{id}")
 	@Transactional
 	public ResponseEntity excluir(@PathVariable Long id) {
 		try {
-			service.excluir(id);
+			service.excluir(id, true);
 			return ResponseEntity.noContent().build();
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a exclusão do Endereço.");

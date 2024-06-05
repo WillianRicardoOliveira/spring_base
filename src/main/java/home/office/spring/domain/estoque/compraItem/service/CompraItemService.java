@@ -17,10 +17,10 @@ import home.office.spring.domain.estoque.compraItem.record.CompraItemRecord;
 import home.office.spring.domain.estoque.compraItem.record.DetalheCompraItemRecord;
 import home.office.spring.domain.estoque.compraItem.record.ListaCompraItemRecord;
 import home.office.spring.domain.estoque.compraItem.repository.CompraItemRepository;
-import home.office.spring.domain.estoque.fornecedor.model.FornecedorModel;
-import home.office.spring.domain.estoque.fornecedor.repository.FornecedorRepository;
 import home.office.spring.domain.estoque.produto.model.ProdutoModel;
 import home.office.spring.domain.estoque.produto.repository.ProdutoRepository;
+import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
+import home.office.spring.domain.fiscal.fornecedor.repository.FornecedorRepository;
 import home.office.spring.infra.exception.ValidacaoException;
 
 @Service
