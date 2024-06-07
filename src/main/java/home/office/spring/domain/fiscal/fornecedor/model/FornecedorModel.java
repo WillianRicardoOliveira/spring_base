@@ -33,40 +33,26 @@ public class FornecedorModel {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotNull
 	private Boolean tipo;
 	
-	@NotNull
-	@Size(min = 1, max = 14)
-	@Pattern(regexp = "\\d{1,14}", message = "Número de documento deve conter apenas dígitos")
 	private String numeroDocumento;
 	
-	@NotNull
-	@Size(min = 1, max = 100)
 	private String razaoSocial;
 	
-	@Size(min = 1, max = 100)
 	private String nomeFantasia;
 	
-	@Size(min = 1, max = 14)
-	@Pattern(regexp = "\\d{1,14}", message = "Inscrição Estadual deve conter apenas dígitos")
 	private String inscricaoEstadual;
 	
-	@Size(min = 1, max = 14)
-	@Pattern(regexp = "\\d{1,14}", message = "Inscrição Municipal deve conter apenas dígitos")
 	private String inscricaoMunicipal;
 	
-	@NotNull
 	@OneToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_regime_tributação_federal")
 	private RegimeTributacaoFederalModel regimeTributacaoFederal;
 	
-	@NotNull
 	@OneToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_setor_atividade")
 	private SetorAtividadeModel setorAtividade;
 	
-	@NotNull
 	@OneToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_endereco")
 	private EnderecoModel endereco;
