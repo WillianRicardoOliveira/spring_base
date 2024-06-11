@@ -15,46 +15,50 @@ create table setor_atividade(
 create table endereco(
     id bigint not null auto_increment,
     cep varchar(10) not null,
-    localidade varchar(50) not null,
+    localidade varchar(100) not null,
     uf varchar(2) not null,
-    bairro varchar(50) not null,
-    logradouro varchar(50) not null,
+    bairro varchar(100) not null,
+    logradouro varchar(150) not null,
     numero varchar(10) not null,
-    complemento varchar(100),
+    complemento varchar(50),
     ativo tinyint(1) not null,
     primary key(id)
 );
 
-
-
-
-
-
-
-
-
-
-
-
-
-INSERT INTO endereco (id, cep, localidade, uf, bairro, logradouro, numero, complemento, ativo) VALUES (1, '00000000', 'abc', 'PR', 'abc', 'abc', 'ab', 'ab', 1);
-
-
-
 create table fornecedor(
     id bigint not null auto_increment,
-    cnpj varchar(14) not null,
+    Tipo tinyint(1) not null,
+    numero_documento varchar(14) not null,
     razao_social varchar(100) not null,
     nome_fantasia varchar(100),
     inscricao_estadual varchar(14),
     inscricao_municipal varchar(14),
     id_regime_tributacao_federal bigint not null,
     id_setor_atividade bigint not null,    
+    id_endereco bigint not null,
     ativo tinyint(1) not null,
     primary key(id),    
     constraint fk_fornecedor_regime_tributacao_federal_id foreign key(id_regime_tributacao_federal) references regime_tributacao_federal(id),    
-    constraint fk_fornecedor_setor_atividade_id foreign key(id_setor_atividade) references setor_atividade(id)    
+    constraint fk_fornecedor_setor_atividade_id foreign key(id_setor_atividade) references setor_atividade(id),
+    constraint fk_fornecedor_endereco_id foreign key(id_endereco) references endereco(id)
 );
+
+
+
+
+
+
+
+
+
+
+
+insert into regime_tributacao_federal(id, nome, ativo) values (1, 'a', 1)
+
+insert into setor_atividade(id, nome, ativo) values (1, 'a', 1)
+
+INSERT INTO endereco (id, cep, localidade, uf, bairro, logradouro, numero, complemento, ativo) VALUES (1, '00000000', 'abc', 'PR', 'abc', 'abc', 'ab', 'ab', 1);
+
 
 
 

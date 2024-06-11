@@ -46,7 +46,7 @@ public class FornecedorModel {
 	private String inscricaoMunicipal;
 	
 	@OneToOne(cascade = CascadeType.DETACH)
-	@JoinColumn(name = "id_regime_tributação_federal")
+	@JoinColumn(name = "id_regime_tributacao_federal")
 	private RegimeTributacaoFederalModel regimeTributacaoFederal;
 	
 	@OneToOne(cascade = CascadeType.DETACH)
