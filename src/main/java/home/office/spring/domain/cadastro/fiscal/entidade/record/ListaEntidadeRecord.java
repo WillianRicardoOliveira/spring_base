@@ -1,8 +1,8 @@
-package home.office.spring.domain.fiscal.fornecedor.record;
+package home.office.spring.domain.cadastro.fiscal.entidade.record;
 
 import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
 
-public record ListaFornecedorRecord(
+public record ListaEntidadeRecord(
 	Long id,
 	Boolean tipo,
 	String numeroDocumento,
@@ -14,7 +14,7 @@ public record ListaFornecedorRecord(
 	String setorAtividade	
 ) {
 	
-	public ListaFornecedorRecord(FornecedorModel dados) {
+	public ListaEntidadeRecord(FornecedorModel dados) {
 		this(
 			dados.getId(),
 			dados.getTipo(),

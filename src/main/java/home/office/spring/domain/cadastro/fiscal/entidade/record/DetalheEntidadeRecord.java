@@ -1,11 +1,11 @@
-package home.office.spring.domain.fiscal.fornecedor.record;
+package home.office.spring.domain.cadastro.fiscal.entidade.record;
 
 import home.office.spring.domain.fiscal.endereco.record.DetalheEnderecoRecord;
 import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
 import home.office.spring.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
 import home.office.spring.domain.fiscal.setorAtividade.record.DetalheSetorAtividadeRecord;
 
-public record DetalheFornecedorRecord(
+public record DetalheEntidadeRecord(
 	Long id,
 	Boolean tipo,
 	String nummeroDocumento,
@@ -19,7 +19,7 @@ public record DetalheFornecedorRecord(
 	Boolean ativo
 ) {
 		
-	public DetalheFornecedorRecord(FornecedorModel dados) {
+	public DetalheEntidadeRecord(FornecedorModel dados) {
 		this(
 			dados.getId(),
 			dados.getTipo(),

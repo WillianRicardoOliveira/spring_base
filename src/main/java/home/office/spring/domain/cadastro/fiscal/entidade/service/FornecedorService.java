@@ -1,4 +1,4 @@
-package home.office.spring.domain.fiscal.fornecedor.service;
+package home.office.spring.domain.cadastro.fiscal.entidade.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

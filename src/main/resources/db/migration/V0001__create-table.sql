@@ -53,14 +53,6 @@ create table fornecedor(
 
 
 
-insert into regime_tributacao_federal(id, nome, ativo) values (1, 'a', 1)
-
-insert into setor_atividade(id, nome, ativo) values (1, 'a', 1)
-
-INSERT INTO endereco (id, cep, localidade, uf, bairro, logradouro, numero, complemento, ativo) VALUES (1, '00000000', 'abc', 'PR', 'abc', 'abc', 'ab', 'ab', 1);
-
-
-
 
 
 
@@ -102,9 +94,6 @@ create table pessoa(
     constraint fk_pessoa_usuario_id foreign key(id_usuario) references usuario(id)
 );
 
-
-INSERT INTO pessoa (id, nome, nascimento, genero, cpf, telefone, id_endereco, id_usuario, aceitar_termos, tipo_pessoa, ativo)
-VALUES (1, 'adm', '19900212', 'masculino', '06488383906', '988755471', 1, 1, 1, 'CLIENTE', 1);
 
 -- #################### --
 -- ATENDIMENTO          --
@@ -264,10 +253,21 @@ create table conta_pagar_parcelas (
 -- #################### --
 -- DADOS BASICOS        --
 -- #################### --
-
+/*
 
 insert into categoria_conta (id, nome, ativo) values (1, 'Despesas Operacionais', 1);
 insert into sub_categoria_conta (id, nome, id_categoria_conta, ativo) values (1, 'Água', 1, 1);
 insert into sub_categoria_conta (id, nome, id_categoria_conta, ativo) values (2, 'Luz', 1, 1);
 
+insert into regime_tributacao_federal(id, nome, ativo) values (1, 'a', 1)
 
+insert into setor_atividade(id, nome, ativo) values (1, 'a', 1)
+
+INSERT INTO endereco (id, cep, localidade, uf, bairro, logradouro, numero, complemento, ativo) VALUES (1, '00000000', 'abc', 'PR', 'abc', 'abc', 'ab', 'ab', 1);
+
+
+
+
+INSERT INTO pessoa (id, nome, nascimento, genero, cpf, telefone, id_endereco, id_usuario, aceitar_termos, tipo_pessoa, ativo)
+VALUES (1, 'adm', '19900212', 'masculino', '06488383906', '988755471', 1, 1, 1, 'CLIENTE', 1);
+*/
