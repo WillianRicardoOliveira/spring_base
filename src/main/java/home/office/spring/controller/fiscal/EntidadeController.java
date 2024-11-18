@@ -17,24 +17,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import home.office.spring.domain.fiscal.fornecedor.record.AtualizaFornecedorRecord;
-import home.office.spring.domain.fiscal.fornecedor.record.DetalheFornecedorRecord;
-import home.office.spring.domain.fiscal.fornecedor.record.FornecedorRecord;
-import home.office.spring.domain.fiscal.fornecedor.record.ListaFornecedorRecord;
-import home.office.spring.domain.fiscal.fornecedor.service.FornecedorService;
+import home.office.spring.domain.cadastro.fiscal.entidade.record.AtualizaEntidadeRecord;
+import home.office.spring.domain.cadastro.fiscal.entidade.record.DetalheEntidadeRecord;
+import home.office.spring.domain.cadastro.fiscal.entidade.record.EntidadeRecord;
+import home.office.spring.domain.cadastro.fiscal.entidade.record.ListaEntidadeRecord;
+import home.office.spring.domain.cadastro.fiscal.entidade.service.EntidadeService;
 import home.office.spring.infra.exception.ValidacaoException;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/fornecedor")
-public class FornecedorController {
+public class EntidadeController {
 	
 	@Autowired
-	private FornecedorService service;
+	private EntidadeService service;
 	
 	@PostMapping
 	@Transactional
-	public ResponseEntity cadastrar(@RequestBody @Valid FornecedorRecord dados, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity cadastrar(@RequestBody @Valid EntidadeRecord dados, UriComponentsBuilder uriBuilder) {
 		
 		try {
 			
@@ -42,7 +42,7 @@ public class FornecedorController {
 			
 			var uri = uriBuilder.path("/fornecedor/{id}").buildAndExpand(fornecedor.getId()).toUri();
 			
-			return ResponseEntity.created(uri).body(new DetalheFornecedorRecord(fornecedor));
+			return ResponseEntity.created(uri).body(new DetalheEntidadeRecord(fornecedor));
 			
 		} catch (ValidacaoException e) {
 			
@@ -67,7 +67,7 @@ public class FornecedorController {
 	
 	
 	@GetMapping 
-	public ResponseEntity<Page<ListaFornecedorRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
+	public ResponseEntity<Page<ListaEntidadeRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
 		try {
 			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
@@ -77,7 +77,7 @@ public class FornecedorController {
 		
 	@PutMapping
 	@Transactional
-	public ResponseEntity atualizar(@RequestBody @Valid AtualizaFornecedorRecord dados) {
+	public ResponseEntity atualizar(@RequestBody @Valid AtualizaEntidadeRecord dados) {
 		try {
 			return ResponseEntity.ok(service.atualizar(dados));
 		} catch (ValidacaoException e) {
@@ -97,7 +97,7 @@ public class FornecedorController {
 	}	
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<DetalheFornecedorRecord> detalhar(@PathVariable Long id) {
+	public ResponseEntity<DetalheEntidadeRecord> detalhar(@PathVariable Long id) {
 		try {
 			return ResponseEntity.ok(service.detalhar(id));
 		} catch (ValidacaoException e) {

@@ -1,30 +1,30 @@
 package home.office.spring.domain.cadastro.fiscal.entidade.record;
 
-import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
+import home.office.spring.domain.cadastro.fiscal.entidade.model.EntidadeModel;
 
 public record ListaEntidadeRecord(
-	Long id,
-	Boolean tipo,
-	String numeroDocumento,
-	String razaoSocial,
-	String nomeFantasia,
-	String inscricaoEstadual,
-	String inscricaoMunicipal,
-	String regimeTributacaoFederal,
-	String setorAtividade	
+		Long id,
+		String nomeCompleto,
+		String nomeFantasia,
+		String numeroDocumento,
+		String inscricaoEstadual,
+		String inscricaoMunicipal,
+		String regimeTributacaoFederal,
+		String setorAtividade,
+		Boolean ativo
 ) {
 	
-	public ListaEntidadeRecord(FornecedorModel dados) {
+	public ListaEntidadeRecord(EntidadeModel dados) {
 		this(
 			dados.getId(),
-			dados.getTipo(),
-			dados.getNumeroDocumento(),
-			dados.getRazaoSocial(),
-			dados.getNomeFantasia(),
+			dados.getNomeCompleto(),
+			dados.getNomeFantasia(),			
+			dados.getNumeroDocumento(),			
 			dados.getInscricaoEstadual(),
 			dados.getInscricaoMunicipal(),
 			dados.getRegimeTributacaoFederal().getNome(),
-			dados.getSetorAtividade().getNome()	
+			dados.getSetorAtividade().getNome(),
+			dados.getAtivo()
 		);
 	}	
 

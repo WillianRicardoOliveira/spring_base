@@ -1,5 +1,5 @@
 package home.office.spring.domain.financeiro.contaPagar.record;
-
+/*
 import java.math.BigDecimal;
 
 import home.office.spring.domain.financeiro.contaPagar.model.ContaPagarModel;
@@ -27,3 +27,4 @@ public record ListaContaPagarRecord(
 	}	
 	
 }
+*/

@@ -1,5 +1,5 @@
 package home.office.spring.domain.estoque.compraItem.record;
-
+/*
 import java.math.BigDecimal;
 
 import home.office.spring.domain.estoque.compraItem.model.CompraItemModel;
@@ -29,3 +29,4 @@ import home.office.spring.domain.fiscal.fornecedor.record.DetalheFornecedorRecor
 	}
 	
 }
+*/

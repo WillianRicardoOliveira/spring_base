@@ -1,5 +1,5 @@
 package home.office.spring.domain.financeiro.contaPagar.record;
-
+/*
 import java.math.BigDecimal;
 
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.record.DetalheCategoriaContaRecord;
@@ -37,4 +37,4 @@ import home.office.spring.domain.fiscal.fornecedor.record.DetalheFornecedorRecor
 				
 	}
 
-}
+}*/

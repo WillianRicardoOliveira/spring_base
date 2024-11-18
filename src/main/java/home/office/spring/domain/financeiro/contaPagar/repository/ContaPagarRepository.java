@@ -1,5 +1,5 @@
 package home.office.spring.domain.financeiro.contaPagar.repository;
-
+/*
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,3 +13,4 @@ public interface ContaPagarRepository extends JpaRepository<ContaPagarModel, Lon
 	Page<ContaPagarModel> findAllByAtivoTrue(Pageable paginacao);
 	
 }
+*/

@@ -1,5 +1,5 @@
 package home.office.spring.domain.financeiro.contaPagar.service;
-
+/*
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +22,7 @@ import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
 import home.office.spring.domain.fiscal.fornecedor.repository.FornecedorRepository;
 import home.office.spring.infra.exception.ValidacaoException;
 
+
 @Service
 public class ContaPagarService {
 	
@@ -29,7 +30,7 @@ public class ContaPagarService {
 	private ContaPagarRepository repository;
 	
 	@Autowired
-	private FornecedorRepository fornecedorRepository;
+	private EntidadeRepository fornecedorRepository;
 	
 	@Autowired
 	private SubCategoriaContaRepository subCategoriaContaRepository;
@@ -102,3 +103,4 @@ public class ContaPagarService {
 	}
 	
 }
+*/

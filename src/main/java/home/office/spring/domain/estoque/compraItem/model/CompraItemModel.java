@@ -1,5 +1,5 @@
 package home.office.spring.domain.estoque.compraItem.model;
-
+/*
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -84,3 +84,4 @@ public class CompraItemModel {
 	}
 	
 }
+*/

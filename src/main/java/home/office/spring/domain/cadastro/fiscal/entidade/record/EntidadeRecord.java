@@ -10,43 +10,36 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record EntidadeRecord(
-
-	@NotBlank(message = "{fornecedor.numero_documento}")	
-	@Pattern(regexp = "\\d{1,14}", message = "{fornecedor.numero_documento.digitos}")
-	@Size(min = 1, max = 14, message = "{fornecedor.numero_documento.tamanho}")
-	String numeroDocumento,
-	
-	
-	@NotBlank(message = "{fornecedor.razao_social}")
-	@Size(min = 1, max = 100, message = "{fornecedor.razao_social.tamanho}")
+		
+	@NotBlank(message = "{entidade.nome}")	
+	@Size(min = 1, max = 255, message = "{entidade.nome.tamanho}")	
 	String nomeCompleto,
-	
-	
-	@Size(max = 100, message = "{fornecedor.nome_fantasia.tamanho}")
+		
+	@Size(max = 255, message = "{entidade.nome_fantasia.tamanho}")
 	String nomeFantasia,
 	
-	
-	@Size(max = 14, message = "{fornecedor.inscricao_estadual.tamanho}")
-	@Pattern(regexp = "\\d{0,14}", message = "{fornecedor.inscricao_estadual.digitos}")
+	@NotBlank(message = "{entidade.numero_documento}")	
+	@Pattern(regexp = "\\d{1,20}", message = "{entidade.numero_documento.digitos}")
+	@Size(min = 1, max = 20, message = "{entidade.numero_documento.tamanho}")
+	String numeroDocumento,
+		
+	@Size(max = 15, message = "{entidade.inscricao_estadual.tamanho}")	
+	@Pattern(regexp = "\\d{0,15}", message = "{entidade.inscricao_estadual.digitos}")	
 	String inscricaoEstadual,
 	
-	
-	@Size(max = 14, message = "{fornecedor.inscricao_municipal.tamanho}")
-	@Pattern(regexp = "\\d{0,14}", message = "{fornecedor.inscricao_municipal.digitos}")
+	@Size(max = 15, message = "{entidade.inscricao_municipal.tamanho}")
+	@Pattern(regexp = "\\d{0,15}", message = "{entidade.inscricao_municipal.digitos}")
 	String inscricaoMunicipal,
-	
-	
-	@NotNull(message = "{fornecedor.regime_tributacao_federal}")
+		
+	@NotNull(message = "{entidade.regime_tributacao_federal}")
 	@Valid
-	DetalheRegimeTributacaoFederalRecord regimeTributacaoFederal,
+	DetalheRegimeTributacaoFederalRecord regimeTributacaoFederal,	
 	
-	
-	@NotNull(message = "{fornecedor.setor_atividade}")
+	@NotNull(message = "{entidade.setor_atividade}")
 	@Valid
-	DetalheSetorAtividadeRecord setorAtividade,
+	DetalheSetorAtividadeRecord setorAtividade,	
 	
-	
-	@NotNull(message = "{fornecedor.endereco}")
+	@NotNull(message = "{entidade.endereco}")
 	@Valid
 	EnderecoRecord endereco	
 	

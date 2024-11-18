@@ -1,5 +1,5 @@
 package home.office.spring.domain.financeiro.contaPagar.model;
-
+/*
 import java.math.BigDecimal;
 
 import home.office.spring.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.model.SubCategoriaContaModel;
@@ -88,3 +88,4 @@ public class ContaPagarModel {
 	}
 		
 }
+*/

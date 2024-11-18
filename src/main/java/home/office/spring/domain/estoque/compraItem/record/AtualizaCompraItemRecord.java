@@ -1,5 +1,5 @@
 package home.office.spring.domain.estoque.compraItem.record;
-
+/*
 import java.math.BigDecimal;
 
 import home.office.spring.domain.estoque.produto.record.DetalheProdutoRecord;
@@ -18,3 +18,4 @@ public record AtualizaCompraItemRecord(
 		@NotNull(message = "{valor.obrigatorio}")
 		BigDecimal valor
 ) {}
+*/

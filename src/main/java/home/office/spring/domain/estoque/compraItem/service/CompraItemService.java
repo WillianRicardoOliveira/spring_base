@@ -1,5 +1,5 @@
 package home.office.spring.domain.estoque.compraItem.service;
-
+/*
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -33,7 +33,7 @@ public class CompraItemService {
 	private CompraRepository compraRepository;
 	
 	@Autowired
-	private FornecedorRepository fornecedorRepository;
+	private EntidadeRepository fornecedorRepository;
 	
 	@Autowired
 	private ProdutoRepository produtoRepository;
@@ -104,3 +104,4 @@ public class CompraItemService {
 	}
 	
 }
+*/
