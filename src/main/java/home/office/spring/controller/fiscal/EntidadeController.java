@@ -22,87 +22,50 @@ import home.office.spring.domain.cadastro.fiscal.entidade.record.DetalheEntidade
 import home.office.spring.domain.cadastro.fiscal.entidade.record.EntidadeRecord;
 import home.office.spring.domain.cadastro.fiscal.entidade.record.ListaEntidadeRecord;
 import home.office.spring.domain.cadastro.fiscal.entidade.service.EntidadeService;
-import home.office.spring.infra.exception.ValidacaoException;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/fornecedor")
+@RequestMapping("/entidade")
 public class EntidadeController {
 	
 	@Autowired
 	private EntidadeService service;
 	
+	@Operation(summary = "Cadastra uma nova entidade", description = "Cria uma nova entidade no sistema ( Cliente - Fornecedor - Parceiro - Transportadora )")
 	@PostMapping
 	@Transactional
-	public ResponseEntity cadastrar(@RequestBody @Valid EntidadeRecord dados, UriComponentsBuilder uriBuilder) {
-		
-		try {
-			
-			var fornecedor = service.cadastrar(dados);
-			
-			var uri = uriBuilder.path("/fornecedor/{id}").buildAndExpand(fornecedor.getId()).toUri();
-			
-			return ResponseEntity.created(uri).body(new DetalheEntidadeRecord(fornecedor));
-			
-		} catch (ValidacaoException e) {
-			
-			throw new ValidacaoException("Não foi possível realizar o cadastro do fornecedor.");
-			
-		}
-		
+	public ResponseEntity<DetalheEntidadeRecord> cadastrar(@RequestBody @Valid EntidadeRecord dados, UriComponentsBuilder uriBuilder) {		
+		var entidade = service.cadastrar(dados);			
+		var uri = uriBuilder.path("/entidade/{id}").buildAndExpand(entidade.id()).toUri();			
+		return ResponseEntity.created(uri).body(entidade);				
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	@GetMapping 
-	public ResponseEntity<Page<ListaEntidadeRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
-		try {
-			return ResponseEntity.ok(service.listar(paginacao, filtro));
-		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a listagem do fornecedor.");
-		}
-	}
-		
+	@Operation(summary = "Atualiza uma entidade", description = "Atualiza uma entidade no sistema ( Cliente - Fornecedor - Parceiro - Transportadora )")
 	@PutMapping
 	@Transactional
-	public ResponseEntity atualizar(@RequestBody @Valid AtualizaEntidadeRecord dados) {
-		try {
-			return ResponseEntity.ok(service.atualizar(dados));
-		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a atualização do fornecedor.");
-		}
+	public ResponseEntity<DetalheEntidadeRecord> atualizar(@RequestBody @Valid AtualizaEntidadeRecord dados) {					
+		return ResponseEntity.ok(service.atualizar(dados));			
 	}
 	
+	@Operation(summary = "Remove uma entidade", description = "Remove uma entidade no sistema ( Cliente - Fornecedor - Parceiro - Transportadora )")
 	@DeleteMapping("/{id}")
 	@Transactional
-	public ResponseEntity excluir(@PathVariable Long id) {
-		try {
-			service.excluir(id, true);
-			return ResponseEntity.noContent().build();
-		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar a exclusão do fornecedor.");
-		}
+	public ResponseEntity<Void> remover(@PathVariable Long id) {			
+		service.remover(id, true);			
+		return ResponseEntity.noContent().build();		
 	}	
 	
+	@Operation(summary = "Busca uma entidade", description = "Busca uma entidade no sistema ( Cliente - Fornecedor - Parceiro - Transportadora )")
 	@GetMapping("/{id}")
-	public ResponseEntity<DetalheEntidadeRecord> detalhar(@PathVariable Long id) {
-		try {
-			return ResponseEntity.ok(service.detalhar(id));
-		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível realizar o detalhamento do fornecedor.");
-		}
+	public ResponseEntity<DetalheEntidadeRecord> detalhar(@PathVariable Long id) {			
+		return ResponseEntity.ok(service.detalhar(id));		
+	}
+	
+	@Operation(summary = "Lista as entidades", description = "Lista as entidades no sistema ( Cliente - Fornecedor - Parceiro - Transportadora )")
+	@GetMapping 
+	public ResponseEntity<Page<ListaEntidadeRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro) {		
+		return ResponseEntity.ok(service.listar(paginacao, filtro));		
 	}
 
 }

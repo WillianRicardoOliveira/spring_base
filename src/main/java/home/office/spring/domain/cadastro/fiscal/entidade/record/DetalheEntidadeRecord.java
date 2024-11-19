@@ -8,7 +8,10 @@ import home.office.spring.domain.fiscal.setorAtividade.record.DetalheSetorAtivid
 public record DetalheEntidadeRecord(
 		Long id,
 		String nomeCompleto,
-		String nomeFantasia,	
+		String nomeFantasia,
+		
+		// Tipo de entidade
+		
 		String nummeroDocumento,
 		String inscricaoEstadual,
 		String inscricaoMunicipal,
@@ -22,7 +25,10 @@ public record DetalheEntidadeRecord(
 		this(
 			dados.getId(),
 			dados.getNomeCompleto(),
-			dados.getNomeFantasia(),			
+			dados.getNomeFantasia(),	
+			
+			// Tipo de entidade
+			
 			dados.getNumeroDocumento(),
 			dados.getInscricaoEstadual(),
 			dados.getInscricaoMunicipal(),

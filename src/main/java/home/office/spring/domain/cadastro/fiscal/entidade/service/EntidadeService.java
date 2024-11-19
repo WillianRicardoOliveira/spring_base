@@ -12,8 +12,11 @@ import home.office.spring.domain.cadastro.fiscal.entidade.record.EntidadeRecord;
 import home.office.spring.domain.cadastro.fiscal.entidade.record.ListaEntidadeRecord;
 import home.office.spring.domain.cadastro.fiscal.entidade.repository.EntidadeRepository;
 import home.office.spring.domain.fiscal.endereco.model.EnderecoModel;
+import home.office.spring.domain.fiscal.endereco.record.EnderecoRecord;
 import home.office.spring.domain.fiscal.endereco.repository.EnderecoRepository;
+import home.office.spring.domain.fiscal.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
 import home.office.spring.domain.fiscal.regimeTributacaoFederal.repository.RegimeTributacaoFederalRepository;
+import home.office.spring.domain.fiscal.setorAtividade.model.SetorAtividadeModel;
 import home.office.spring.domain.fiscal.setorAtividade.repository.SetorAtividadeRepository;
 import home.office.spring.infra.exception.ValidacaoException;
 import jakarta.transaction.Transactional;
@@ -34,90 +37,48 @@ public class EntidadeService {
 	private EnderecoRepository enderecoRepository;
 	
 	@Transactional
-	public EntidadeModel cadastrar(EntidadeRecord dados) {
+	public DetalheEntidadeRecord cadastrar(EntidadeRecord dados) {
+		return new DetalheEntidadeRecord(repository.save(new EntidadeModel(dados, buscarRegime(dados.regimeTributacaoFederal().id()), buscarSetor(dados.setorAtividade().id()), criarEndereco(dados.endereco()))));			
+	}
+	
+	@Transactional
+	public DetalheEntidadeRecord atualizar(AtualizaEntidadeRecord dados) {		
+		 EntidadeModel entidade = repository.findById(dados.id()).orElseThrow(() -> new ValidacaoException("Entidade não encontrada."));		 
+		 entidade.atualizar(dados, buscarRegime(dados.regimeTributacaoFederal().id()), buscarSetor(dados.setorAtividade().id()));		
+		 return new DetalheEntidadeRecord(entidade);
+	}
+	
+	@Transactional
+	public void remover(Long id, Boolean ativo) {
+	    EntidadeModel entidade = repository.findById(id).orElseThrow(() -> new ValidacaoException("Entidade não encontrada."));
+	    entidade.ativo(ativo);
+	    repository.save(entidade);
+	}
 		
-		try {
-			
-			var endereco = new EnderecoModel(dados.endereco());
-			
-			enderecoRepository.save(endereco);
-			
-			var regimeTributacaoFederal = regimeTributacaoFederalRepository.getReferenceById(dados.regimeTributacaoFederal().id());
-			
-			var setorAtividade = setorAtividadeRepository.getReferenceById(dados.setorAtividade().id());
-			
-			var entidade = new EntidadeModel(dados, regimeTributacaoFederal, setorAtividade, endereco);
-			
-			repository.save(entidade);
-			
-			return entidade;
-			
-		} catch (ValidacaoException e) {
-			
-			throw new ValidacaoException("Não foi possível cadastrar a entidade.");
-			
-		}
-		
+	public DetalheEntidadeRecord detalhar(Long id) {
+	    return new DetalheEntidadeRecord(repository.findById(id).orElseThrow(() -> new ValidacaoException("Entidade não encontrada.")));
 	}
 		
 	public Page<ListaEntidadeRecord> listar(Pageable paginacao, String filtro) {
-		try {
-			if(filtro != null) {
-				return repository.findByNomeCompletoContaining(paginacao, filtro).map(ListaEntidadeRecord::new);
-			} else {			
-				return repository.findAllByAtivoTrue(paginacao).map(ListaEntidadeRecord::new);
-			}
-		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível listar as entidades.");
-		}
-	}
 		
-	@Transactional
-	public DetalheEntidadeRecord atualizar(AtualizaEntidadeRecord dados) {
-		
-		try {
-			
-			var regime = regimeTributacaoFederalRepository.getReferenceById(dados.regimeTributacaoFederal().id());
-			
-			var setor = setorAtividadeRepository.getReferenceById(dados.setorAtividade().id());
-			
-			EntidadeModel entidade = repository.getReferenceById(dados.id());
-			
-			entidade.atualizar(dados, regime, setor);
-			
-			return new DetalheEntidadeRecord(entidade);
-			
-		} catch (ValidacaoException e) {
-			
-			throw new ValidacaoException("Não foi possível atualizar a entidade.");
-			
+		if(filtro != null) {
+			return repository.findByNomeCompletoContaining(paginacao, filtro).map(ListaEntidadeRecord::new);
+		} else {			
+			return repository.findAllByAtivoTrue(paginacao).map(ListaEntidadeRecord::new);
 		}
 		
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	@Transactional
-	public void excluir(Long id, Boolean ativo) {
-		try {
-			repository.getReferenceById(id).ativo(ativo);
-		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível excluir a entidade.");
-		}
+	private EnderecoModel criarEndereco(EnderecoRecord enderecoRecord) {
+	    return enderecoRepository.save(new EnderecoModel(enderecoRecord));	    
 	}
 	
-	public DetalheEntidadeRecord detalhar(Long id) {
-		try {
-			EntidadeModel entidade = repository.getReferenceById(id);
-			return new DetalheEntidadeRecord(entidade);
-		} catch (ValidacaoException e) {
-			throw new ValidacaoException("Não foi possível detalhamento a entidade.");
-		}
+	private RegimeTributacaoFederalModel buscarRegime(Long id) {
+	    return regimeTributacaoFederalRepository.findById(id).orElseThrow(() -> new ValidacaoException("Regime de Tributação Federal não encontrado."));
 	}
-	
+
+	private SetorAtividadeModel buscarSetor(Long id) {
+	    return setorAtividadeRepository.findById(id).orElseThrow(() -> new ValidacaoException("Setor de Atividade não encontrado."));
+	}
+			
 }

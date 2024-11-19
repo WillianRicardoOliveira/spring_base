@@ -15,7 +15,7 @@ public record AtualizaEntidadeRecord(
 	Long id,
 	
 	@NotBlank(message = "{entidade.nome}")
-	@Size(min = 1, max = 255, message = "{entidade.nome.tamanho}")
+	@Size(max = 255, message = "{entidade.nome.tamanho}")
 	String nomeCompleto,
 	
 	@Size(max = 255, message = "entidade.nome_fantasia.tamanho")
@@ -23,14 +23,11 @@ public record AtualizaEntidadeRecord(
 	
 	@NotBlank(message = "{entidade.numero_documento}")
 	@Pattern(regexp = "\\d{1,20}", message = "{entidade.numero_documento.digitos}")
-	@Size(min = 1, max = 20, message = "{entidade.numero_documento.tamanho}")
 	String numeroDocumento,	
 	
-	@Size(max = 15, message = "{entidade.inscricao_estadual.tamanho}")	
 	@Pattern(regexp = "\\d{0,15}", message = "{entidade.inscricao_estadual.digitos}")	
 	String inscricaoEstadual,
 	
-	@Size(max = 15, message = "{entidade.inscricao_municipal.tamanho}")
 	@Pattern(regexp = "\\d{0,15}", message = "{entidade.inscricao_municipal.digitos}")
 	String inscricaoMunicipal,	
 		

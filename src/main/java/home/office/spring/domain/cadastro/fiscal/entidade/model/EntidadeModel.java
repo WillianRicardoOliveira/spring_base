@@ -34,6 +34,9 @@ public class EntidadeModel extends BaseModel {
 	private Long id;
 	private String nomeCompleto;
 	private String nomeFantasia;
+	
+	// Tipo de entidade
+	
 	private String numeroDocumento;	
 	private String inscricaoEstadual;	
 	private String inscricaoMunicipal;	
