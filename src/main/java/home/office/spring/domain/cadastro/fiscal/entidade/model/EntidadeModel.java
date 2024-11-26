@@ -1,5 +1,8 @@
 package home.office.spring.domain.cadastro.fiscal.entidade.model;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import home.office.spring.domain.base.model.BaseModel;
 import home.office.spring.domain.cadastro.fiscal.entidade.record.AtualizaEntidadeRecord;
 import home.office.spring.domain.cadastro.fiscal.entidade.record.EntidadeRecord;
@@ -12,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -33,10 +37,9 @@ public class EntidadeModel extends BaseModel {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String nomeCompleto;
-	private String nomeFantasia;
-	
-	// Tipo de entidade
-	
+	private String nomeFantasia;	
+	@OneToMany(mappedBy = "entidade", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<EntidadeTipoModel> entidadeTipos;
 	private String numeroDocumento;	
 	private String inscricaoEstadual;	
 	private String inscricaoMunicipal;	
@@ -58,10 +61,11 @@ public class EntidadeModel extends BaseModel {
 	) {
 		super();
 		this.nomeCompleto = dados.nomeCompleto();
-		this.nomeFantasia = dados.nomeFantasia();
+		this.nomeFantasia = dados.nomeFantasia();		
+		this.entidadeTipos = dados.entidadeTipos().stream().map(tipo -> new EntidadeTipoModel(this, tipo)).collect(Collectors.toList());		
 		this.numeroDocumento = dados.numeroDocumento();
 		this.inscricaoEstadual = dados.inscricaoEstadual();		
-		this.inscricaoMunicipal = dados.inscricaoMunicipal();		
+		this.inscricaoMunicipal = dados.inscricaoMunicipal();
 		this.regimeTributacaoFederal = regimeTributacaoFederal;		
 		this.setorAtividade = setorAtividade;
 		this.endereco = endereco;
@@ -71,12 +75,16 @@ public class EntidadeModel extends BaseModel {
 			AtualizaEntidadeRecord dados,
 			RegimeTributacaoFederalModel regimeTributacaoFederal,
 			SetorAtividadeModel setorAtividade
-	) { 		
+	) {
 		if(dados.nomeCompleto() != null) {
 			this.nomeCompleto = dados.nomeCompleto();
 		}
 		if(dados.nomeFantasia() != null) {
 			this.nomeFantasia = dados.nomeFantasia();
+		}
+		if (dados.entidadeTipos() != null) {
+		    this.entidadeTipos.clear();
+		    this.entidadeTipos.addAll(dados.entidadeTipos().stream().map(tipo -> new EntidadeTipoModel(this, tipo)).collect(Collectors.toList()));
 		}
 		if(dados.numeroDocumento() != null) {		
 			this.numeroDocumento = dados.numeroDocumento();		

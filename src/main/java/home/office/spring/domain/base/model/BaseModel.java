@@ -11,19 +11,19 @@ public class BaseModel {
 	@NotNull
 	private Boolean ativo;
 	@NotNull
-	private Boolean remove;
+	private Boolean removido;
 	
 	public BaseModel() {
 		this.ativo = true;
-		this.remove = false;
+		this.removido = false;
 	}
 	
 	public void ativo(Boolean ativo) {		
 		this.ativo = ativo;		
 	}
 	
-	public void remove(Boolean remove) {		
-		this.remove = remove;
+	public void removido(Boolean removido) {		
+		this.removido = removido;
 	}
 	
 }

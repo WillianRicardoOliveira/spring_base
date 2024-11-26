@@ -1,16 +1,80 @@
-create table regime_tributacao_federal(
-    id bigint not null auto_increment,
-    nome varchar(50) not null,
-    ativo tinyint(1) not null,
-    primary key(id)
+
+-- Criação da tabela RegimeTributacaoFederal
+CREATE TABLE regime_tributacao_federal (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    ativo TINYINT(1) NOT NULL DEFAULT 1,
+    removido TINYINT(1) NOT NULL DEFAULT 0
 );
 
-create table setor_atividade(
-    id bigint not null auto_increment,
-    nome varchar(50) not null,
-    ativo tinyint(1) not null,
-    primary key(id)
+-- Criação da tabela SetorAtividade
+CREATE TABLE setor_atividade (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    ativo TINYINT(1) NOT NULL DEFAULT 1,
+    removido TINYINT(1) NOT NULL DEFAULT 0
 );
+
+-- Criação da tabela TipoEntidade
+CREATE TABLE tipo_entidade (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    ativo TINYINT(1) NOT NULL DEFAULT 1,
+    removido TINYINT(1) NOT NULL DEFAULT 0
+);
+
+-- Criação da tabela Entidade
+CREATE TABLE entidade (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome_completo VARCHAR(255) NOT NULL,
+    nome_fantasia VARCHAR(255),
+    numero_documento VARCHAR(20) NOT NULL UNIQUE,
+    inscricao_estadual VARCHAR(15),
+    inscricao_municipal VARCHAR(15),
+    id_regime_tributacao_federal BIGINT,
+    id_setor_atividade BIGINT,
+    id_endereco BIGINT,
+    ativo TINYINT(1) NOT NULL DEFAULT 1,
+    removido TINYINT(1) NOT NULL DEFAULT 0,
+    FOREIGN KEY (id_regime_tributacao_federal) REFERENCES regime_tributacao_federal(id),
+    FOREIGN KEY (id_setor_atividade) REFERENCES setor_atividade(id),
+    FOREIGN KEY (id_endereco) REFERENCES endereco(id)
+);
+
+-- Criação da tabela EntidadeTipo
+CREATE TABLE entidade_tipo (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_entidade BIGINT,
+    id_tipo_entidade BIGINT,
+    ativo TINYINT(1) NOT NULL DEFAULT 1,
+    removido TINYINT(1) NOT NULL DEFAULT 0,
+    FOREIGN KEY (id_entidade) REFERENCES entidade(id),
+    FOREIGN KEY (id_tipo_entidade) REFERENCES tipo_entidade(id)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 create table endereco(
     id bigint not null auto_increment,
