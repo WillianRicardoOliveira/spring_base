@@ -1,5 +1,6 @@
 package home.office.spring.domain.cadastro.fiscal.entidade.model;
 
+import home.office.spring.domain.base.model.BaseModel;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,8 +20,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
-public class EntidadeTipoModel {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class EntidadeTipoModel extends BaseModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,5 +34,5 @@ public class EntidadeTipoModel {
     @ManyToOne
     @JoinColumn(name = "id_tipo_entidade")
     private TipoEntidadeModel tipoEntidade;
-    
+
 }
