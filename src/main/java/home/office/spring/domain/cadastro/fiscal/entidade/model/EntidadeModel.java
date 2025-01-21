@@ -61,8 +61,8 @@ public class EntidadeModel extends BaseModel {
 	) {
 		super();
 		this.nomeCompleto = dados.nomeCompleto();
-		this.nomeFantasia = dados.nomeFantasia();		
-		this.entidadeTipos = dados.entidadeTipos().stream().map(tipo -> new EntidadeTipoModel(this, tipo)).collect(Collectors.toList());		
+		//this.nomeFantasia = dados.nomeFantasia();		
+		//this.entidadeTipos = dados.entidadeTipos().stream().map(tipo -> new EntidadeTipoModel(this, tipo)).collect(Collectors.toList());		
 		this.numeroDocumento = dados.numeroDocumento();
 		this.inscricaoEstadual = dados.inscricaoEstadual();		
 		this.inscricaoMunicipal = dados.inscricaoMunicipal();
@@ -79,13 +79,13 @@ public class EntidadeModel extends BaseModel {
 		if(dados.nomeCompleto() != null) {
 			this.nomeCompleto = dados.nomeCompleto();
 		}
-		if(dados.nomeFantasia() != null) {
-			this.nomeFantasia = dados.nomeFantasia();
-		}
-		if (dados.entidadeTipos() != null) {
-		    this.entidadeTipos.clear();
-		    this.entidadeTipos.addAll(dados.entidadeTipos().stream().map(tipo -> new EntidadeTipoModel(this, tipo)).collect(Collectors.toList()));
-		}
+		//if(dados.nomeFantasia() != null) {
+		//	this.nomeFantasia = dados.nomeFantasia();
+		//}
+		//if (dados.entidadeTipos() != null) {
+		//    this.entidadeTipos.clear();
+		//    this.entidadeTipos.addAll(dados.entidadeTipos().stream().map(tipo -> new EntidadeTipoModel(this, tipo)).collect(Collectors.toList()));
+		//}
 		if(dados.numeroDocumento() != null) {		
 			this.numeroDocumento = dados.numeroDocumento();		
 		}
