@@ -9,15 +9,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import home.office.spring.domain.estoque.compra.model.CompraModel;
-import home.office.spring.domain.estoque.compra.repository.CompraRepository;
-import home.office.spring.domain.estoque.movimentacao.model.MovimentacaoModel;
-import home.office.spring.domain.estoque.movimentacao.record.DetalheMovimentacaoRecord;
-import home.office.spring.domain.estoque.movimentacao.record.ListaMovimentacaoRecord;
-import home.office.spring.domain.estoque.movimentacao.record.MovimentacaoRecord;
-import home.office.spring.domain.estoque.movimentacao.repository.MovimentacaoRepository;
-import home.office.spring.domain.estoque.produto.model.ProdutoModel;
-import home.office.spring.domain.estoque.produto.repository.ProdutoRepository;
+import com.empresa.erp.domain.estoque.compra.model.CompraModel;
+import com.empresa.erp.domain.estoque.compra.repository.CompraRepository;
+import com.empresa.erp.domain.estoque.movimentacao.model.MovimentacaoModel;
+import com.empresa.erp.domain.estoque.movimentacao.record.DetalheMovimentacaoRecord;
+import com.empresa.erp.domain.estoque.movimentacao.record.ListaMovimentacaoRecord;
+import com.empresa.erp.domain.estoque.movimentacao.record.MovimentacaoRecord;
+import com.empresa.erp.domain.estoque.movimentacao.repository.MovimentacaoRepository;
+import com.empresa.erp.domain.estoque.movimentacao.service.MovimentacaoService;
+import com.empresa.erp.domain.estoque.produto.model.ProdutoModel;
+import com.empresa.erp.domain.estoque.produto.repository.ProdutoRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MovimentacaoServiceTest {

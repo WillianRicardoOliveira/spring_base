@@ -11,12 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import home.office.spring.domain.estoque.produto.model.ProdutoModel;
-import home.office.spring.domain.estoque.produto.record.AtualizaProdutoRecord;
-import home.office.spring.domain.estoque.produto.record.DetalheProdutoRecord;
-import home.office.spring.domain.estoque.produto.record.ListaProdutoRecord;
-import home.office.spring.domain.estoque.produto.record.ProdutoRecord;
-import home.office.spring.domain.estoque.produto.repository.ProdutoRepository;
+import com.empresa.erp.domain.estoque.produto.model.ProdutoModel;
+import com.empresa.erp.domain.estoque.produto.record.AtualizaProdutoRecord;
+import com.empresa.erp.domain.estoque.produto.record.DetalheProdutoRecord;
+import com.empresa.erp.domain.estoque.produto.record.ListaProdutoRecord;
+import com.empresa.erp.domain.estoque.produto.record.ProdutoRecord;
+import com.empresa.erp.domain.estoque.produto.repository.ProdutoRepository;
+import com.empresa.erp.domain.estoque.produto.service.ProdutoService;
 
 @ExtendWith(MockitoExtension.class)
 class ProdutoServiceTest {

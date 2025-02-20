@@ -13,18 +13,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import home.office.spring.domain.estoque.compra.model.CompraModel;
-import home.office.spring.domain.estoque.compra.repository.CompraRepository;
-import home.office.spring.domain.estoque.compraItem.model.CompraItemModel;
-import home.office.spring.domain.estoque.compraItem.record.AtualizaCompraItemRecord;
-import home.office.spring.domain.estoque.compraItem.record.CompraItemRecord;
-import home.office.spring.domain.estoque.compraItem.record.DetalheCompraItemRecord;
-import home.office.spring.domain.estoque.compraItem.record.ListaCompraItemRecord;
-import home.office.spring.domain.estoque.compraItem.repository.CompraItemRepository;
-import home.office.spring.domain.estoque.produto.model.ProdutoModel;
-import home.office.spring.domain.estoque.produto.repository.ProdutoRepository;
-import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
-import home.office.spring.domain.fiscal.fornecedor.repository.FornecedorRepository;
+import com.empresa.erp.domain.estoque.compra.model.CompraModel;
+import com.empresa.erp.domain.estoque.compra.repository.CompraRepository;
+import com.empresa.erp.domain.estoque.compraItem.model.CompraItemModel;
+import com.empresa.erp.domain.estoque.compraItem.record.AtualizaCompraItemRecord;
+import com.empresa.erp.domain.estoque.compraItem.record.CompraItemRecord;
+import com.empresa.erp.domain.estoque.compraItem.record.DetalheCompraItemRecord;
+import com.empresa.erp.domain.estoque.compraItem.record.ListaCompraItemRecord;
+import com.empresa.erp.domain.estoque.compraItem.repository.CompraItemRepository;
+import com.empresa.erp.domain.estoque.produto.model.ProdutoModel;
+import com.empresa.erp.domain.estoque.produto.repository.ProdutoRepository;
+import com.empresa.erp.domain.fiscal.fornecedor.model.FornecedorModel;
+import com.empresa.erp.domain.fiscal.fornecedor.repository.FornecedorRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CompraItemServiceTest {

@@ -14,8 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.google.gson.Gson;
 
-import home.office.spring.domain.fiscal.fornecedor.service.FornecedorService;
-import home.office.spring.infra.security.DadosTokenJWT;
+import com.empresa.erp.domain.fiscal.fornecedor.service.FornecedorService;
+import com.empresa.erp.core.security.DadosTokenJWT;
 
 @SpringBootTest
 @AutoConfigureMockMvc

@@ -11,13 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import home.office.spring.domain.estoque.compra.model.CompraModel;
-import home.office.spring.domain.estoque.compra.record.AtualizaCompraRecord;
-import home.office.spring.domain.estoque.compra.record.CompraRecord;
-import home.office.spring.domain.estoque.compra.record.DetalheCompraRecord;
-import home.office.spring.domain.estoque.compra.record.ListaCompraRecord;
-import home.office.spring.domain.estoque.compra.repository.CompraRepository;
-import home.office.spring.domain.fiscal.fornecedor.model.FornecedorModel;
+import com.empresa.erp.domain.estoque.compra.model.CompraModel;
+import com.empresa.erp.domain.estoque.compra.record.AtualizaCompraRecord;
+import com.empresa.erp.domain.estoque.compra.record.CompraRecord;
+import com.empresa.erp.domain.estoque.compra.record.DetalheCompraRecord;
+import com.empresa.erp.domain.estoque.compra.record.ListaCompraRecord;
+import com.empresa.erp.domain.estoque.compra.repository.CompraRepository;
+import com.empresa.erp.domain.fiscal.fornecedor.model.FornecedorModel;
 
 @ExtendWith(MockitoExtension.class)
 class CompraServiceTest {
