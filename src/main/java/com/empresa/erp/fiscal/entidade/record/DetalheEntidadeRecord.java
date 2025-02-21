@@ -7,6 +7,7 @@ import com.empresa.erp.fiscal.entidade.model.EntidadeModel;
 
 public record DetalheEntidadeRecord(	
 		Long id,
+		Boolean pessoaJuridica,
 		String nomeCompleto,
 		String numeroDocumento,
 		String inscricaoEstadual,
@@ -34,6 +35,7 @@ public record DetalheEntidadeRecord(
 	public DetalheEntidadeRecord(EntidadeModel dados) {
 		this(
 			dados.getId(),
+			dados.getPessoaJuridica(),
 			dados.getNomeCompleto(),			
 			dados.getNumeroDocumento(),
 			dados.getInscricaoEstadual(),

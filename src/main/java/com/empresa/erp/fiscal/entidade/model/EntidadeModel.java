@@ -32,6 +32,7 @@ public class EntidadeModel {
 	@Id 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private Boolean pessoaJuridica;
 	private String nomeCompleto;
 	private String numeroDocumento;
 	private String inscricaoEstadual;	

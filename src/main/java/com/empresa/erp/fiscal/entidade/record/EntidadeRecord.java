@@ -13,6 +13,10 @@ import jakarta.validation.constraints.Size;
 
 public record EntidadeRecord(
 		
+	@Schema(description = "A pessoa juridica da entidade é obrigatório e deve ser verdadeiro (true) ou falso (false).", example = "")
+	@NotNull(message = "{entidade.pessoa_juridica.vazio}")
+	Boolean pessoaJuridica,
+		
 	@Schema(description = "O nome da entidade é obrigatório e não pode estar vazio ou em branco e pode ter no máximo 255 caracteres.", example = "")
 	@NotBlank(message = "{entidade.nome.vazio}")	
 	@Size(max = 255, message = "{entidade.nome.tamanho}")	
