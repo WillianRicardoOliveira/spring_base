@@ -4,6 +4,7 @@ import com.empresa.erp.domain.fiscal.endereco.record.DetalheEnderecoRecord;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
 import com.empresa.erp.domain.fiscal.setorAtividade.record.DetalheSetorAtividadeRecord;
 import com.empresa.erp.fiscal.entidade.model.EntidadeModel;
+import com.empresa.erp.padrao.constant.StatusEnum;
 
 public record DetalheEntidadeRecord(	
 		Long id,
@@ -28,8 +29,7 @@ public record DetalheEntidadeRecord(
 		String motivoInativacao,
 		Boolean nacional,
 		DetalheEntidadeRecord matriz,
-		Boolean ativado,
-		Boolean removido
+		StatusEnum status
 ) {
 		
 	public DetalheEntidadeRecord(EntidadeModel dados) {
@@ -56,8 +56,7 @@ public record DetalheEntidadeRecord(
 			dados.getMotivoInativacao(),
 			dados.getNacional(),
 			new DetalheEntidadeRecord(dados.getMatriz()),			
-			dados.getAtivado(),
-			dados.getRemovido()
+			dados.getStatus()
 		);		
 	}
 

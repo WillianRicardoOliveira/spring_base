@@ -5,6 +5,7 @@ import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.model.RegimeTributa
 import com.empresa.erp.domain.fiscal.setorAtividade.model.SetorAtividadeModel;
 import com.empresa.erp.fiscal.entidade.record.AtualizaEntidadeRecord;
 import com.empresa.erp.fiscal.entidade.record.EntidadeRecord;
+import com.empresa.erp.padrao.constant.StatusEnum;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -61,8 +62,7 @@ public class EntidadeModel {
 	@OneToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_matriz")
 	private EntidadeModel matriz;
-	private Boolean ativado;
-	private Boolean removido;
+	private StatusEnum status;
 	
 	public EntidadeModel(
 			EntidadeRecord dados,
@@ -91,8 +91,7 @@ public class EntidadeModel {
 		this.motivoInativacao = dados.motivoInativacao();
 		this.nacional = dados.nacional();
 		this.matriz = matriz;
-		this.ativado = true;
-		this.removido = false;
+		//this.status = "ATIVO";
 	}
 	
 	public void atualizar(

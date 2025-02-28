@@ -15,67 +15,6 @@ CREATE TABLE setor_atividade (
     removido TINYINT(1) NOT NULL DEFAULT 0
 );
 
--- Criação da tabela TipoEntidade
-CREATE TABLE tipo_entidade (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    ativo TINYINT(1) NOT NULL DEFAULT 1,
-    removido TINYINT(1) NOT NULL DEFAULT 0
-);
-
--- Criação da tabela Entidade
-CREATE TABLE entidade (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome_completo VARCHAR(255) NOT NULL,
-    nome_fantasia VARCHAR(255),
-    numero_documento VARCHAR(20) NOT NULL UNIQUE,
-    inscricao_estadual VARCHAR(15),
-    inscricao_municipal VARCHAR(15),
-    id_regime_tributacao_federal BIGINT,
-    id_setor_atividade BIGINT,
-    id_endereco BIGINT,
-    ativo TINYINT(1) NOT NULL DEFAULT 1,
-    removido TINYINT(1) NOT NULL DEFAULT 0,
-    FOREIGN KEY (id_regime_tributacao_federal) REFERENCES regime_tributacao_federal(id),
-    FOREIGN KEY (id_setor_atividade) REFERENCES setor_atividade(id),
-    FOREIGN KEY (id_endereco) REFERENCES endereco(id)
-);
-
--- Criação da tabela EntidadeTipo
-CREATE TABLE entidade_tipo (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    id_entidade BIGINT,
-    id_tipo_entidade BIGINT,
-    ativo TINYINT(1) NOT NULL DEFAULT 1,
-    removido TINYINT(1) NOT NULL DEFAULT 0,
-    FOREIGN KEY (id_entidade) REFERENCES entidade(id),
-    FOREIGN KEY (id_tipo_entidade) REFERENCES tipo_entidade(id)
-);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 create table endereco(
     id bigint not null auto_increment,
     cep varchar(10) not null,
@@ -89,23 +28,62 @@ create table endereco(
     primary key(id)
 );
 
-create table fornecedor(
-    id bigint not null auto_increment,
-    Tipo tinyint(1) not null,
-    numero_documento varchar(14) not null,
-    razao_social varchar(100) not null,
-    nome_fantasia varchar(100),
-    inscricao_estadual varchar(14),
-    inscricao_municipal varchar(14),
-    id_regime_tributacao_federal bigint not null,
-    id_setor_atividade bigint not null,    
-    id_endereco bigint not null,
-    ativo tinyint(1) not null,
-    primary key(id),    
-    constraint fk_fornecedor_regime_tributacao_federal_id foreign key(id_regime_tributacao_federal) references regime_tributacao_federal(id),    
-    constraint fk_fornecedor_setor_atividade_id foreign key(id_setor_atividade) references setor_atividade(id),
-    constraint fk_fornecedor_endereco_id foreign key(id_endereco) references endereco(id)
+-- Criação da tabela Entidade
+CREATE TABLE entidade (
+    codigo BIGINT PRIMARY KEY AUTO_INCREMENT,
+    pessoa_juridica TINYINT NOT NULL,
+    nome_completo VARCHAR(255) NOT NULL,    
+    numero_documento VARCHAR(20) NOT NULL,
+    inscricao_estadual VARCHAR(15),
+    inscricao_municipal VARCHAR(15),    
+    cliente TINYINT NOT NULL,
+    fornecedor TINYINT NOT NULL,
+    parceiro TINYINT NOT NULL,
+    transportador TINYINT NOT NULL,    
+    regime_tributacao_federal BIGINT NOT NULL, -- FK
+    setor_atividade BIGINT NOT NULL, -- FK    
+    endereco BIGINT NOT NULL, -- FK    
+    contato_principal VARCHAR(255) NOT NULL,
+    email_nfe VARCHAR(255) NOT NULL,    
+    email_comercial VARCHAR(255) NOT NULL,
+    primeiro_telefone VARCHAR(20) NOT NULL,
+    segundo_telefone VARCHAR(20) NOT NULL,    
+    observacao VARCHAR(255),    
+    nacional TINYINT NOT NULL,    
+    matriz BIGINT NOT NULL, -- FK
+    FOREIGN KEY (regime_tributacao_federal) REFERENCES regime_tributacao_federal(id),
+    FOREIGN KEY (setor_atividade) REFERENCES setor_atividade(id),
+    FOREIGN KEY (endereco) REFERENCES endereco(id),
+    FOREIGN KEY (matriz) REFERENCES entidade(codigo)
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -157,7 +135,7 @@ create table pessoa(
     constraint fk_pessoa_endereco_id foreign key(id_endereco) references endereco(id),
     constraint fk_pessoa_usuario_id foreign key(id_usuario) references usuario(id)
 );
-
+/*
 
 -- #################### --
 -- ATENDIMENTO          --
@@ -313,7 +291,7 @@ create table conta_pagar_parcelas (
   primary key(id),
   constraint fk_conta_pagar_parcelas_conta_pagar_id foreign key(id_conta_pagar) references conta_pagar(id),
   constraint fk_conta_pagar_parcelas_status_pagamento_id foreign key(id_status_pagamento) references status_pagamento(id)
-);
+);*/
 -- #################### --
 -- DADOS BASICOS        --
 -- #################### --

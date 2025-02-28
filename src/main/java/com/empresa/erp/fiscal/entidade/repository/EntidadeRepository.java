@@ -10,6 +10,6 @@ public interface EntidadeRepository extends JpaRepository<EntidadeModel, Long> {
 
 	Page<EntidadeModel> findByNomeCompletoContaining(Pageable paginacao, String filtro);
 	
-	Page<EntidadeModel> findAllByAtivoTrue(Pageable paginacao);
+	//Page<EntidadeModel> findAllByAtivoTrue(Pageable paginacao);
 	
 }

@@ -54,12 +54,12 @@ public record EntidadeRecord(
 	@Schema(description = "O regime de tributação federal da entidade é obrigatório e não pode estar vazio ou em branco.", example = "")
 	@NotNull(message = "{entidade.regime_tributacao_federal.vazio}")
 	@Valid
-	DetalheRegimeTributacaoFederalRecord regimeTributacaoFederal,
+	DetalheRegimeTributacaoFederalRecord regime,
 	
 	@Schema(description = "O setor de atividade da entidade é obrigatório e não pode estar vazio ou em branco.", example = "")	
 	@NotNull(message = "{entidade.setor_atividade.vazio}")
 	@Valid
-	DetalheSetorAtividadeRecord setorAtividade,
+	DetalheSetorAtividadeRecord setor,
 	
 	@Schema(description = "O endereço da entidade é obrigatório e não pode estar vazio ou em branco.", example = "")	
 	@NotNull(message = "{entidade.endereco.vazio}")
