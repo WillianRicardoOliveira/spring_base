@@ -81,7 +81,7 @@ public class EntidadeService {
 	    return Optional.ofNullable(filtro)
 	        .filter(f -> !f.isBlank())
 	        .map(f -> repository.findByNomeCompletoContaining(paginacao, f))
-	        .orElse(repository.findAllByStatusAtivo(paginacao))
+	        .orElse(repository.findAllByStatus(paginacao, StatusEnum.ATIVO))
 	        .map(ListaEntidadeRecord::new);
 	}
 

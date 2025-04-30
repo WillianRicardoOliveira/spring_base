@@ -40,17 +40,17 @@ CREATE TABLE entidade (
     fornecedor TINYINT NOT NULL,
     parceiro TINYINT NOT NULL,
     transportador TINYINT NOT NULL,    
-    regime_tributacao_federal BIGINT NOT NULL, -- FK
-    setor_atividade BIGINT NOT NULL, -- FK    
-    endereco BIGINT NOT NULL, -- FK    
+    regime_tributacao_federal BIGINT NOT NULL,
+    setor_atividade BIGINT NOT NULL,
+    endereco BIGINT NOT NULL,   
     contato_principal VARCHAR(255) NOT NULL,
     email_nfe VARCHAR(255) NOT NULL,    
     email_comercial VARCHAR(255) NOT NULL,
     primeiro_telefone VARCHAR(20) NOT NULL,
-    segundo_telefone VARCHAR(20) NOT NULL,    
-    observacao VARCHAR(255),    
+    segundo_telefone VARCHAR(20) NOT NULL,
     nacional TINYINT NOT NULL,    
-    matriz BIGINT NOT NULL, -- FK
+    matriz BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
     FOREIGN KEY (regime_tributacao_federal) REFERENCES regime_tributacao_federal(id),
     FOREIGN KEY (setor_atividade) REFERENCES setor_atividade(id),
     FOREIGN KEY (endereco) REFERENCES endereco(id),
