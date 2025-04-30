@@ -1,9 +1,9 @@
-package com.empresa.erp.fiscal.entidade.record;
+package com.empresa.erp.modulos.fiscal.record;
 
 import com.empresa.erp.domain.fiscal.endereco.record.DetalheEnderecoRecord;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
 import com.empresa.erp.domain.fiscal.setorAtividade.record.DetalheSetorAtividadeRecord;
-import com.empresa.erp.fiscal.entidade.model.EntidadeModel;
+import com.empresa.erp.modulos.fiscal.model.EntidadeModel;
 import com.empresa.erp.padrao.constant.StatusEnum;
 
 public record DetalheEntidadeRecord(	
@@ -25,8 +25,6 @@ public record DetalheEntidadeRecord(
 		String emailComercial,
 		String telefonePrimeiro,
 		String telefoneSegundo,
-		String observacao,
-		String motivoInativacao,
 		Boolean nacional,
 		DetalheEntidadeRecord matriz,
 		StatusEnum status
@@ -52,8 +50,6 @@ public record DetalheEntidadeRecord(
 			dados.getEmailComercial(),
 			dados.getTelefonePrimeiro(),
 			dados.getTelefoneSegundo(),
-			dados.getObservacao(),
-			dados.getMotivoInativacao(),
 			dados.getNacional(),
 			new DetalheEntidadeRecord(dados.getMatriz()),			
 			dados.getStatus()

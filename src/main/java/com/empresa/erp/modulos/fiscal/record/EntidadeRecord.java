@@ -1,4 +1,4 @@
-package com.empresa.erp.fiscal.entidade.record;
+package com.empresa.erp.modulos.fiscal.record;
 
 import com.empresa.erp.domain.fiscal.endereco.record.EnderecoRecord;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
@@ -90,14 +90,6 @@ public record EntidadeRecord(
 	@NotBlank(message = "{entidade.telefone_segundo.vazio}")	
 	@Size(max = 20, message = "{entidade.telefone_segundo.tamanho}")
 	String telefoneSegundo,
-
-	@Schema(description = "A observação pode ter no máximo 255 caracteres.", example = "")
-	@Size(max = 255, message = "{entidade.observacao.tamanho}")
-	String observacao,	
-	
-	@Schema(description = "O motivo da inativação pode ter no máximo 255 caracteres.", example = "")
-	@Size(max = 255, message = "{entidade.motivo_inativacao.tamanho}")
-	String motivoInativacao,
 	
 	@Schema(description = "O nacional da entidade é obrigatório e deve ser verdadeiro (true) ou falso (false).", example = "")
 	@NotNull(message = "{entidade.nacional.vazio}")

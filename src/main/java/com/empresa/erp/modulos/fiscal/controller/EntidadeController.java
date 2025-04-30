@@ -1,4 +1,4 @@
-package com.empresa.erp.fiscal.entidade.controller;
+package com.empresa.erp.modulos.fiscal.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.empresa.erp.fiscal.entidade.record.AtualizaEntidadeRecord;
-import com.empresa.erp.fiscal.entidade.record.DetalheEntidadeRecord;
-import com.empresa.erp.fiscal.entidade.record.EntidadeRecord;
-import com.empresa.erp.fiscal.entidade.record.ListaEntidadeRecord;
-import com.empresa.erp.fiscal.entidade.service.EntidadeService;
+import com.empresa.erp.modulos.fiscal.record.AtualizaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.record.DetalheEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.record.EntidadeRecord;
+import com.empresa.erp.modulos.fiscal.record.ListaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.service.EntidadeService;
 import com.empresa.erp.padrao.record.StatusRecord;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,11 +60,11 @@ public class EntidadeController {
 	public ResponseEntity<DetalheEntidadeRecord> detalhar(@Parameter(description = "ID da entidade") @PathVariable Long id) {			
 	    return ResponseEntity.ok(service.detalhar(id));		
 	}
-	/*
+	
 	@Operation(summary = "Lista as entidades", description = "Lista as entidades no sistema ( Cliente - Fornecedor - Parceiro - Transportadora )")
 	@GetMapping
 	public ResponseEntity<Page<ListaEntidadeRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, @Parameter(description = "Filtro para pesquisa") @RequestParam(required = false) String filtro) {
 		return ResponseEntity.ok(service.listar(paginacao, filtro));
-	}	*/
+	}
 
 }

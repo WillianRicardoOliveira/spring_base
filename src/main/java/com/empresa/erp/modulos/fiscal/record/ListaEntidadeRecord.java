@@ -1,6 +1,6 @@
-package com.empresa.erp.fiscal.entidade.record;
+package com.empresa.erp.modulos.fiscal.record;
 
-import com.empresa.erp.fiscal.entidade.model.EntidadeModel;
+import com.empresa.erp.modulos.fiscal.model.EntidadeModel;
 import com.empresa.erp.padrao.constant.StatusEnum;
 
 public record ListaEntidadeRecord(

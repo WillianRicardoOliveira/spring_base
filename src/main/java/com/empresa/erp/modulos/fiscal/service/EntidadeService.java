@@ -1,4 +1,4 @@
-package com.empresa.erp.fiscal.entidade.service;
+package com.empresa.erp.modulos.fiscal.service;
 
 import java.util.Optional;
 
@@ -13,12 +13,12 @@ import com.empresa.erp.domain.fiscal.endereco.record.EnderecoRecord;
 import com.empresa.erp.domain.fiscal.endereco.repository.EnderecoRepository;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.repository.RegimeTributacaoFederalRepository;
 import com.empresa.erp.domain.fiscal.setorAtividade.repository.SetorAtividadeRepository;
-import com.empresa.erp.fiscal.entidade.model.EntidadeModel;
-import com.empresa.erp.fiscal.entidade.record.AtualizaEntidadeRecord;
-import com.empresa.erp.fiscal.entidade.record.DetalheEntidadeRecord;
-import com.empresa.erp.fiscal.entidade.record.EntidadeRecord;
-import com.empresa.erp.fiscal.entidade.record.ListaEntidadeRecord;
-import com.empresa.erp.fiscal.entidade.repository.EntidadeRepository;
+import com.empresa.erp.modulos.fiscal.model.EntidadeModel;
+import com.empresa.erp.modulos.fiscal.record.AtualizaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.record.DetalheEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.record.EntidadeRecord;
+import com.empresa.erp.modulos.fiscal.record.ListaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.repository.EntidadeRepository;
 import com.empresa.erp.padrao.constant.StatusEnum;
 
 import jakarta.transaction.Transactional;
@@ -76,14 +76,14 @@ public class EntidadeService {
 	public DetalheEntidadeRecord detalhar(Long id) {
 		return new DetalheEntidadeRecord(buscar(id, repository, "Entidade não encontrada."));
 	}
-	/*
+	
 	public Page<ListaEntidadeRecord> listar(Pageable paginacao, String filtro) {
 	    return Optional.ofNullable(filtro)
 	        .filter(f -> !f.isBlank())
 	        .map(f -> repository.findByNomeCompletoContaining(paginacao, f))
-	        .orElse(repository.findAllByAtivoTrue(paginacao))
+	        .orElse(repository.findAllByStatusAtivo(paginacao))
 	        .map(ListaEntidadeRecord::new);
-	}*/
+	}
 
 	private EnderecoModel criarEndereco(EnderecoRecord enderecoRecord) {
 	    return endereco.save(new EnderecoModel(enderecoRecord));
