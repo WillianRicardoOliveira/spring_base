@@ -43,16 +43,46 @@ public class EntidadeService {
 
 	@Transactional
 	public DetalheEntidadeRecord cadastrar(EntidadeRecord dados) {
+		
+		EntidadeModel matriz = null;
+
+		if (dados.matriz() != null && dados.matriz().id() != null) {
+		    matriz = buscar(dados.matriz().id(), repository, "Entidade matriz não encontrada.");
+		}
+		
 		return new DetalheEntidadeRecord(				
 				repository.save(
 						new EntidadeModel(
 								dados,								
+								
 								buscar(dados.regime().id(), regime, "Regime de Tributação Federal não encontrado."),																
+								
+								
+								
 								buscar(dados.setor().id(), setor, "Setor de Atividade não encontrado."),								
-								criarEndereco(dados.endereco()),								
-								buscar(dados.matriz().id(), repository, "Entidade matriz não encontrada.")								
-								)));
+								criarEndereco(dados.endereco()),					
+								
+								matriz
+								
+								)
+						)
+				);
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	@Transactional
 	public DetalheEntidadeRecord atualizar(AtualizaEntidadeRecord dados) {		
@@ -65,13 +95,13 @@ public class EntidadeService {
 				 );		
 		 return new DetalheEntidadeRecord(entidade);
 	}
-	
+	/*
 	@Transactional
 	public void status(Long id, StatusEnum status) {
 	    EntidadeModel entidade = repository.findById(id).orElseThrow(() -> new ValidacaoException("Entidade não encontrada."));
 	    entidade.setStatus(status);
 	   
-	}
+	}*/
 		
 	public DetalheEntidadeRecord detalhar(Long id) {
 		return new DetalheEntidadeRecord(buscar(id, repository, "Entidade não encontrada."));

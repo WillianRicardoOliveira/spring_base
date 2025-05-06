@@ -58,10 +58,10 @@ public class EntidadeModel {
 	@JoinColumn(name = "id_endereco")
 	private EnderecoModel endereco;
 	private String contatoPrincipal;
-	private String emailNFe;
+	private String emailNfe;
 	private String emailComercial;
-	private String telefonePrimeiro;
-	private String telefoneSegundo;
+	private String primeiroTelefone;
+	private String segundoTelefone;
 	private Boolean nacional;
 	@OneToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_matriz")
@@ -70,6 +70,7 @@ public class EntidadeModel {
 	private StatusEnum status;
 
 	public EntidadeModel(EntidadeRecord dados, RegimeTributacaoFederalModel regime, SetorAtividadeModel setor, EnderecoModel endereco, EntidadeModel matriz) {
+		this.pessoaJuridica = dados.pessoaJuridica();
 		this.nomeCompleto = dados.nomeCompleto();
 		this.numeroDocumento = dados.numeroDocumento();
 		this.inscricaoEstadual = dados.inscricaoEstadual();
@@ -82,16 +83,17 @@ public class EntidadeModel {
 		this.setorAtividade = setor;
 		this.endereco = endereco;
 		this.contatoPrincipal = dados.contatoPrincipal();
-		this.emailNFe = dados.emailNFe();
+		this.emailNfe = dados.emailNfe();
 		this.emailComercial = dados.emailComercial();
-		this.telefonePrimeiro = dados.telefonePrimeiro();
-		this.telefoneSegundo = dados.telefoneSegundo();
+		this.primeiroTelefone = dados.primeiroTelefone();
+		this.segundoTelefone = dados.segundoTelefone();
 		this.nacional = dados.nacional();
 		this.matriz = matriz;
 		this.status = StatusEnum.ATIVO;
 	}
 
 	public void atualizar(AtualizaEntidadeRecord dados, RegimeTributacaoFederalModel regime, SetorAtividadeModel setor, EntidadeModel matriz) {
+		this.pessoaJuridica = dados.pessoaJuridica();
 		this.nomeCompleto = dados.nomeCompleto();
 		this.numeroDocumento = dados.numeroDocumento();
 		this.inscricaoEstadual = dados.inscricaoEstadual();
@@ -104,10 +106,10 @@ public class EntidadeModel {
 		this.setorAtividade = setor;
 		this.endereco.atualizar(dados.endereco());
 		this.contatoPrincipal = dados.contatoPrincipal();
-		this.emailNFe = dados.emailNFe();
+		this.emailNfe = dados.emailNfe();
 		this.emailComercial = dados.emailComercial();
-		this.telefonePrimeiro = dados.telefonePrimeiro();
-		this.telefoneSegundo = dados.telefoneSegundo();
+		this.primeiroTelefone = dados.primeiroTelefone();
+		this.segundoTelefone = dados.segundoTelefone();
 		this.nacional = dados.nacional();
 		this.matriz = matriz;
 	}

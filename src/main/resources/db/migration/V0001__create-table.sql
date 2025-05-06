@@ -30,7 +30,7 @@ create table endereco(
 
 -- Criação da tabela Entidade
 CREATE TABLE entidade (
-    codigo BIGINT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     pessoa_juridica TINYINT NOT NULL,
     nome_completo VARCHAR(255) NOT NULL,    
     numero_documento VARCHAR(20) NOT NULL,
@@ -40,21 +40,21 @@ CREATE TABLE entidade (
     fornecedor TINYINT NOT NULL,
     parceiro TINYINT NOT NULL,
     transportador TINYINT NOT NULL,    
-    regime_tributacao_federal BIGINT NOT NULL,
-    setor_atividade BIGINT NOT NULL,
-    endereco BIGINT NOT NULL,   
+    id_regime_tributacao_federal BIGINT NOT NULL,
+    id_setor_atividade BIGINT NOT NULL,
+    id_endereco BIGINT NOT NULL,   
     contato_principal VARCHAR(255) NOT NULL,
     email_nfe VARCHAR(255) NOT NULL,    
     email_comercial VARCHAR(255) NOT NULL,
     primeiro_telefone VARCHAR(20) NOT NULL,
     segundo_telefone VARCHAR(20) NOT NULL,
     nacional TINYINT NOT NULL,    
-    matriz BIGINT NOT NULL,
-    status TINYINT NOT NULL DEFAULT 0,
-    FOREIGN KEY (regime_tributacao_federal) REFERENCES regime_tributacao_federal(id),
-    FOREIGN KEY (setor_atividade) REFERENCES setor_atividade(id),
-    FOREIGN KEY (endereco) REFERENCES endereco(id),
-    FOREIGN KEY (matriz) REFERENCES entidade(codigo)
+    id_matriz BIGINT,
+    status TINYINT,
+    FOREIGN KEY (id_regime_tributacao_federal) REFERENCES regime_tributacao_federal(id),
+    FOREIGN KEY (id_setor_atividade) REFERENCES setor_atividade(id),
+    FOREIGN KEY (id_endereco) REFERENCES endereco(id),
+    FOREIGN KEY (id_matriz) REFERENCES entidade(id)
 );
 
 

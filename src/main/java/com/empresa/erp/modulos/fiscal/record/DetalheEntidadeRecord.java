@@ -21,10 +21,10 @@ public record DetalheEntidadeRecord(
 		DetalheSetorAtividadeRecord setorAtividade,
 		DetalheEnderecoRecord endereco,
 		String contatoPrincipal,
-		String emailNFe,
+		String emailNfe,
 		String emailComercial,
-		String telefonePrimeiro,
-		String telefoneSegundo,
+		String primeiroTelefone,
+		String segundoTelefone,
 		Boolean nacional,
 		DetalheEntidadeRecord matriz,
 		StatusEnum status
@@ -46,12 +46,12 @@ public record DetalheEntidadeRecord(
 			new DetalheSetorAtividadeRecord(dados.getSetorAtividade()),
 			new DetalheEnderecoRecord(dados.getEndereco()),
 			dados.getContatoPrincipal(),
-			dados.getEmailNFe(),
+			dados.getEmailNfe(),
 			dados.getEmailComercial(),
-			dados.getTelefonePrimeiro(),
-			dados.getTelefoneSegundo(),
+			dados.getPrimeiroTelefone(),
+			dados.getSegundoTelefone(),
 			dados.getNacional(),
-			new DetalheEntidadeRecord(dados.getMatriz()),			
+			dados.getMatriz() != null ? new DetalheEntidadeRecord(dados.getMatriz()) : null,			
 			dados.getStatus()
 		);		
 	}

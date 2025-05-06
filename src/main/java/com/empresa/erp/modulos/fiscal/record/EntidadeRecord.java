@@ -28,7 +28,7 @@ public record EntidadeRecord(
 	String numeroDocumento,
 	
 	@Schema(description = "A inscrição estadual da entidade pode conter apenas dígitos numéricos e ter no máximo 15 caracteres.", example = "")
-	@Pattern(regexp = "\\d{0,15}", message = "{entidade.inscricao_estadual.digitos}")	
+	@Pattern(regexp = "\\d{0,15}", message = "{entidade.inscricao_estadual.digitos}")
 	String inscricaoEstadual,
 	
 	@Schema(description = "A inscrição municipal da entidade pode conter apenas dígitos numéricos e ter no máximo 15 caracteres.", example = "")
@@ -74,7 +74,7 @@ public record EntidadeRecord(
 	@Schema(description = "O e-mail NFe da entidade é obrigatório e não pode estar vazio ou em branco e pode ter no máximo 255 caracteres.", example = "")	
 	@NotBlank(message = "{entidade.email_nfe.vazio}")	
 	@Size(max = 255, message = "{entidade.email_nfe.tamanho}")
-	String emailNFe,
+	String emailNfe,
 	
 	@Schema(description = "O e-mail comercial da entidade é obrigatório e não pode estar vazio ou em branco e pode ter no máximo 255 caracteres.", example = "")	
 	@NotBlank(message = "{entidade.email_comercial.vazio}")	
@@ -84,12 +84,12 @@ public record EntidadeRecord(
 	@Schema(description = "O primeiro telefone da entidade é obrigatório e não pode estar vazio ou em branco e pode ter no máximo 20 caracteres.", example = "")
 	@NotBlank(message = "{entidade.telefone_primeiro.vazio}")	
 	@Size(max = 20, message = "{entidade.telefone_primeiro.tamanho}")
-	String telefonePrimeiro,
+	String primeiroTelefone,
 	
 	@Schema(description = "O segundo telefone da entidade é obrigatório e não pode estar vazio ou em branco e pode ter no máximo 20 caracteres.", example = "")
 	@NotBlank(message = "{entidade.telefone_segundo.vazio}")	
 	@Size(max = 20, message = "{entidade.telefone_segundo.tamanho}")
-	String telefoneSegundo,
+	String segundoTelefone,
 	
 	@Schema(description = "O nacional da entidade é obrigatório e deve ser verdadeiro (true) ou falso (false).", example = "")
 	@NotNull(message = "{entidade.nacional.vazio}")
