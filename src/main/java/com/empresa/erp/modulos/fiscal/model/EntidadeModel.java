@@ -54,7 +54,7 @@ public class EntidadeModel {
 	@OneToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "id_setor_atividade")
 	private SetorAtividadeModel setorAtividade;
-	@OneToOne(cascade = CascadeType.DETACH)
+	@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	@JoinColumn(name = "id_endereco")
 	private EnderecoModel endereco;
 	private String contatoPrincipal;

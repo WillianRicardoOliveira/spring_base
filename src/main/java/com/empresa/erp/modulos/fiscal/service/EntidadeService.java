@@ -4,12 +4,10 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
-import com.empresa.erp.domain.fiscal.endereco.record.EnderecoRecord;
 import com.empresa.erp.domain.fiscal.endereco.repository.EnderecoRepository;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.repository.RegimeTributacaoFederalRepository;
 import com.empresa.erp.domain.fiscal.setorAtividade.repository.SetorAtividadeRepository;
@@ -29,7 +27,6 @@ public class EntidadeService {
 	private final EntidadeRepository repository;
 	private final RegimeTributacaoFederalRepository regime;
 	private final SetorAtividadeRepository setor;
-	private final EnderecoRepository endereco;
 
 	public EntidadeService(EntidadeRepository repository, 
 	                       RegimeTributacaoFederalRepository regime, 
@@ -38,89 +35,64 @@ public class EntidadeService {
 	        this.repository = repository;
 	        this.regime = regime;
 	        this.setor = setor;
-	        this.endereco = endereco;
 	}
 
 	@Transactional
 	public DetalheEntidadeRecord cadastrar(EntidadeRecord dados) {
+					
+		var regimeModel = regime.findById(dados.regime().id())
+				.orElseThrow(() -> new ValidacaoException("Regime de Tributação Federal não encontrado."));
+				
+		var setorModel = setor.findById(dados.setor().id())
+				.orElseThrow(() -> new ValidacaoException("Setor de Atividade não encontrado."));
 		
-		EntidadeModel matriz = null;
-
-		if (dados.matriz() != null && dados.matriz().id() != null) {
-		    matriz = buscar(dados.matriz().id(), repository, "Entidade matriz não encontrada.");
-		}
+		var enderecoModel = new EnderecoModel(dados.endereco());
 		
-		return new DetalheEntidadeRecord(				
-				repository.save(
-						new EntidadeModel(
-								dados,								
-								
-								buscar(dados.regime().id(), regime, "Regime de Tributação Federal não encontrado."),																
-								
-								
-								
-								buscar(dados.setor().id(), setor, "Setor de Atividade não encontrado."),								
-								criarEndereco(dados.endereco()),					
-								
-								matriz
-								
-								)
-						)
-				);
+		var matriz = dados.matriz() != null ? repository.findById(dados.matriz().id()).orElseThrow(() -> new ValidacaoException("Entidade matriz não encontrada.")) : null; 
+		
+		var entidade = new EntidadeModel(dados, regimeModel, setorModel, enderecoModel, matriz);
+		
+		return new DetalheEntidadeRecord(repository.save(entidade));
+				
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	@Transactional
-	public DetalheEntidadeRecord atualizar(AtualizaEntidadeRecord dados) {		
-		 EntidadeModel entidade = repository.findById(dados.id()).orElseThrow(() -> new ValidacaoException("Entidade não encontrada."));		 
-		 entidade.atualizar(
-				 dados,				 
-				 buscar(dados.regime().id(), regime, "Regime de Tributação Federal não encontrado."),				 
-				 buscar(dados.setor().id(), setor, "Setor de Atividade não encontrado."),				 
-				 buscar(dados.matriz().id(), repository, "Entidade matriz não encontrada.")				 
-				 );		
-		 return new DetalheEntidadeRecord(entidade);
-	}
-	/*
-	@Transactional
-	public void status(Long id, StatusEnum status) {
-	    EntidadeModel entidade = repository.findById(id).orElseThrow(() -> new ValidacaoException("Entidade não encontrada."));
-	    entidade.setStatus(status);
-	   
-	}*/
 		
+	@Transactional
+	public DetalheEntidadeRecord atualizar(AtualizaEntidadeRecord dados) {
+		
+		var entidade = repository.findById(dados.id())
+				.orElseThrow(() -> new ValidacaoException("Entidade não encontrada."));		 
+		 
+		var regimeModel = regime.findById(dados.regime().id())
+				.orElseThrow(() -> new ValidacaoException("Regime de Tributação Federal não encontrado."));
+		 
+		var setorModel = setor.findById(dados.setor().id())
+				.orElseThrow(() -> new ValidacaoException("Setor de Atividade não encontrado."));
+		
+		var matriz = dados.matriz() != null ? repository.findById(dados.matriz().id()).orElseThrow(() -> new ValidacaoException("Entidade matriz não encontrada.")) : null; 
+		 
+		entidade.atualizar(dados, regimeModel, setorModel, matriz);
+		 
+		return new DetalheEntidadeRecord(entidade);
+		
+	}
+			
 	public DetalheEntidadeRecord detalhar(Long id) {
-		return new DetalheEntidadeRecord(buscar(id, repository, "Entidade não encontrada."));
+		
+		var entidade = repository.findById(id)
+				.orElseThrow(() -> new ValidacaoException("Entidade não encontrada."));
+		
+		return new DetalheEntidadeRecord(entidade);
+		
 	}
 	
 	public Page<ListaEntidadeRecord> listar(Pageable paginacao, String filtro) {
+		
 	    return Optional.ofNullable(filtro)
 	        .filter(f -> !f.isBlank())
 	        .map(f -> repository.findByNomeCompletoContaining(paginacao, f))
 	        .orElse(repository.findAllByStatus(paginacao, StatusEnum.ATIVO))
 	        .map(ListaEntidadeRecord::new);
-	}
-
-	private EnderecoModel criarEndereco(EnderecoRecord enderecoRecord) {
-	    return endereco.save(new EnderecoModel(enderecoRecord));
-	}
-	
-	private <T> T buscar(Long id, JpaRepository<T, Long> repository, String mensagemErro) {
-	    return repository.findById(id).orElseThrow(() -> new ValidacaoException(mensagemErro));
+	    
 	}
 	
 }

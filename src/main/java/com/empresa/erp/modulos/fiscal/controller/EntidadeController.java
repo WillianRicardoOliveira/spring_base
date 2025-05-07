@@ -21,7 +21,6 @@ import com.empresa.erp.modulos.fiscal.record.DetalheEntidadeRecord;
 import com.empresa.erp.modulos.fiscal.record.EntidadeRecord;
 import com.empresa.erp.modulos.fiscal.record.ListaEntidadeRecord;
 import com.empresa.erp.modulos.fiscal.service.EntidadeService;
-import com.empresa.erp.padrao.record.StatusRecord;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,14 +46,7 @@ public class EntidadeController {
 	public ResponseEntity<DetalheEntidadeRecord> atualizar(@Valid @RequestBody AtualizaEntidadeRecord request) {					
 		return ResponseEntity.ok(service.atualizar(request));
 	}
-	/*		
-	@Operation(summary = "Atualiza o status de uma entidade", description = "Ativa, inativa ou remove logicamente uma entidade no sistema (Cliente - Fornecedor - Parceiro - Transportadora)")
-	@PutMapping("/status/{id}")	
-	public ResponseEntity<Void> status(@PathVariable Long id, @Valid @RequestBody StatusRecord request) {			
-		service.status(id, request.status());
-		return ResponseEntity.noContent().build();
-	}	
-	*/
+
 	@Operation(summary = "Busca uma entidade", description = "Busca uma entidade no sistema ( Cliente - Fornecedor - Parceiro - Transportadora )")
 	@GetMapping("/{id}")
 	public ResponseEntity<DetalheEntidadeRecord> detalhar(@Parameter(description = "ID da entidade") @PathVariable Long id) {			

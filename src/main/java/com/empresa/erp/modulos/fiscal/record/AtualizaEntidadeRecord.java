@@ -14,7 +14,7 @@ import jakarta.validation.constraints.Size;
 public record AtualizaEntidadeRecord(
 		
 	@Schema(description = "O ID da entidade é obrigatório e não pode estar vazio ou em branco.", example = "")
-	@NotNull(message = "{entidade.id.vazio ")
+	@NotNull(message = "{entidade.id.vazio}")
 	Long id,
 	
 	@Schema(description = "A pessoa juridica da entidade é obrigatório e deve ser verdadeiro (true) ou falso (false).", example = "")
