@@ -26,8 +26,8 @@ import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.service.RegimeTribu
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/regimeTributacaoFederal")
+//@RestController
+//@RequestMapping("/regimeTributacaoFederal")
 public class RegimeTributacaoFederalController {
 	
 	@Autowired

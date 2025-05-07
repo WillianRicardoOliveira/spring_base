@@ -26,8 +26,8 @@ import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.service.CartaoS
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/cartao")
+//@RestController
+//@RequestMapping("/cartao")
 public class CartaoController {
 	
 	@Autowired

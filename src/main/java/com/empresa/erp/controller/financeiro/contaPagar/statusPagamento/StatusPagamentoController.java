@@ -26,8 +26,8 @@ import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.service.Stat
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/statusPagamento")
+//@RestController
+//@RequestMapping("/statusPagamento")
 public class StatusPagamentoController {
 	
 	@Autowired

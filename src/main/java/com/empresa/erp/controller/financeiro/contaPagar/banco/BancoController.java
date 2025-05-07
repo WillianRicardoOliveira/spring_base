@@ -26,8 +26,8 @@ import com.empresa.erp.domain.financeiro.contaPagar.banco.service.BancoService;
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/banco")
+//@RestController
+//@RequestMapping("/banco")
 public class BancoController {
 	
 	@Autowired

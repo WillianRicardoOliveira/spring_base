@@ -27,8 +27,8 @@ import com.empresa.erp.domain.estoque.produto.service.ProdutoService;
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/produto")
+//@RestController
+//@RequestMapping("/produto")
 public class ProdutoController {
 	
 	@Autowired

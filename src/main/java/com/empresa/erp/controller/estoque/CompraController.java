@@ -26,8 +26,8 @@ import com.empresa.erp.domain.estoque.compra.service.CompraService;
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/compra")
+//@RestController
+//@RequestMapping("/compra")
 public class CompraController {
 	
 	@Autowired

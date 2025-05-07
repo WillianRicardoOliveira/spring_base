@@ -26,8 +26,8 @@ import com.empresa.erp.domain.fiscal.setorAtividade.service.SetorAtividadeServic
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/setorAtividade")
+//@RestController
+//@RequestMapping("/setorAtividade")
 public class SetorAtividadeController {
 	
 	@Autowired

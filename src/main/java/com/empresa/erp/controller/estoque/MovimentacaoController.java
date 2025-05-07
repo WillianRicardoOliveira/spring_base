@@ -23,8 +23,8 @@ import com.empresa.erp.domain.estoque.movimentacao.service.MovimentacaoService;
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/movimentacao")
+//@RestController
+//@RequestMapping("/movimentacao")
 public class MovimentacaoController {
 	
 	@Autowired

@@ -26,8 +26,8 @@ import com.empresa.erp.domain.financeiro.contaPagar.formaPagamento.service.Forma
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/formaPagamento")
+//@RestController
+//@RequestMapping("/formaPagamento")
 public class FormaPagamentoController {
 	
 	@Autowired

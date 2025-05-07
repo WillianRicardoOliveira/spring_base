@@ -26,8 +26,8 @@ import com.empresa.erp.domain.estoque.movimentacao.tipoMovimentacao.service.Tipo
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/tipoMovimentacao")
+//@RestController
+//@RequestMapping("/tipoMovimentacao")
 public class TipoMovimentacaoController {
 	
 	@Autowired

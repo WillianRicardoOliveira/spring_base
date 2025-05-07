@@ -27,8 +27,8 @@ import com.empresa.erp.domain.pessoa.service.PessoaService;
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/pessoa")
+//@RestController
+//@RequestMapping("/pessoa")
 public class PessoaController {
 	
 	@Autowired

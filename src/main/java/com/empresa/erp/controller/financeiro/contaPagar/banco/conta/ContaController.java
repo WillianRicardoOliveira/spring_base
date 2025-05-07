@@ -26,8 +26,8 @@ import com.empresa.erp.domain.financeiro.contaPagar.banco.conta.service.ContaSer
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/conta")
+//@RestController
+//@RequestMapping("/conta")
 public class ContaController {
 	
 	@Autowired

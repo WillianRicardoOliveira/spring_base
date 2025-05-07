@@ -26,8 +26,8 @@ import com.empresa.erp.domain.fiscal.endereco.service.EnderecoService;
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/endereco")
+//@RestController
+//@RequestMapping("/endereco")
 public class EnderecoController {
 	
 	@Autowired

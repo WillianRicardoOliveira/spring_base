@@ -26,8 +26,8 @@ import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.subCategoriaC
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/subCategoriaConta")
+//@RestController
+//@RequestMapping("/subCategoriaConta")
 public class SubCategoriaContaController {
 	
 	@Autowired
