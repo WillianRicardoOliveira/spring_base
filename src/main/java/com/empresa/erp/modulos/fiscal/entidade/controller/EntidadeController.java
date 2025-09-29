@@ -1,4 +1,4 @@
-package com.empresa.erp.modulos.fiscal.controller;
+package com.empresa.erp.modulos.fiscal.entidade.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.empresa.erp.modulos.fiscal.record.AtualizaEntidadeRecord;
-import com.empresa.erp.modulos.fiscal.record.DetalheEntidadeRecord;
-import com.empresa.erp.modulos.fiscal.record.EntidadeRecord;
-import com.empresa.erp.modulos.fiscal.record.ListaEntidadeRecord;
-import com.empresa.erp.modulos.fiscal.service.EntidadeService;
+import com.empresa.erp.modulos.fiscal.entidade.record.AtualizaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.record.DetalheEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.record.EntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.record.ListaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.service.EntidadeService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

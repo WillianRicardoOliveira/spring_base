@@ -1,10 +1,10 @@
-package com.empresa.erp.modulos.fiscal.model;
+package com.empresa.erp.modulos.fiscal.entidade.model;
 
 import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
 import com.empresa.erp.domain.fiscal.setorAtividade.model.SetorAtividadeModel;
-import com.empresa.erp.modulos.fiscal.record.AtualizaEntidadeRecord;
-import com.empresa.erp.modulos.fiscal.record.EntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.record.AtualizaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.record.EntidadeRecord;
 import com.empresa.erp.padrao.constant.StatusEnum;
 
 import jakarta.persistence.CascadeType;

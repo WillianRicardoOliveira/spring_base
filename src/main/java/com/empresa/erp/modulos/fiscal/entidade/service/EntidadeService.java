@@ -1,4 +1,4 @@
-package com.empresa.erp.modulos.fiscal.service;
+package com.empresa.erp.modulos.fiscal.entidade.service;
 
 import java.util.Optional;
 
@@ -11,12 +11,12 @@ import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
 import com.empresa.erp.domain.fiscal.endereco.repository.EnderecoRepository;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.repository.RegimeTributacaoFederalRepository;
 import com.empresa.erp.domain.fiscal.setorAtividade.repository.SetorAtividadeRepository;
-import com.empresa.erp.modulos.fiscal.model.EntidadeModel;
-import com.empresa.erp.modulos.fiscal.record.AtualizaEntidadeRecord;
-import com.empresa.erp.modulos.fiscal.record.DetalheEntidadeRecord;
-import com.empresa.erp.modulos.fiscal.record.EntidadeRecord;
-import com.empresa.erp.modulos.fiscal.record.ListaEntidadeRecord;
-import com.empresa.erp.modulos.fiscal.repository.EntidadeRepository;
+import com.empresa.erp.modulos.fiscal.entidade.model.EntidadeModel;
+import com.empresa.erp.modulos.fiscal.entidade.record.AtualizaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.record.DetalheEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.record.EntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.record.ListaEntidadeRecord;
+import com.empresa.erp.modulos.fiscal.entidade.repository.EntidadeRepository;
 import com.empresa.erp.padrao.constant.StatusEnum;
 
 import jakarta.transaction.Transactional;
