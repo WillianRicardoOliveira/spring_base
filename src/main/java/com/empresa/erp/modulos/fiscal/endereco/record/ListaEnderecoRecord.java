@@ -1,4 +1,4 @@
-package com.empresa.erp.domain.fiscal.endereco.record;
+package com.empresa.erp.modulos.fiscal.endereco.record;
 
 import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
 
@@ -11,10 +11,8 @@ public record ListaEnderecoRecord(
 		String logradouro,
 		String numero,
 		String complemento
-) {
-	
+) {	
 	public ListaEnderecoRecord(EnderecoModel dados) {
-		
 		this(
 				dados.getId(),
 				dados.getCep(),
@@ -24,8 +22,6 @@ public record ListaEnderecoRecord(
 				dados.getLogradouro(),
 				dados.getNumero(),
 				dados.getComplemento()
-		);
-		
-	}	
-
+		);		
+	}
 }

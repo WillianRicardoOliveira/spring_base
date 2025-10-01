@@ -1,8 +1,8 @@
 package com.empresa.erp.modulos.fiscal.entidade.record;
 
-import com.empresa.erp.domain.fiscal.endereco.record.EnderecoRecord;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
 import com.empresa.erp.domain.fiscal.setorAtividade.record.DetalheSetorAtividadeRecord;
+import com.empresa.erp.modulos.fiscal.endereco.record.EnderecoRecord;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;

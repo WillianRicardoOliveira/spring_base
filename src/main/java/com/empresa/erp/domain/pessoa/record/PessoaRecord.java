@@ -1,8 +1,8 @@
 package com.empresa.erp.domain.pessoa.record;
 
-import com.empresa.erp.domain.fiscal.endereco.record.EnderecoRecord;
 import com.empresa.erp.domain.pessoa.constante.TipoPessoa;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
+import com.empresa.erp.modulos.fiscal.endereco.record.EnderecoRecord;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

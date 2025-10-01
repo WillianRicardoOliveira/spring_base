@@ -1,6 +1,6 @@
 package com.empresa.erp.domain.fiscal.endereco.model;
 
-import com.empresa.erp.domain.fiscal.endereco.record.EnderecoRecord;
+import com.empresa.erp.modulos.fiscal.endereco.record.EnderecoRecord;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

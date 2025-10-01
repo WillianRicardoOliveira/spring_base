@@ -1,8 +1,8 @@
 package com.empresa.erp.modulos.fiscal.entidade.record;
 
-import com.empresa.erp.domain.fiscal.endereco.record.DetalheEnderecoRecord;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
 import com.empresa.erp.domain.fiscal.setorAtividade.record.DetalheSetorAtividadeRecord;
+import com.empresa.erp.modulos.fiscal.endereco.record.DetalheEnderecoRecord;
 import com.empresa.erp.modulos.fiscal.entidade.model.EntidadeModel;
 import com.empresa.erp.padrao.constant.StatusEnum;
 
