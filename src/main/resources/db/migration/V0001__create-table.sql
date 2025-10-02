@@ -15,6 +15,10 @@ CREATE TABLE setor_atividade (
     removido TINYINT(1) NOT NULL DEFAULT 0
 );
 
+
+
+
+
 create table endereco(
     id bigint not null auto_increment,
     cep varchar(10) not null,
@@ -27,6 +31,39 @@ create table endereco(
     ativo tinyint(1) not null,
     primary key(id)
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 -- Criação da tabela Entidade
 CREATE TABLE entidade (

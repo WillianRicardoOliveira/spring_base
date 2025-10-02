@@ -12,12 +12,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
-import com.empresa.erp.domain.fiscal.endereco.repository.EnderecoRepository;
+import com.empresa.erp.modulos.fiscal.endereco.model.EnderecoModel;
 import com.empresa.erp.modulos.fiscal.endereco.record.AtualizaEnderecoRecord;
 import com.empresa.erp.modulos.fiscal.endereco.record.DetalheEnderecoRecord;
 import com.empresa.erp.modulos.fiscal.endereco.record.EnderecoRecord;
 import com.empresa.erp.modulos.fiscal.endereco.record.ListaEnderecoRecord;
+import com.empresa.erp.modulos.fiscal.endereco.repository.EnderecoRepository;
 import com.google.gson.Gson;
 
 import jakarta.transaction.Transactional;

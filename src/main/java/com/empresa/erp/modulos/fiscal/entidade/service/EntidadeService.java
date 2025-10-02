@@ -7,10 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
-import com.empresa.erp.domain.fiscal.endereco.repository.EnderecoRepository;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.repository.RegimeTributacaoFederalRepository;
 import com.empresa.erp.domain.fiscal.setorAtividade.repository.SetorAtividadeRepository;
+import com.empresa.erp.modulos.fiscal.endereco.model.EnderecoModel;
+import com.empresa.erp.modulos.fiscal.endereco.repository.EnderecoRepository;
 import com.empresa.erp.modulos.fiscal.entidade.model.EntidadeModel;
 import com.empresa.erp.modulos.fiscal.entidade.record.AtualizaEntidadeRecord;
 import com.empresa.erp.modulos.fiscal.entidade.record.DetalheEntidadeRecord;

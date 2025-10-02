@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
-import com.empresa.erp.domain.fiscal.endereco.repository.EnderecoRepository;
 import com.empresa.erp.domain.pessoa.model.PessoaModel;
 import com.empresa.erp.domain.pessoa.record.AtualizaPessoaRecord;
 import com.empresa.erp.domain.pessoa.record.DetalhePessoaRecord;
@@ -17,6 +15,8 @@ import com.empresa.erp.domain.pessoa.record.PessoaRecord;
 import com.empresa.erp.domain.pessoa.repository.PessoaRepository;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
+import com.empresa.erp.modulos.fiscal.endereco.model.EnderecoModel;
+import com.empresa.erp.modulos.fiscal.endereco.repository.EnderecoRepository;
 
 @Service
 public class PessoaService {

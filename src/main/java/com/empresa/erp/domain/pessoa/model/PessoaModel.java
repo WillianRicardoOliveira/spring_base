@@ -1,10 +1,10 @@
 package com.empresa.erp.domain.pessoa.model;
 
-import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
 import com.empresa.erp.domain.pessoa.constante.TipoPessoa;
 import com.empresa.erp.domain.pessoa.record.AtualizaPessoaRecord;
 import com.empresa.erp.domain.pessoa.record.PessoaRecord;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
+import com.empresa.erp.modulos.fiscal.endereco.model.EnderecoModel;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;

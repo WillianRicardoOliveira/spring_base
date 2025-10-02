@@ -1,8 +1,8 @@
 package com.empresa.erp.modulos.fiscal.entidade.model;
 
-import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
 import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.model.RegimeTributacaoFederalModel;
 import com.empresa.erp.domain.fiscal.setorAtividade.model.SetorAtividadeModel;
+import com.empresa.erp.modulos.fiscal.endereco.model.EnderecoModel;
 import com.empresa.erp.modulos.fiscal.entidade.record.AtualizaEntidadeRecord;
 import com.empresa.erp.modulos.fiscal.entidade.record.EntidadeRecord;
 import com.empresa.erp.padrao.constant.StatusEnum;
@@ -34,7 +34,6 @@ import lombok.Setter;
 @EqualsAndHashCode(of = "id")
 @Builder
 public class EntidadeModel {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -48,13 +47,13 @@ public class EntidadeModel {
 	private Boolean fornecedor;
 	private Boolean parceiro;
 	private Boolean transportador;
-	@OneToOne(cascade = CascadeType.DETACH)
+	@OneToOne
 	@JoinColumn(name = "id_regime_tributacao_federal")
 	private RegimeTributacaoFederalModel regimeTributacaoFederal;
-	@OneToOne(cascade = CascadeType.DETACH)
+	@OneToOne
 	@JoinColumn(name = "id_setor_atividade")
 	private SetorAtividadeModel setorAtividade;
-	@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "id_endereco")
 	private EnderecoModel endereco;
 	private String contatoPrincipal;
@@ -63,12 +62,11 @@ public class EntidadeModel {
 	private String primeiroTelefone;
 	private String segundoTelefone;
 	private Boolean nacional;
-	@OneToOne(cascade = CascadeType.DETACH)
+	@OneToOne
 	@JoinColumn(name = "id_matriz")
 	private EntidadeModel matriz;
 	@Enumerated(EnumType.ORDINAL)
 	private StatusEnum status;
-
 	public EntidadeModel(EntidadeRecord dados, RegimeTributacaoFederalModel regime, SetorAtividadeModel setor, EnderecoModel endereco, EntidadeModel matriz) {
 		this.pessoaJuridica = dados.pessoaJuridica();
 		this.nomeCompleto = dados.nomeCompleto();
@@ -91,7 +89,6 @@ public class EntidadeModel {
 		this.matriz = matriz;
 		this.status = StatusEnum.ATIVO;
 	}
-
 	public void atualizar(AtualizaEntidadeRecord dados, RegimeTributacaoFederalModel regime, SetorAtividadeModel setor, EntidadeModel matriz) {
 		this.pessoaJuridica = dados.pessoaJuridica();
 		this.nomeCompleto = dados.nomeCompleto();
@@ -113,5 +110,4 @@ public class EntidadeModel {
 		this.nacional = dados.nacional();
 		this.matriz = matriz;
 	}
-
 }

@@ -1,6 +1,6 @@
 package com.empresa.erp.modulos.fiscal.endereco.record;
 
-import com.empresa.erp.domain.fiscal.endereco.model.EnderecoModel;
+import com.empresa.erp.modulos.fiscal.endereco.model.EnderecoModel;
 
 public record ListaEnderecoRecord(				
 		Long id,
