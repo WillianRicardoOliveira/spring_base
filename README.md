@@ -44,7 +44,7 @@
 
 		3. Renomeie a pasta para Spring
 
-# Para instalar o Lombok no Spring Tool Suite (STS), siga os passos abaixo
+# Lombok
 
 	Passo 1: Baixar o Lombok.
 
