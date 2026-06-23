@@ -20,7 +20,7 @@
 
 			C:\Desenvolvimento\Projeto\Back\Workspace
 			
-# Baixar o Projeto
+# Projeto
 
 		Passo 1: Baixar o projeto no Github.
 	
@@ -30,7 +30,7 @@
 
 			2. Clonar o Repositório na pasta Workspace.
 		
-# Baixar o Spring Tools
+# Spring Tools
 
 		Passo 1: Baixar o Spring Tools for Eclipse.
 	
@@ -44,7 +44,7 @@
 
 		3. Renomeie a pasta para Spring
 
-# Para instalar o Lombok no Spring Tool Suite (STS), siga os passos abaixo
+# Lombok
 
 	Passo 1: Baixar o Lombok.
 
