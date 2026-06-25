@@ -1,4 +1,4 @@
-package com.empresa.erp.controller;
+package com.empresa.erp.controller.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.empresa.erp.core.security.DadosTokenJWT;
-import com.empresa.erp.core.security.TokenService;
+import com.empresa.erp.core.security.jwt.TokenSecurity;
+import com.empresa.erp.core.security.record.TokenJwtSecurity;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
@@ -24,7 +24,7 @@ public class AutenticacaoController {
 	private AuthenticationManager manager;
 	
 	@Autowired
-	private TokenService tokenService;
+	private TokenSecurity tokenService;
 	
 	@PostMapping
 	public ResponseEntity efetuarLogin(@RequestBody @Valid UsuarioRecord dados) {
@@ -32,7 +32,7 @@ public class AutenticacaoController {
 			var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
 			var authentication = manager.authenticate(authenticationToken);
 			var tokenJWT = tokenService.gerarToken((UsuarioModel) authentication.getPrincipal());
-			return ResponseEntity.ok(new DadosTokenJWT(tokenJWT));
+			return ResponseEntity.ok(new TokenJwtSecurity(tokenJWT));
 		} catch (Exception e) {
 	        e.printStackTrace();
 	        return ResponseEntity.badRequest().body(e.getMessage());
