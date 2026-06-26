@@ -48,6 +48,11 @@ public class TratarErros {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado");
     }
 
+    @ExceptionHandler(SsoAuthenticationException.class)
+    public ResponseEntity tratarErroSsoAuthentication(SsoAuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+    
     @ExceptionHandler(Exception.class)
     public ResponseEntity tratarErro500(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro: " +ex.getLocalizedMessage());

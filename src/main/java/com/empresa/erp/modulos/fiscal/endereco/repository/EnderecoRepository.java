@@ -11,8 +11,8 @@ import com.empresa.erp.padrao.constant.StatusEnum;
 
 public interface EnderecoRepository extends JpaRepository<EnderecoModel, Long> {
 	
-	Page<EnderecoModel> findAllByStatusAndCriacaoAfter(Pageable paginacao, StatusEnum status, LocalDateTime criacao);
+	// Page<EnderecoModel> findAllByStatusAndCriacaoAfter(Pageable paginacao, StatusEnum status, LocalDateTime criacao);
 	
-	Page<EnderecoModel> findByLogradouroContainingAndStatusAndCriacaoAfter(Pageable paginacao, String filtro, StatusEnum status, LocalDateTime criacao);
+	// Page<EnderecoModel> findByLogradouroContainingAndStatusAndCriacaoAfter(Pageable paginacao, String filtro, StatusEnum status, LocalDateTime criacao);
 	
 }

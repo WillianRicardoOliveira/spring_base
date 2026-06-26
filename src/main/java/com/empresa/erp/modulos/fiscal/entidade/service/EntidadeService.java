@@ -84,7 +84,7 @@ public class EntidadeService {
 		return new DetalheEntidadeRecord(entidade);
 		
 	}
-	
+	/*
 	public Page<ListaEntidadeRecord> listar(Pageable paginacao, String filtro) {
 		
 	    return Optional.ofNullable(filtro)
@@ -94,5 +94,5 @@ public class EntidadeService {
 	        .map(ListaEntidadeRecord::new);
 	    
 	}
-	
+	*/
 }

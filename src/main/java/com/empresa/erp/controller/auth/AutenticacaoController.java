@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.empresa.erp.core.security.jwt.TokenSecurity;
+import com.empresa.erp.core.security.record.SsoLoginSecurity;
 import com.empresa.erp.core.security.record.TokenJwtSecurity;
+import com.empresa.erp.core.security.service.SsoSecurity;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
@@ -26,6 +28,9 @@ public class AutenticacaoController {
 	@Autowired
 	private TokenSecurity tokenService;
 	
+	@Autowired
+	private SsoSecurity ssoSecurity;
+	
 	@PostMapping
 	public ResponseEntity efetuarLogin(@RequestBody @Valid UsuarioRecord dados) {
 		try {
@@ -37,6 +42,11 @@ public class AutenticacaoController {
 	        e.printStackTrace();
 	        return ResponseEntity.badRequest().body(e.getMessage());
 	    }
+	}
+	
+	@PostMapping("/sso")
+	public ResponseEntity efetuarLoginSso(@RequestBody @Valid SsoLoginSecurity dados) {
+	    return ResponseEntity.ok(ssoSecurity.autenticar(dados));
 	}
 	
 }

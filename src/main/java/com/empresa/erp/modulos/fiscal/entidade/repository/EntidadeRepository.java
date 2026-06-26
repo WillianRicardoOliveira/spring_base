@@ -11,8 +11,8 @@ import com.empresa.erp.padrao.constant.StatusEnum;
 
 public interface EntidadeRepository extends JpaRepository<EntidadeModel, Long> {
 	
-	Page<EntidadeModel> findAllByStatusAndCriacaoAfter(Pageable paginacao, StatusEnum status, LocalDateTime criacao);
+	//Page<EntidadeModel> findAllByStatusAndCriacaoAfter(Pageable paginacao, StatusEnum status, LocalDateTime criacao);
 
-	Page<EntidadeModel> findByNomeCompletoContainingAndStatusAndCriacaoAfter(Pageable paginacao, String filtro, StatusEnum status, LocalDateTime criacao);
+	//Page<EntidadeModel> findByNomeCompletoContainingAndStatusAndCriacaoAfter(Pageable paginacao, String filtro, StatusEnum status, LocalDateTime criacao);
 	
 }

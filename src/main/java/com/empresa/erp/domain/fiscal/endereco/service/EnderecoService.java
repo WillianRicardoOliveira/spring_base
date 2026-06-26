@@ -18,7 +18,7 @@ import com.empresa.erp.modulos.fiscal.endereco.record.DetalheEnderecoRecord;
 import com.empresa.erp.modulos.fiscal.endereco.record.EnderecoRecord;
 import com.empresa.erp.modulos.fiscal.endereco.record.ListaEnderecoRecord;
 import com.empresa.erp.modulos.fiscal.endereco.repository.EnderecoRepository;
-import com.google.gson.Gson;
+
 
 import jakarta.transaction.Transactional;
 
@@ -38,7 +38,7 @@ public class EnderecoService {
 			throw new ValidacaoException("Não foi possível realizar o cadastro do Endereço.");
 		}
 	}
-	
+	/*
 	public Page<ListaEnderecoRecord> listar(Pageable paginacao, String filtro) {
 		try {
 			if(filtro != null) {
@@ -50,7 +50,7 @@ public class EnderecoService {
 			throw new ValidacaoException("Não foi possível realizar a listagem dos Endereços.");
 		}
 	}
-	
+	*/
 	/*
 	@Transactional
 	public DetalheEnderecoRecord atualizar(AtualizaEnderecoRecord dados) {
@@ -63,6 +63,7 @@ public class EnderecoService {
 		}
 	}
 	*/
+	/*
 	@Transactional
 	public void excluir(Long id, Boolean ativo) {
 		try {
@@ -70,7 +71,7 @@ public class EnderecoService {
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a exclusão do Endereço.");
 		}
-	}
+	}*/
 	
 	public DetalheEnderecoRecord detalhar(Long id) {
 		try {
@@ -80,7 +81,7 @@ public class EnderecoService {
 			throw new ValidacaoException("Não foi possível realizar o detalhamento do Endereço.");
 		}
 	}
-	
+	/*
 	public EnderecoRecord buscaDadosEndereco(Long cep) throws Exception {
 		try {
 			String valor = Long.valueOf(cep).toString();
@@ -98,6 +99,6 @@ public class EnderecoService {
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível buscar os dados do endereço.");
 		}
-	}
+	}*/
 	
 }

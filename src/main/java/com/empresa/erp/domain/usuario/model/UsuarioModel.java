@@ -31,10 +31,12 @@ public class UsuarioModel implements UserDetails {
 	private Long id;
 	private String email;
 	private String senha;
+	private Boolean ativo = true;
 	
 	public UsuarioModel(UsuarioRecord dados) {
 		this.email = dados.email();
 		this.senha = dados.senha();
+		this.ativo = true;
 	}
 	
     public void atualizar(UsuarioRecord dados) {
@@ -84,8 +86,7 @@ public class UsuarioModel implements UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		// TODO Auto-generated method stub
-		return true;
+	    return Boolean.TRUE.equals(ativo);
 	}
 	
 }
