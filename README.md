@@ -2,11 +2,7 @@
 
 	Git 					: https://git-scm.com/downloads
 
-	MySql				 	: https://www.mysql.com/downloads
-
-	DBeaver 				: https://dbeaver.io/download
-
-	Visual Studio Code			: https://code.visualstudio.com/download
+	MySql 8 e Workbench	8 	: https://www.mysql.com/downloads	
 	
 	Postman 				: https://www.postman.com/downloads
 	
