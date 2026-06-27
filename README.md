@@ -34,11 +34,11 @@
 
 			https://spring.io/tools
 
-		2. Descompacte na pasta.
+		2. Renomeie a pasta para Spring
+		
+		3. Descompacte na pasta.
 
 			C:\Desenvolvimento
-
-		3. Renomeie a pasta para Spring
 
 # Lombok
 
