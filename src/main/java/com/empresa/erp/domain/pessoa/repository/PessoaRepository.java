@@ -1,5 +1,7 @@
 package com.empresa.erp.domain.pessoa.repository;
 
+/*
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,3 +27,5 @@ public interface PessoaRepository extends JpaRepository<PessoaModel, Long> {
 	public PessoaModel buscaPessoaUsuario(Long id);
 
 }
+
+*/

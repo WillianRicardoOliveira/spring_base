@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.pessoa.record;
 
+/*
 import com.empresa.erp.domain.pessoa.model.PessoaModel;
 import com.empresa.erp.modulos.fiscal.endereco.record.EnderecoRecord;
 
@@ -35,3 +36,5 @@ public record DetalhePessoaRecord(
 	}
 
 }
+
+*/

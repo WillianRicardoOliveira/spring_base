@@ -1,5 +1,7 @@
 package com.empresa.erp.domain.pessoa.record;
 
+/*
+
 import com.empresa.erp.domain.pessoa.model.PessoaModel;
 
 public record ListaPessoaRecord(
@@ -12,3 +14,4 @@ public record ListaPessoaRecord(
 	}	
 
 }
+*/;

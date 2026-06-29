@@ -1,5 +1,7 @@
 package com.empresa.erp.domain.pessoa.model;
 
+/*
+
 import com.empresa.erp.domain.pessoa.constante.TipoPessoa;
 import com.empresa.erp.domain.pessoa.record.AtualizaPessoaRecord;
 import com.empresa.erp.domain.pessoa.record.PessoaRecord;
@@ -90,3 +92,5 @@ public class PessoaModel {
 	}
 		
 }
+
+*/

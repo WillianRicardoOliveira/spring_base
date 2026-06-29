@@ -1,5 +1,7 @@
 package com.empresa.erp.domain.pessoa.record;
 
+
+/*
 import com.empresa.erp.domain.pessoa.constante.TipoPessoa;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 import com.empresa.erp.modulos.fiscal.endereco.record.EnderecoRecord;
@@ -32,3 +34,5 @@ public record AtualizaPessoaRecord(
 	@NotNull(message = "{tipoPessoa.obrigatorio}")
 	TipoPessoa tipoPessoa
 ) {}
+
+*/

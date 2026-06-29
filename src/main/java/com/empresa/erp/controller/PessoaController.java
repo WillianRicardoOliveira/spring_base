@@ -1,5 +1,7 @@
 package com.empresa.erp.controller;
 
+/*
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +29,8 @@ import com.empresa.erp.domain.pessoa.service.PessoaService;
 
 import jakarta.validation.Valid;
 
-//@RestController
-//@RequestMapping("/pessoa")
+@RestController
+@RequestMapping("/pessoa")
 public class PessoaController {
 	
 	@Autowired
@@ -86,3 +88,5 @@ public class PessoaController {
 	}
 
 }
+
+*/
