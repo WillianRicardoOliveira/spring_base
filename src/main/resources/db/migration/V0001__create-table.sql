@@ -34,6 +34,15 @@ CREATE TABLE permissao (
     PRIMARY KEY(id)
 );
 
+CREATE TABLE perfil_permissao (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_perfil BIGINT NOT NULL,
+    id_permissao BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY(id),
+    CONSTRAINT fk_perfil_permissao_perfil_id FOREIGN KEY(id_perfil) REFERENCES perfil(id),
+    CONSTRAINT fk_perfil_permissao_permissao_id FOREIGN KEY(id_permissao) REFERENCES permissao(id)
+);
 
 
 
