@@ -7,9 +7,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
+import com.empresa.erp.padrao.constant.StatusEnum;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,67 +30,78 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class UsuarioModel implements UserDetails {
+	
+	private static final long serialVersionUID = 1L;
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	private String email;
-	private String senha;
-	private Boolean ativo = true;
-	
-	public UsuarioModel(UsuarioRecord dados) {
-		this.email = dados.email();
-		this.senha = dados.senha();
-		this.ativo = true;
-	}
-	
-    public void atualizar(UsuarioRecord dados) {
-    	if(dados.email() != null) {
-    		this.email = dados.email();
-    	}
-    	if(dados.senha() != null) {
-    		this.senha = dados.senha();
-    	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String email;
+    private String senha;
+    
+    @Enumerated(EnumType.ORDINAL)
+    private StatusEnum status;
+
+    public UsuarioModel(UsuarioRecord dados, String senhaCriptografada) {
+        this.email = normalizarEmail(dados.email());
+        this.senha = senhaCriptografada;
+        this.status = StatusEnum.ATIVO;
     }
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
-		return List.of(new SimpleGrantedAuthority("ROLE_USER"));
-	}
+    public void atualizar(AtualizaUsuarioRecord dados) {
+        this.email = normalizarEmail(dados.email());
+    }
 
-	@Override
-	public String getPassword() {
-		// TODO Auto-generated method stub
-		return senha;
-	}
+    public void atualizarSenha(String senhaCriptografada) {
+        this.senha = senhaCriptografada;
+    }
 
-	@Override
-	public String getUsername() {
-		// TODO Auto-generated method stub
-		return email;
-	}
+    public void inativar() {
+    	this.status = StatusEnum.INATIVO;
+    }
+    
+    public void remover() {
+        this.status = StatusEnum.REMOVIDO;
+    }
 
-	@Override
-	public boolean isAccountNonExpired() {
-		// TODO Auto-generated method stub
-		return true;
-	}
+    private String normalizarEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
+    }
 
-	@Override
-	public boolean isAccountNonLocked() {
-		// TODO Auto-generated method stub
-		return true;
-	}
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
 
-	@Override
-	public boolean isCredentialsNonExpired() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-
-	@Override
-	public boolean isEnabled() {
-	    return Boolean.TRUE.equals(ativo);
-	}
-	
+    @Override
+    public String getPassword() {
+    	return senha;
+    }
+    
+    @Override
+    public String getUsername() {
+    	return email;
+    }
+    
+    @Override
+    public boolean isAccountNonExpired() {
+    	return true;
+    }
+    
+    @Override
+    public boolean isAccountNonLocked() {
+    	return true;
+    }
+    
+    @Override
+    public boolean isCredentialsNonExpired() {
+    	return true;
+    }
+    
+    @Override
+    public boolean isEnabled() {
+        return StatusEnum.ATIVO.equals(this.status);
+    }
+    
 }

@@ -59,7 +59,7 @@ public class SsoSecurity {
             validarAudience(jwt);
             validarScope(jwt);
             String email = extrairEmail(jwt);
-            UsuarioModel usuario = usuarioRepository.findByEmail(email);
+            UsuarioModel usuario = usuarioRepository.findByEmailIgnoreCase(email);
 
             if (usuario == null || !usuario.isEnabled()) {
                 throw new SsoAuthenticationException("Usuario nao autorizado para SSO");

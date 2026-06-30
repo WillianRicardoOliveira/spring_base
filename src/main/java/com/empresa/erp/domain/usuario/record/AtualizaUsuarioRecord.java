@@ -2,11 +2,12 @@ package com.empresa.erp.domain.usuario.record;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public record UsuarioRecord(
+public record AtualizaUsuarioRecord(
+    @NotNull
+    Long id,
     @NotBlank(message = "{usuario.email.obrigatorio}")
     @Email(message = "{usuario.email.invalido}")
-    String email,
-    @NotBlank(message = "{usuario.senha.obrigatorio}")
-    String senha
+    String email
 ) {}

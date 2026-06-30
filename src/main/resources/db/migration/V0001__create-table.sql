@@ -1,21 +1,12 @@
 
-
-
-
 CREATE TABLE usuario (
     id BIGINT NOT NULL AUTO_INCREMENT,
     email VARCHAR(100) NOT NULL,
     senha VARCHAR(255) NOT NULL,
-    ativo TINYINT(1) NOT NULL,
-    PRIMARY KEY(id)
+    status TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_usuario_email UNIQUE (email)
 );
-
-
-
-
-
-
-
 
 CREATE TABLE perfil (
     id BIGINT NOT NULL AUTO_INCREMENT,
@@ -58,7 +49,7 @@ CREATE TABLE perfil_permissao (
 
 
 
-insert into usuario (id, email, senha, ativo) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 1);
+insert into usuario (id, email, senha, status) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 0);
 
 
 

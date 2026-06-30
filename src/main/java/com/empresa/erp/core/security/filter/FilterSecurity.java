@@ -2,7 +2,6 @@ package com.empresa.erp.core.security.filter;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -15,15 +14,15 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class FilterSecurity extends OncePerRequestFilter {
 
-	@Autowired
-	private TokenSecurity tokenService;
+	private final TokenSecurity tokenService;
 	
-	@Autowired
-	private UsuarioRepository repository;
+	private final UsuarioRepository repository;
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -31,8 +30,8 @@ public class FilterSecurity extends OncePerRequestFilter {
 		var tokenJWT = recuperarToken(request);
 		if(tokenJWT != null) {		
 			var subject = tokenService.getSubject(tokenJWT);
-			var usuario = repository.findByEmail(subject);			
-			if (usuario != null) {			
+			var usuario = repository.findByEmailIgnoreCase(subject);	
+			if (usuario != null && usuario.isEnabled()) {			
 				var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
