@@ -2,16 +2,54 @@
 
 
 
-create table usuario(
-    id bigint not null auto_increment,
-    email varchar(100) not null,
-    senha varchar(255) not null,
-    ativo TINYINT(1) not null,
-    primary key(id)
+CREATE TABLE usuario (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    email VARCHAR(100) NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    ativo TINYINT(1) NOT NULL,
+    PRIMARY KEY(id)
 );
 
-insert into usuario (id, email, senha, ativo) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 1);
 
+
+
+
+
+
+
+CREATE TABLE perfil (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    descricao VARCHAR(255),
+    status TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE permissao (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    chave VARCHAR(100) NOT NULL,
+    descricao VARCHAR(255),
+    status TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY(id)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+insert into usuario (id, email, senha, ativo) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 1);
 
 
 
