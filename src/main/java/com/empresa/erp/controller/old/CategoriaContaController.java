@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.financeiro.contaPagar.banco.cartao;
+package com.empresa.erp.controller.old;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,35 +18,35 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.record.AtualizaCartaoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.record.CartaoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.record.DetalheCartaoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.record.ListaCartaoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.service.CartaoService;
+import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.record.AtualizaCategoriaContaRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.record.CategoriaContaRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.record.DetalheCategoriaContaRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.record.ListaCategoriaContaRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.service.CategoriaContaService;
 
 import jakarta.validation.Valid;
 
 //@RestController
-//@RequestMapping("/cartao")
-public class CartaoController {
+//@RequestMapping("/categoriaConta")
+public class CategoriaContaController {
 	
 	@Autowired
-	private CartaoService service;
+	private CategoriaContaService service;
 	
 	@PostMapping
 	@Transactional
-	public ResponseEntity cadastrar(@RequestBody @Valid CartaoRecord dados, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity cadastrar(@RequestBody @Valid CategoriaContaRecord dados, UriComponentsBuilder uriBuilder) {
 		try {
-			var cartao = service.cadastrar(dados);
-			var uri = uriBuilder.path("/cartao/{id}").buildAndExpand(cartao.getId()).toUri();
-			return ResponseEntity.created(uri).body(new DetalheCartaoRecord(cartao));
+			var categoriaConta = service.cadastrar(dados);
+			var uri = uriBuilder.path("/categoriaConta/{id}").buildAndExpand(categoriaConta.getId()).toUri();
+			return ResponseEntity.created(uri).body(new DetalheCategoriaContaRecord(categoriaConta));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar o cadastro.");
 		}
 	}	
 	
 	@GetMapping
-	public ResponseEntity<Page<ListaCartaoRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
+	public ResponseEntity<Page<ListaCategoriaContaRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
 		try {
 			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
@@ -56,7 +56,7 @@ public class CartaoController {
 		
 	@PutMapping
 	@Transactional
-	public ResponseEntity atualizar(@RequestBody @Valid AtualizaCartaoRecord dados) {
+	public ResponseEntity atualizar(@RequestBody @Valid AtualizaCategoriaContaRecord dados) {
 		try {
 			return ResponseEntity.ok(service.atualizar(dados));
 		} catch (ValidacaoException e) {
@@ -76,7 +76,7 @@ public class CartaoController {
 	}	
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<DetalheCartaoRecord> detalhar(@PathVariable Long id) {
+	public ResponseEntity<DetalheCategoriaContaRecord> detalhar(@PathVariable Long id) {
 		try {
 			return ResponseEntity.ok(service.detalhar(id));
 		} catch (ValidacaoException e) {

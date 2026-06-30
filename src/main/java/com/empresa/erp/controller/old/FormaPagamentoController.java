@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.financeiro.contaPagar.banco;
+package com.empresa.erp.controller.old;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,35 +18,35 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.record.AtualizaBancoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.record.BancoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.record.DetalheBancoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.record.ListaBancoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.service.BancoService;
+import com.empresa.erp.domain.financeiro.contaPagar.formaPagamento.record.AtualizaFormaPagamentoRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.formaPagamento.record.DetalheFormaPagamentoRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.formaPagamento.record.FormaPagamentoRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.formaPagamento.record.ListaFormaPagamentoRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.formaPagamento.service.FormaPagamentoService;
 
 import jakarta.validation.Valid;
 
 //@RestController
-//@RequestMapping("/banco")
-public class BancoController {
+//@RequestMapping("/formaPagamento")
+public class FormaPagamentoController {
 	
 	@Autowired
-	private BancoService service;
+	private FormaPagamentoService service;
 	
 	@PostMapping
 	@Transactional
-	public ResponseEntity cadastrar(@RequestBody @Valid BancoRecord dados, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity cadastrar(@RequestBody @Valid FormaPagamentoRecord dados, UriComponentsBuilder uriBuilder) {
 		try {
-			var banco = service.cadastrar(dados);
-			var uri = uriBuilder.path("/banco/{id}").buildAndExpand(banco.getId()).toUri();
-			return ResponseEntity.created(uri).body(new DetalheBancoRecord(banco));
+			var formaPagamento = service.cadastrar(dados);
+			var uri = uriBuilder.path("/formaPagamento/{id}").buildAndExpand(formaPagamento.getId()).toUri();
+			return ResponseEntity.created(uri).body(new DetalheFormaPagamentoRecord(formaPagamento));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar o cadastro.");
 		}
 	}	
 	
 	@GetMapping
-	public ResponseEntity<Page<ListaBancoRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
+	public ResponseEntity<Page<ListaFormaPagamentoRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
 		try {
 			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
@@ -56,7 +56,7 @@ public class BancoController {
 		
 	@PutMapping
 	@Transactional
-	public ResponseEntity atualizar(@RequestBody @Valid AtualizaBancoRecord dados) {
+	public ResponseEntity atualizar(@RequestBody @Valid AtualizaFormaPagamentoRecord dados) {
 		try {
 			return ResponseEntity.ok(service.atualizar(dados));
 		} catch (ValidacaoException e) {
@@ -76,7 +76,7 @@ public class BancoController {
 	}	
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<DetalheBancoRecord> detalhar(@PathVariable Long id) {
+	public ResponseEntity<DetalheFormaPagamentoRecord> detalhar(@PathVariable Long id) {
 		try {
 			return ResponseEntity.ok(service.detalhar(id));
 		} catch (ValidacaoException e) {

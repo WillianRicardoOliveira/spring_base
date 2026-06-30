@@ -1,7 +1,5 @@
-package com.empresa.erp.controller;
-
+package com.empresa.erp.controller.old;
 /*
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,39 +17,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.empresa.erp.domain.financeiro.contaPagar.record.AtualizaContaPagarRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.record.ContaPagarRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.record.DetalheContaPagarRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.record.ListaContaPagarRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.service.ContaPagarService;
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.pessoa.model.PessoaModel;
-import com.empresa.erp.domain.pessoa.record.AtualizaPessoaRecord;
-import com.empresa.erp.domain.pessoa.record.DetalhePessoaRecord;
-import com.empresa.erp.domain.pessoa.record.ListaPessoaRecord;
-import com.empresa.erp.domain.pessoa.record.PessoaRecord;
-import com.empresa.erp.domain.pessoa.service.PessoaService;
-
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/pessoa")
-public class PessoaController {
+@RequestMapping("/contasPagar")
+public class ContaPagarController {
 	
 	@Autowired
-	private PessoaService service;
+	private ContaPagarService service;
 	
-	@PostMapping("/cadastrar")
+	@PostMapping
 	@Transactional
-	public ResponseEntity cadastrar(@RequestBody @Valid PessoaRecord dados, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity cadastrar(@RequestBody @Valid ContaPagarRecord dados, UriComponentsBuilder uriBuilder) {
 		try {
-			PessoaModel pessoa = service.cadastrar(dados);
-			var uri = uriBuilder.path("/pessoa/{id}").buildAndExpand(pessoa.getId()).toUri();
-			return ResponseEntity.created(uri).body(new DetalhePessoaRecord(pessoa));
+			var contaPagar = service.cadastrar(dados);
+			var uri = uriBuilder.path("/contaPagar/{id}").buildAndExpand(contaPagar.getId()).toUri();
+			return ResponseEntity.created(uri).body(new DetalheContaPagarRecord(contaPagar));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar o cadastro.");
 		}
 	}	
 	
 	@GetMapping
-	public ResponseEntity<Page<ListaPessoaRecord>> listar(@PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao){
+	public ResponseEntity<Page<ListaContaPagarRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
 		try {
-			return ResponseEntity.ok(service.listar(paginacao));
+			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar a listagem.");
 		}
@@ -59,7 +55,7 @@ public class PessoaController {
 		
 	@PutMapping
 	@Transactional
-	public ResponseEntity atualizar(@RequestBody @Valid AtualizaPessoaRecord dados) {
+	public ResponseEntity atualizar(@RequestBody @Valid AtualizaContaPagarRecord dados) {
 		try {
 			return ResponseEntity.ok(service.atualizar(dados));
 		} catch (ValidacaoException e) {
@@ -79,7 +75,7 @@ public class PessoaController {
 	}	
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<DetalhePessoaRecord> detalhar(@PathVariable Long id) {
+	public ResponseEntity<DetalheContaPagarRecord> detalhar(@PathVariable Long id) {
 		try {
 			return ResponseEntity.ok(service.detalhar(id));
 		} catch (ValidacaoException e) {
@@ -88,5 +84,4 @@ public class PessoaController {
 	}
 
 }
-
 */

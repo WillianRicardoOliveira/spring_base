@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.financeiro.contaPagar.categoriaConta.subCategoriaConta;
+package com.empresa.erp.controller.old;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,35 +18,35 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.record.AtualizaSubCategoriaContaRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.record.DetalheSubCategoriaContaRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.record.ListaSubCategoriaContaRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.record.SubCategoriaContaRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.categoriaConta.subCategoriaConta.service.SubCategoriaContaService;
+import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.record.AtualizaStatusPagamentoRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.record.DetalheStatusPagamentoRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.record.ListaStatusPagamentoRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.record.StatusPagamentoRecord;
+import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.service.StatusPagamentoService;
 
 import jakarta.validation.Valid;
 
 //@RestController
-//@RequestMapping("/subCategoriaConta")
-public class SubCategoriaContaController {
+//@RequestMapping("/statusPagamento")
+public class StatusPagamentoController {
 	
 	@Autowired
-	private SubCategoriaContaService service;
+	private StatusPagamentoService service;
 	
 	@PostMapping
 	@Transactional
-	public ResponseEntity cadastrar(@RequestBody @Valid SubCategoriaContaRecord dados, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity cadastrar(@RequestBody @Valid StatusPagamentoRecord dados, UriComponentsBuilder uriBuilder) {
 		try {
-			var subCategoriaConta = service.cadastrar(dados);
-			var uri = uriBuilder.path("/subCategoriaConta/{id}").buildAndExpand(subCategoriaConta.getId()).toUri();
-			return ResponseEntity.created(uri).body(new DetalheSubCategoriaContaRecord(subCategoriaConta));
+			var statusPagamento = service.cadastrar(dados);
+			var uri = uriBuilder.path("/statusPagamento/{id}").buildAndExpand(statusPagamento.getId()).toUri();
+			return ResponseEntity.created(uri).body(new DetalheStatusPagamentoRecord(statusPagamento));
 		} catch (ValidacaoException e) {
 			throw new ValidacaoException("Não foi possível realizar o cadastro.");
 		}
 	}	
 	
 	@GetMapping
-	public ResponseEntity<Page<ListaSubCategoriaContaRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
+	public ResponseEntity<Page<ListaStatusPagamentoRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro){
 		try {
 			return ResponseEntity.ok(service.listar(paginacao, filtro));
 		} catch (ValidacaoException e) {
@@ -56,7 +56,7 @@ public class SubCategoriaContaController {
 		
 	@PutMapping
 	@Transactional
-	public ResponseEntity atualizar(@RequestBody @Valid AtualizaSubCategoriaContaRecord dados) {
+	public ResponseEntity atualizar(@RequestBody @Valid AtualizaStatusPagamentoRecord dados) {
 		try {
 			return ResponseEntity.ok(service.atualizar(dados));
 		} catch (ValidacaoException e) {
@@ -76,7 +76,7 @@ public class SubCategoriaContaController {
 	}	
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<DetalheSubCategoriaContaRecord> detalhar(@PathVariable Long id) {
+	public ResponseEntity<DetalheStatusPagamentoRecord> detalhar(@PathVariable Long id) {
 		try {
 			return ResponseEntity.ok(service.detalhar(id));
 		} catch (ValidacaoException e) {
