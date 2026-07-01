@@ -1,6 +1,5 @@
 package com.empresa.erp.controller.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,36 +16,35 @@ import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/login")
+@RequiredArgsConstructor
 public class AutenticacaoController {
 
-	@Autowired
-	private AuthenticationManager manager;
-	
-	@Autowired
-	private TokenSecurity tokenService;
-	
-	@Autowired
-	private SsoSecurity ssoSecurity;
-	
-	@PostMapping
-	public ResponseEntity efetuarLogin(@RequestBody @Valid UsuarioRecord dados) {
-		try {
-			var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
-			var authentication = manager.authenticate(authenticationToken);
-			var tokenJWT = tokenService.gerarToken((UsuarioModel) authentication.getPrincipal());
-			return ResponseEntity.ok(new TokenJwtSecurity(tokenJWT));
-		} catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.badRequest().body(e.getMessage());
-	    }
-	}
-	
-	@PostMapping("/sso")
-	public ResponseEntity efetuarLoginSso(@RequestBody @Valid SsoLoginSecurity dados) {
-	    return ResponseEntity.ok(ssoSecurity.autenticar(dados));
-	}
-	
+    private final AuthenticationManager manager;
+
+    private final TokenSecurity tokenService;
+
+    private final SsoSecurity ssoSecurity;
+
+    @PostMapping
+    public ResponseEntity<?> efetuarLogin(@RequestBody @Valid UsuarioRecord dados) {
+        try {
+            var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
+            var authentication = manager.authenticate(authenticationToken);
+            var tokenJWT = tokenService.gerarToken((UsuarioModel) authentication.getPrincipal());
+            return ResponseEntity.ok(new TokenJwtSecurity(tokenJWT));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/sso")
+    public ResponseEntity<TokenJwtSecurity> efetuarLoginSso(@RequestBody @Valid SsoLoginSecurity dados) {
+        return ResponseEntity.ok(ssoSecurity.autenticar(dados));
+    }
+
 }

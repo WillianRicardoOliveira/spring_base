@@ -14,7 +14,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 public class SpringDocConfigurations {
 
 	@Bean
-	public OpenAPI customOpenAPI() {
+	OpenAPI customOpenAPI() {
 	    return new OpenAPI()
 	            .components(new Components()
 	                    .addSecuritySchemes("bearer-key",

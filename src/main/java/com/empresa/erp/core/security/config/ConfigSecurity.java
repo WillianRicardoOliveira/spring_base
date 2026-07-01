@@ -1,6 +1,5 @@
 package com.empresa.erp.core.security.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,13 +17,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.empresa.erp.core.security.filter.FilterSecurity;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
+@RequiredArgsConstructor
 public class ConfigSecurity {
 	
-	@Autowired
-	private FilterSecurity filter;
+	private final FilterSecurity filter;
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
