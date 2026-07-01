@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
-import com.empresa.erp.padrao.constant.StatusEnum;
+import com.empresa.erp.domain.old.StatusEnum;
 
 public interface PermissaoRepository extends JpaRepository<PermissaoModel, Long> {
 

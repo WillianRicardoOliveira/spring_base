@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.record.AtualizaStatusPagamentoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.record.DetalheStatusPagamentoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.record.ListaStatusPagamentoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.record.StatusPagamentoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.statusPagamento.service.StatusPagamentoService;
+import com.empresa.erp.domain.old.AtualizaStatusPagamentoRecord;
+import com.empresa.erp.domain.old.DetalheStatusPagamentoRecord;
+import com.empresa.erp.domain.old.ListaStatusPagamentoRecord;
+import com.empresa.erp.domain.old.StatusPagamentoRecord;
+import com.empresa.erp.domain.old.StatusPagamentoService;
 
 import jakarta.validation.Valid;
 

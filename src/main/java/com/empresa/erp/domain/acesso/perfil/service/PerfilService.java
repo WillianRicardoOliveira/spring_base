@@ -12,7 +12,7 @@ import com.empresa.erp.domain.acesso.perfil.record.DetalhePerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.ListaPerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.repository.PerfilRepository;
-import com.empresa.erp.padrao.constant.StatusEnum;
+import com.empresa.erp.domain.old.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
 

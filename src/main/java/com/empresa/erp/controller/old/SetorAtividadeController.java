@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.fiscal.setorAtividade.record.AtualizaSetorAtividadeRecord;
-import com.empresa.erp.domain.fiscal.setorAtividade.record.DetalheSetorAtividadeRecord;
-import com.empresa.erp.domain.fiscal.setorAtividade.record.ListaSetorAtividadeRecord;
-import com.empresa.erp.domain.fiscal.setorAtividade.record.SetorAtividadeRecord;
-import com.empresa.erp.domain.fiscal.setorAtividade.service.SetorAtividadeService;
+import com.empresa.erp.domain.old.AtualizaSetorAtividadeRecord;
+import com.empresa.erp.domain.old.DetalheSetorAtividadeRecord;
+import com.empresa.erp.domain.old.ListaSetorAtividadeRecord;
+import com.empresa.erp.domain.old.SetorAtividadeRecord;
+import com.empresa.erp.domain.old.SetorAtividadeService;
 
 import jakarta.validation.Valid;
 

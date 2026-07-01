@@ -7,9 +7,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
-import com.empresa.erp.padrao.constant.StatusEnum;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

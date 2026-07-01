@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.record.AtualizaCartaoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.record.CartaoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.record.DetalheCartaoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.record.ListaCartaoRecord;
-import com.empresa.erp.domain.financeiro.contaPagar.banco.cartao.service.CartaoService;
+import com.empresa.erp.domain.old.AtualizaCartaoRecord;
+import com.empresa.erp.domain.old.CartaoRecord;
+import com.empresa.erp.domain.old.CartaoService;
+import com.empresa.erp.domain.old.DetalheCartaoRecord;
+import com.empresa.erp.domain.old.ListaCartaoRecord;
 
 import jakarta.validation.Valid;
 

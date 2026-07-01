@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.fiscal.endereco.service.EnderecoService;
-import com.empresa.erp.modulos.fiscal.endereco.record.DetalheEnderecoRecord;
-import com.empresa.erp.modulos.fiscal.endereco.record.EnderecoRecord;
-import com.empresa.erp.modulos.fiscal.endereco.record.ListaEnderecoRecord;
+import com.empresa.erp.domain.old.DetalheEnderecoRecord;
+import com.empresa.erp.domain.old.EnderecoRecord;
+import com.empresa.erp.domain.old.EnderecoService;
+import com.empresa.erp.domain.old.ListaEnderecoRecord;
 
 import jakarta.validation.Valid;
 

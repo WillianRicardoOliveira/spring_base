@@ -2,7 +2,7 @@ package com.empresa.erp.domain.acesso.permissao.model;
 
 import com.empresa.erp.domain.acesso.permissao.record.AtualizaPermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.record.PermissaoRecord;
-import com.empresa.erp.padrao.constant.StatusEnum;
+import com.empresa.erp.domain.old.StatusEnum;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

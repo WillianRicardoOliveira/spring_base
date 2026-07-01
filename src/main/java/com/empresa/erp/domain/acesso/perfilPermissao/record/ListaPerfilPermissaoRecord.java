@@ -1,7 +1,7 @@
 package com.empresa.erp.domain.acesso.perfilPermissao.record;
 
 import com.empresa.erp.domain.acesso.perfilPermissao.model.PerfilPermissaoModel;
-import com.empresa.erp.padrao.constant.StatusEnum;
+import com.empresa.erp.domain.old.StatusEnum;
 
 public record ListaPerfilPermissaoRecord(
     Long id,

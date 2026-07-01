@@ -1,7 +1,7 @@
 package com.empresa.erp.domain.acesso.perfil.record;
 
 import com.empresa.erp.domain.acesso.perfil.model.PerfilModel;
-import com.empresa.erp.padrao.constant.StatusEnum;
+import com.empresa.erp.domain.old.StatusEnum;
 
 public record DetalhePerfilRecord(
 	    Long id,

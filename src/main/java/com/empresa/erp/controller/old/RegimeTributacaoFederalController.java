@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.AtualizaRegimeTributacaoFederalRecord;
-import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.DetalheRegimeTributacaoFederalRecord;
-import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.ListaRegimeTributacaoFederalRecord;
-import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.record.RegimeTributacaoFederalRecord;
-import com.empresa.erp.domain.fiscal.regimeTributacaoFederal.service.RegimeTributacaoFederalService;
+import com.empresa.erp.domain.old.AtualizaRegimeTributacaoFederalRecord;
+import com.empresa.erp.domain.old.DetalheRegimeTributacaoFederalRecord;
+import com.empresa.erp.domain.old.ListaRegimeTributacaoFederalRecord;
+import com.empresa.erp.domain.old.RegimeTributacaoFederalRecord;
+import com.empresa.erp.domain.old.RegimeTributacaoFederalService;
 
 import jakarta.validation.Valid;
 

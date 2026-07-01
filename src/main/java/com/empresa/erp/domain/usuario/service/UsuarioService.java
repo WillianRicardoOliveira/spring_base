@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.AtualizaSenhaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
@@ -17,7 +18,6 @@ import com.empresa.erp.domain.usuario.record.DetalheUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.ListaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
-import com.empresa.erp.padrao.constant.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
 

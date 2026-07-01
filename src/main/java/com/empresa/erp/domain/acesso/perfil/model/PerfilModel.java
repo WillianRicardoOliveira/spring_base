@@ -2,7 +2,7 @@ package com.empresa.erp.domain.acesso.perfil.model;
 
 import com.empresa.erp.domain.acesso.perfil.record.AtualizaPerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
-import com.empresa.erp.padrao.constant.StatusEnum;
+import com.empresa.erp.domain.old.StatusEnum;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
