@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.empresa.erp.core.security.jwt.TokenSecurity;
+import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.core.security.record.SsoLoginSecurity;
 import com.empresa.erp.core.security.record.TokenJwtSecurity;
 import com.empresa.erp.core.security.service.SsoSecurity;
-import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
 import jakarta.validation.Valid;
@@ -34,7 +34,8 @@ public class AutenticacaoController {
         try {
             var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
             var authentication = manager.authenticate(authenticationToken);
-            var tokenJWT = tokenService.gerarToken((UsuarioModel) authentication.getPrincipal());
+            UsuarioAutenticado usuarioAutenticado = (UsuarioAutenticado) authentication.getPrincipal();
+            var tokenJWT = tokenService.gerarToken(usuarioAutenticado.getUsuario());
             return ResponseEntity.ok(new TokenJwtSecurity(tokenJWT));
         } catch (Exception e) {
             e.printStackTrace();
