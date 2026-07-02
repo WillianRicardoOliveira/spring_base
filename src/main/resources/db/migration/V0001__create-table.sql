@@ -16,6 +16,16 @@ CREATE TABLE perfil (
     PRIMARY KEY(id)
 );
 
+CREATE TABLE usuario_perfil (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_usuario BIGINT NOT NULL,
+    id_perfil BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY(id),
+    CONSTRAINT fk_usuario_perfil_usuario_id FOREIGN KEY(id_usuario) REFERENCES usuario(id),
+    CONSTRAINT fk_usuario_perfil_perfil_id FOREIGN KEY(id_perfil) REFERENCES perfil(id)
+);
+
 CREATE TABLE permissao (
     id BIGINT NOT NULL AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
