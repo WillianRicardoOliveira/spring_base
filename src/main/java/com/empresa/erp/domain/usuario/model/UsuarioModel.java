@@ -1,12 +1,5 @@
 package com.empresa.erp.domain.usuario.model;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -29,9 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class UsuarioModel implements UserDetails {
-	
-	private static final long serialVersionUID = 1L;
+public class UsuarioModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,37 +60,6 @@ public class UsuarioModel implements UserDetails {
         return email == null ? null : email.trim().toLowerCase();
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
-    }
-
-    @Override
-    public String getPassword() {
-    	return senha;
-    }
-    
-    @Override
-    public String getUsername() {
-    	return email;
-    }
-    
-    @Override
-    public boolean isAccountNonExpired() {
-    	return true;
-    }
-    
-    @Override
-    public boolean isAccountNonLocked() {
-    	return true;
-    }
-    
-    @Override
-    public boolean isCredentialsNonExpired() {
-    	return true;
-    }
-    
-    @Override
     public boolean isEnabled() {
         return StatusEnum.ATIVO.equals(this.status);
     }

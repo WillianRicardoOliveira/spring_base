@@ -45,6 +45,70 @@ CREATE TABLE perfil_permissao (
     CONSTRAINT fk_perfil_permissao_permissao_id FOREIGN KEY(id_permissao) REFERENCES permissao(id)
 );
 
+INSERT INTO usuario (id, email, senha, status) VALUES 
+(1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 0);
+
+INSERT INTO perfil (id, nome, descricao, status) VALUES
+(1, 'Administrador', 'Perfil com acesso total ao sistema', 0);
+
+INSERT INTO permissao (id, nome, chave, descricao, status) VALUES
+(1, 'Criar perfis', 'ACESSO_PERFIL_CRIAR', 'Permite criar perfis de acesso', 0),
+(2, 'Listar perfis', 'ACESSO_PERFIL_LISTAR', 'Permite listar perfis de acesso', 0),
+(3, 'Detalhar perfil', 'ACESSO_PERFIL_DETALHAR', 'Permite detalhar perfil de acesso', 0),
+(4, 'Editar perfil', 'ACESSO_PERFIL_EDITAR', 'Permite editar perfil de acesso', 0),
+(5, 'Excluir perfil', 'ACESSO_PERFIL_EXCLUIR', 'Permite remover perfil de acesso', 0),
+
+(6, 'Criar permissões', 'ACESSO_PERMISSAO_CRIAR', 'Permite criar permissões', 0),
+(7, 'Listar permissões', 'ACESSO_PERMISSAO_LISTAR', 'Permite listar permissões', 0),
+(8, 'Detalhar permissão', 'ACESSO_PERMISSAO_DETALHAR', 'Permite detalhar permissão', 0),
+(9, 'Editar permissão', 'ACESSO_PERMISSAO_EDITAR', 'Permite editar permissão', 0),
+(10, 'Excluir permissão', 'ACESSO_PERMISSAO_EXCLUIR', 'Permite remover permissão', 0),
+
+(11, 'Vincular permissão ao perfil', 'ACESSO_PERFIL_PERMISSAO_CRIAR', 'Permite vincular permissão ao perfil', 0),
+(12, 'Listar permissões do perfil', 'ACESSO_PERFIL_PERMISSAO_LISTAR', 'Permite listar permissões vinculadas ao perfil', 0),
+(13, 'Detalhar vínculo perfil permissão', 'ACESSO_PERFIL_PERMISSAO_DETALHAR', 'Permite detalhar vínculo entre perfil e permissão', 0),
+(14, 'Remover permissão do perfil', 'ACESSO_PERFIL_PERMISSAO_EXCLUIR', 'Permite remover permissão vinculada ao perfil', 0),
+
+(15, 'Vincular perfil ao usuário', 'ACESSO_USUARIO_PERFIL_CRIAR', 'Permite vincular perfil ao usuário', 0),
+(16, 'Listar perfis do usuário', 'ACESSO_USUARIO_PERFIL_LISTAR', 'Permite listar perfis vinculados ao usuário', 0),
+(17, 'Detalhar vínculo usuário perfil', 'ACESSO_USUARIO_PERFIL_DETALHAR', 'Permite detalhar vínculo entre usuário e perfil', 0),
+(18, 'Remover perfil do usuário', 'ACESSO_USUARIO_PERFIL_EXCLUIR', 'Permite remover perfil vinculado ao usuário', 0),
+
+(19, 'Criar usuários', 'ACESSO_USUARIO_CRIAR', 'Permite criar usuários', 0),
+(20, 'Listar usuários', 'ACESSO_USUARIO_LISTAR', 'Permite listar usuários', 0),
+(21, 'Detalhar usuário', 'ACESSO_USUARIO_DETALHAR', 'Permite detalhar usuário', 0),
+(22, 'Editar usuário', 'ACESSO_USUARIO_EDITAR', 'Permite editar usuário', 0),
+(23, 'Excluir usuário', 'ACESSO_USUARIO_EXCLUIR', 'Permite remover usuário', 0),
+(24, 'Alterar senha de usuário', 'ACESSO_USUARIO_SENHA_EDITAR', 'Permite alterar senha de usuário', 0);
+
+INSERT INTO perfil_permissao (id_perfil, id_permissao, status) VALUES
+(1, 1, 0),
+(1, 2, 0),
+(1, 3, 0),
+(1, 4, 0),
+(1, 5, 0),
+(1, 6, 0),
+(1, 7, 0),
+(1, 8, 0),
+(1, 9, 0),
+(1, 10, 0),
+(1, 11, 0),
+(1, 12, 0),
+(1, 13, 0),
+(1, 14, 0),
+(1, 15, 0),
+(1, 16, 0),
+(1, 17, 0),
+(1, 18, 0),
+(1, 19, 0),
+(1, 20, 0),
+(1, 21, 0),
+(1, 22, 0),
+(1, 23, 0),
+(1, 24, 0);
+
+INSERT INTO usuario_perfil (id_usuario, id_perfil, status) VALUES
+(1, 1, 0);
 
 
 
@@ -59,7 +123,44 @@ CREATE TABLE perfil_permissao (
 
 
 
-insert into usuario (id, email, senha, status) values (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
