@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ public class PermissaoController {
     private final PermissaoService service;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ACESSO_PERMISSAO_CRIAR')")
     public ResponseEntity<DetalhePermissaoRecord> cadastrar(@RequestBody @Valid PermissaoRecord dados, UriComponentsBuilder uriBuilder) {
         PermissaoModel permissao = service.cadastrar(dados);
         var uri = uriBuilder.path("/permissao/{id}").buildAndExpand(permissao.getId()).toUri();
@@ -40,22 +42,26 @@ public class PermissaoController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ACESSO_PERMISSAO_LISTAR')")
     public ResponseEntity<Page<ListaPermissaoRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, String filtro) {
         return ResponseEntity.ok(service.listar(paginacao, filtro));
     }
 
     @PutMapping
+    @PreAuthorize("hasAuthority('ACESSO_PERMISSAO_EDITAR')")
     public ResponseEntity<DetalhePermissaoRecord> atualizar(@RequestBody @Valid AtualizaPermissaoRecord dados) {
         return ResponseEntity.ok(service.atualizar(dados));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ACESSO_PERMISSAO_EXCLUIR')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         service.excluir(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ACESSO_PERMISSAO_DETALHAR')")
     public ResponseEntity<DetalhePermissaoRecord> detalhar(@PathVariable Long id) {
         return ResponseEntity.ok(service.detalhar(id));
     }

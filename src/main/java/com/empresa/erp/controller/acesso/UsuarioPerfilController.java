@@ -3,6 +3,7 @@ package com.empresa.erp.controller.acesso;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class UsuarioPerfilController {
     private final UsuarioPerfilService service;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ACESSO_USUARIO_PERFIL_CRIAR')")
     public ResponseEntity<DetalheUsuarioPerfilRecord> cadastrar(@RequestBody @Valid UsuarioPerfilRecord dados, UriComponentsBuilder uriBuilder) {
         UsuarioPerfilModel usuarioPerfil = service.cadastrar(dados);
         var uri = uriBuilder.path("/usuario-perfil/{id}").buildAndExpand(usuarioPerfil.getId()).toUri();
@@ -36,17 +38,20 @@ public class UsuarioPerfilController {
     }
 
     @GetMapping("/usuario/{idUsuario}")
+    @PreAuthorize("hasAuthority('ACESSO_USUARIO_PERFIL_LISTAR')")
     public ResponseEntity<List<ListaUsuarioPerfilRecord>> listarPorUsuario(@PathVariable Long idUsuario) {
         return ResponseEntity.ok(service.listarPorUsuario(idUsuario));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ACESSO_USUARIO_PERFIL_EXCLUIR')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         service.excluir(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ACESSO_USUARIO_PERFIL_DETALHAR')")
     public ResponseEntity<DetalheUsuarioPerfilRecord> detalhar(@PathVariable Long id) {
         return ResponseEntity.ok(service.detalhar(id));
     }
