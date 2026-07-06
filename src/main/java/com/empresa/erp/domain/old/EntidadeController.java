@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.old;
 
+/*
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,11 +47,12 @@ public class EntidadeController {
 	public ResponseEntity<DetalheEntidadeRecord> detalhar(@Parameter(description = "ID da entidade") @PathVariable Long id) {			
 	    return ResponseEntity.ok(service.detalhar(id));		
 	}
-	/*
+
 	@Operation(summary = "Lista as entidades", description = "Lista as entidades no sistema ( Cliente - Fornecedor - Parceiro - Transportadora )")
 	@GetMapping
 	public ResponseEntity<Page<ListaEntidadeRecord>> listar(@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable paginacao, @Parameter(description = "Filtro para pesquisa") @RequestParam(required = false) String filtro) {
 		return ResponseEntity.ok(service.listar(paginacao, filtro));
 	}
-*/
+
 }
+*/

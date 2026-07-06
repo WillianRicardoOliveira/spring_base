@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.old;
 
+/*
 public record DetalheEntidadeRecord(	
 		Long id,
 		Boolean pessoaJuridica,
@@ -51,3 +52,4 @@ public record DetalheEntidadeRecord(
 	}
 
 }
+*/

@@ -1,5 +1,5 @@
 package com.empresa.erp.domain.old;
-
+/*
 public record ListaRegimeTributacaoFederalRecord(				
 		Long id,
 		String nome
@@ -15,3 +15,4 @@ public record ListaRegimeTributacaoFederalRecord(
 	}	
 
 }
+*/

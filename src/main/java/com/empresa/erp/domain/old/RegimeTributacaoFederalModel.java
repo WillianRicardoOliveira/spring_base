@@ -1,5 +1,5 @@
 package com.empresa.erp.domain.old;
-
+/*
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,3 +39,4 @@ public class RegimeTributacaoFederalModel {
 	}
 	
 }
+*/

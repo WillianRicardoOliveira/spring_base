@@ -176,7 +176,7 @@ INSERT INTO usuario_perfil (id_usuario, id_perfil, status) VALUES
 
 
 
-
+/*
 -- Criação da tabela RegimeTributacaoFederal
 CREATE TABLE regime_tributacao_federal (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -184,7 +184,8 @@ CREATE TABLE regime_tributacao_federal (
     ativo TINYINT(1) NOT NULL DEFAULT 1,
     removido TINYINT(1) NOT NULL DEFAULT 0
 );
-
+*/
+/*
 -- Criação da tabela SetorAtividade
 CREATE TABLE setor_atividade (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -192,11 +193,11 @@ CREATE TABLE setor_atividade (
     ativo TINYINT(1) NOT NULL DEFAULT 1,
     removido TINYINT(1) NOT NULL DEFAULT 0
 );
+*/
 
 
 
-
-
+/*
 create table endereco(
     id bigint not null auto_increment,
     cep varchar(10) not null,
@@ -209,6 +210,7 @@ create table endereco(
     ativo tinyint(1) not null,
     primary key(id)
 );
+*/
 
 
 
@@ -241,8 +243,7 @@ create table endereco(
 
 
 
-
-
+/*
 -- Criação da tabela Entidade
 CREATE TABLE entidade (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -271,7 +272,7 @@ CREATE TABLE entidade (
     FOREIGN KEY (id_endereco) REFERENCES endereco(id),
     FOREIGN KEY (id_matriz) REFERENCES entidade(id)
 );
-
+*/
 
 
 

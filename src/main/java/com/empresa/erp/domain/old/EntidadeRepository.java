@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.old;
 
+/*
 import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
@@ -13,3 +14,4 @@ public interface EntidadeRepository extends JpaRepository<EntidadeModel, Long> {
 	//Page<EntidadeModel> findByNomeCompletoContainingAndStatusAndCriacaoAfter(Pageable paginacao, String filtro, StatusEnum status, LocalDateTime criacao);
 	
 }
+*/

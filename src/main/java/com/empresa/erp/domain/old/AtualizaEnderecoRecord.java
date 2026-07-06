@@ -1,5 +1,5 @@
 package com.empresa.erp.domain.old;
-
+/*
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,3 +38,4 @@ public record AtualizaEnderecoRecord(
 		@Size(max = 100, message = "{endereco.complemento.tamanho}")
 		String complemento		
 ) {}
+*/

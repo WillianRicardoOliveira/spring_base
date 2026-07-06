@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.old;
 
+/*
 public record DetalheEnderecoRecord(
 		Long id,
 		String cep,
@@ -23,3 +24,4 @@ public record DetalheEnderecoRecord(
 		);
 	}
 }
+*/

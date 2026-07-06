@@ -1,5 +1,5 @@
 package com.empresa.erp.domain.old;
-
+/*
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,3 +11,4 @@ public interface RegimeTributacaoFederalRepository extends JpaRepository<RegimeT
 	Page<RegimeTributacaoFederalModel> findAllByAtivoTrue(Pageable paginacao);
 	
 }
+*/

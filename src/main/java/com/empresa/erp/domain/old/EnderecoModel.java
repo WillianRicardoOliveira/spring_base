@@ -1,5 +1,5 @@
 package com.empresa.erp.domain.old;
-
+/*
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -55,3 +55,4 @@ public class EnderecoModel {
     	this.complemento = dados.complemento();
     }
 }
+*/

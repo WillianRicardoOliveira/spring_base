@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.old;
 
+/*
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -104,3 +105,4 @@ public class EntidadeModel {
 		this.matriz = matriz;
 	}
 }
+*/

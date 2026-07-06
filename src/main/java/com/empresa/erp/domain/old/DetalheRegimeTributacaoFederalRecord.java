@@ -1,5 +1,5 @@
 package com.empresa.erp.domain.old;
-
+/*
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -20,3 +20,4 @@ public record DetalheRegimeTributacaoFederalRecord(
 	}
 
 }
+*/

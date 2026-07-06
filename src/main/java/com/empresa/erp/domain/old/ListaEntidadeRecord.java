@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.old;
 
+/*
 public record ListaEntidadeRecord(
 		Long id,
 		String nomeCompleto,
@@ -15,3 +16,4 @@ public record ListaEntidadeRecord(
 	}	
 
 }
+*/

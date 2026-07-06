@@ -1,8 +1,10 @@
 package com.empresa.erp.domain.old;
 
+/*
 import jakarta.validation.constraints.NotBlank;
 
 public record RegimeTributacaoFederalRecord(
 		@NotBlank(message = "{regime_tributacao_federal.nome}")
 		String nome	
 ) {}
+*/

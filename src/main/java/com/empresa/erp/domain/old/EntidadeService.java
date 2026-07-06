@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.old;
 
+/*
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -73,7 +74,7 @@ public class EntidadeService {
 		return new DetalheEntidadeRecord(entidade);
 		
 	}
-	/*
+	
 	public Page<ListaEntidadeRecord> listar(Pageable paginacao, String filtro) {
 		
 	    return Optional.ofNullable(filtro)
@@ -83,5 +84,7 @@ public class EntidadeService {
 	        .map(ListaEntidadeRecord::new);
 	    
 	}
-	*/
+	
 }
+
+*/

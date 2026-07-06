@@ -1,5 +1,7 @@
 package com.empresa.erp.controller.old;
 
+/*
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +29,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/endereco")
 public class EnderecoController {
-	/*
+	
 	@Autowired
 	private EnderecoService service;
 	
@@ -90,5 +92,7 @@ public class EnderecoController {
 			throw new ValidacaoException("Não foi possível realizar a busca do endereço.");
 		}
 	}
-*/
+
 }
+
+*/
