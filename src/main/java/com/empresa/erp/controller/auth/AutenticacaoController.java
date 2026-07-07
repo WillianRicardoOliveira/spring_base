@@ -30,17 +30,14 @@ public class AutenticacaoController {
     private final SsoSecurity ssoSecurity;
 
     @PostMapping
-    public ResponseEntity<?> efetuarLogin(@RequestBody @Valid UsuarioRecord dados) {
-        try {
-            var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
-            var authentication = manager.authenticate(authenticationToken);
-            UsuarioAutenticado usuarioAutenticado = (UsuarioAutenticado) authentication.getPrincipal();
-            var tokenJWT = tokenService.gerarToken(usuarioAutenticado.getUsuario());
-            return ResponseEntity.ok(new TokenJwtSecurity(tokenJWT));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<TokenJwtSecurity> efetuarLogin(@RequestBody @Valid UsuarioRecord dados) {
+        var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
+        var authentication = manager.authenticate(authenticationToken);
+
+        UsuarioAutenticado usuarioAutenticado = (UsuarioAutenticado) authentication.getPrincipal();
+        var tokenJWT = tokenService.gerarToken(usuarioAutenticado.getUsuario());
+
+        return ResponseEntity.ok(new TokenJwtSecurity(tokenJWT));
     }
 
     @PostMapping("/sso")

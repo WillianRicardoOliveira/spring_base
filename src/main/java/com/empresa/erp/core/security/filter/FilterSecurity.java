@@ -26,21 +26,30 @@ public class FilterSecurity extends OncePerRequestFilter {
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-		var tokenJWT = recuperarToken(request);
-		if (tokenJWT != null) {
-		    var subject = tokenService.getSubject(tokenJWT);
-		    var usuarioAutenticado = usuarioService.loadUserByUsername(subject);
+	        throws ServletException, IOException {
+	    var tokenJWT = recuperarToken(request);
 
-		    var authentication = new UsernamePasswordAuthenticationToken(
-		            usuarioAutenticado,
-		            null,
-		            usuarioAutenticado.getAuthorities()
-		    );
+	    try {
+	        if (tokenJWT != null) {
+	            var subject = tokenService.getSubject(tokenJWT);
+	            var usuarioAutenticado = usuarioService.loadUserByUsername(subject);
 
-		    SecurityContextHolder.getContext().setAuthentication(authentication);
-		}
-		filterChain.doFilter(request, response);		
+	            var authentication = new UsernamePasswordAuthenticationToken(
+	                    usuarioAutenticado,
+	                    null,
+	                    usuarioAutenticado.getAuthorities()
+	            );
+
+	            SecurityContextHolder.getContext().setAuthentication(authentication);
+	        }
+
+	        filterChain.doFilter(request, response);
+	    } catch (Exception e) {
+	        SecurityContextHolder.clearContext();
+	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	        response.setContentType("text/plain;charset=UTF-8");
+	        response.getWriter().write("Token invalido ou expirado");
+	    }
 	}
 
 	private String recuperarToken(HttpServletRequest request) {

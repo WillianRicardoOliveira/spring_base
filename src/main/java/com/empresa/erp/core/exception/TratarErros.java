@@ -1,11 +1,11 @@
 package com.empresa.erp.core.exception;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -36,12 +36,12 @@ public class TratarErros {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> tratarErroBadCredentials() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais invalidas");
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<String> tratarErroAuthentication() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Falha na autenticação");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Falha na autenticacao");
     }
 
     @ExceptionHandler(AccessDeniedException.class)
