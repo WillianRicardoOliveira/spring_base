@@ -1,6 +1,7 @@
 package com.empresa.erp.domain.acesso.usuarioPerfil.model;
 
 import com.empresa.erp.domain.acesso.perfil.model.PerfilModel;
+import com.empresa.erp.domain.base.model.AuditoriaModel;
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
@@ -24,8 +25,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
-public class UsuarioPerfilModel {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class UsuarioPerfilModel extends AuditoriaModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

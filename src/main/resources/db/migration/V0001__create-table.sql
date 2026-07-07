@@ -4,6 +4,12 @@ CREATE TABLE usuario (
     email VARCHAR(100) NOT NULL,
     senha VARCHAR(255) NOT NULL,
     status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
     PRIMARY KEY (id),
     CONSTRAINT uk_usuario_email UNIQUE (email)
 );
@@ -13,7 +19,13 @@ CREATE TABLE perfil (
     nome VARCHAR(100) NOT NULL,
     descricao VARCHAR(255),
     status TINYINT NOT NULL DEFAULT 0,
-    PRIMARY KEY(id)
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE usuario_perfil (
@@ -21,9 +33,15 @@ CREATE TABLE usuario_perfil (
     id_usuario BIGINT NOT NULL,
     id_perfil BIGINT NOT NULL,
     status TINYINT NOT NULL DEFAULT 0,
-    PRIMARY KEY(id),
-    CONSTRAINT fk_usuario_perfil_usuario_id FOREIGN KEY(id_usuario) REFERENCES usuario(id),
-    CONSTRAINT fk_usuario_perfil_perfil_id FOREIGN KEY(id_perfil) REFERENCES perfil(id)
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_usuario_perfil_usuario_id FOREIGN KEY (id_usuario) REFERENCES usuario (id),
+    CONSTRAINT fk_usuario_perfil_perfil_id FOREIGN KEY (id_perfil) REFERENCES perfil (id)
 );
 
 CREATE TABLE permissao (
@@ -32,7 +50,14 @@ CREATE TABLE permissao (
     chave VARCHAR(100) NOT NULL,
     descricao VARCHAR(255),
     status TINYINT NOT NULL DEFAULT 0,
-    PRIMARY KEY(id)
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_permissao_chave UNIQUE (chave)
 );
 
 CREATE TABLE perfil_permissao (
@@ -40,9 +65,15 @@ CREATE TABLE perfil_permissao (
     id_perfil BIGINT NOT NULL,
     id_permissao BIGINT NOT NULL,
     status TINYINT NOT NULL DEFAULT 0,
-    PRIMARY KEY(id),
-    CONSTRAINT fk_perfil_permissao_perfil_id FOREIGN KEY(id_perfil) REFERENCES perfil(id),
-    CONSTRAINT fk_perfil_permissao_permissao_id FOREIGN KEY(id_permissao) REFERENCES permissao(id)
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_perfil_permissao_perfil_id FOREIGN KEY (id_perfil) REFERENCES perfil (id),
+    CONSTRAINT fk_perfil_permissao_permissao_id FOREIGN KEY (id_permissao) REFERENCES permissao (id)
 );
 
 INSERT INTO usuario (id, email, senha, status) VALUES 

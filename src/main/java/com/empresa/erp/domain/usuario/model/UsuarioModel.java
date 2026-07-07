@@ -1,5 +1,6 @@
 package com.empresa.erp.domain.usuario.model;
 
+import com.empresa.erp.domain.base.model.AuditoriaModel;
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -21,8 +22,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
-public class UsuarioModel {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class UsuarioModel extends AuditoriaModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

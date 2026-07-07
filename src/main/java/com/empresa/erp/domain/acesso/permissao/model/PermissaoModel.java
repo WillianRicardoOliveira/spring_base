@@ -2,6 +2,7 @@ package com.empresa.erp.domain.acesso.permissao.model;
 
 import com.empresa.erp.domain.acesso.permissao.record.AtualizaPermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.record.PermissaoRecord;
+import com.empresa.erp.domain.base.model.AuditoriaModel;
 import com.empresa.erp.domain.old.StatusEnum;
 
 import jakarta.persistence.Entity;
@@ -21,8 +22,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
-public class PermissaoModel {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class PermissaoModel extends AuditoriaModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

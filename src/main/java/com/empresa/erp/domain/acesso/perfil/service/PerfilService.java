@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.perfil.model.PerfilModel;
 import com.empresa.erp.domain.acesso.perfil.record.AtualizaPerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.DetalhePerfilRecord;
@@ -21,38 +22,28 @@ import lombok.RequiredArgsConstructor;
 public class PerfilService {
 
     private final PerfilRepository repository;
+    private final UsuarioLogadoService usuarioLogadoService;
 
     @Transactional
     public PerfilModel cadastrar(PerfilRecord dados) {
-    	if (repository.existsByNomeIgnoreCaseAndStatus(dados.nome(), StatusEnum.ATIVO)) {
-    	    throw new ValidacaoException("Perfil ja cadastrado.");
-    	}
-    	PerfilModel perfil = new PerfilModel(dados);
+        if (repository.existsByNomeIgnoreCaseAndStatus(dados.nome(), StatusEnum.ATIVO)) {
+            throw new ValidacaoException("Perfil ja cadastrado.");
+        }
+
+        PerfilModel perfil = new PerfilModel(dados);
         repository.save(perfil);
         return perfil;
     }
 
     @Transactional(readOnly = true)
     public Page<ListaPerfilRecord> listar(Pageable paginacao, String filtro) {
-    	if (filtro != null && !filtro.isBlank()) {
-    	    return repository.findByNomeContainingIgnoreCaseAndStatus(paginacao, filtro, StatusEnum.ATIVO).map(ListaPerfilRecord::new);
-    	}
-    	return repository.findAllByStatus(paginacao, StatusEnum.ATIVO).map(ListaPerfilRecord::new);
-    }
-
-    @Transactional
-    public DetalhePerfilRecord atualizar(AtualizaPerfilRecord dados) {
-        if (repository.existsByNomeIgnoreCaseAndStatusAndIdNot(dados.nome(), StatusEnum.ATIVO, dados.id())) {
-            throw new ValidacaoException("Perfil ja cadastrado.");
+        if (filtro != null && !filtro.isBlank()) {
+            return repository.findByNomeContainingIgnoreCaseAndStatus(paginacao, filtro, StatusEnum.ATIVO)
+                    .map(ListaPerfilRecord::new);
         }
-        PerfilModel perfil = repository.getReferenceById(dados.id());
-        perfil.atualizar(dados);
-        return new DetalhePerfilRecord(perfil);
-    }
 
-    @Transactional
-    public void excluir(Long id) {
-        repository.getReferenceById(id).remover();
+        return repository.findAllByStatus(paginacao, StatusEnum.ATIVO)
+                .map(ListaPerfilRecord::new);
     }
 
     @Transactional(readOnly = true)
@@ -60,5 +51,24 @@ public class PerfilService {
         PerfilModel perfil = repository.getReferenceById(id);
         return new DetalhePerfilRecord(perfil);
     }
-    
+
+    @Transactional
+    public DetalhePerfilRecord atualizar(AtualizaPerfilRecord dados) {
+        if (repository.existsByNomeIgnoreCaseAndStatusAndIdNot(dados.nome(), StatusEnum.ATIVO, dados.id())) {
+            throw new ValidacaoException("Perfil ja cadastrado.");
+        }
+
+        PerfilModel perfil = repository.getReferenceById(dados.id());
+        perfil.atualizar(dados);
+
+        return new DetalhePerfilRecord(perfil);
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+        Long idUsuario = usuarioLogadoService.getId();
+
+        PerfilModel perfil = repository.getReferenceById(id);
+        perfil.remover(idUsuario);
+    }
 }
