@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.empresa.erp.core.security.filter.FilterSecurity;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -24,32 +25,43 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @RequiredArgsConstructor
 public class ConfigSecurity {
-	
-	private final FilterSecurity filter;
 
-	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	    return http.csrf(csrf -> csrf.disable())
-	            .cors(Customizer.withDefaults())
-	    		.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-	            .authorizeHttpRequests(req -> {
-	                req.requestMatchers(HttpMethod.POST, "/login").permitAll();
-	                req.requestMatchers(HttpMethod.POST, "/login/sso").permitAll();
-	                req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
-	                req.anyRequest().authenticated();
-	            })
-	            .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-	            .build();
-	}
-	
-	@Bean
-	AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-		return configuration.getAuthenticationManager();	
-	}
-	
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-	
+    private final FilterSecurity filter;
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http.csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("text/plain;charset=UTF-8");
+                            response.getWriter().write("Nao autenticado");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("text/plain;charset=UTF-8");
+                            response.getWriter().write("Acesso negado");
+                        })
+                )
+                .authorizeHttpRequests(req -> {
+                    req.requestMatchers(HttpMethod.POST, "/login").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/login/sso").permitAll();
+                    req.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
+                    req.anyRequest().authenticated();
+                })
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.empresa.erp.core.security.jwt.TokenSecurity;
-import com.empresa.erp.domain.usuario.service.UsuarioService;
+import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,7 +22,7 @@ public class FilterSecurity extends OncePerRequestFilter {
 
 	private final TokenSecurity tokenService;
 	
-	private final UsuarioService usuarioService;
+	private final UsuarioAutenticadoService usuarioAutenticadoService;
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -32,15 +32,17 @@ public class FilterSecurity extends OncePerRequestFilter {
 	    try {
 	        if (tokenJWT != null) {
 	            var subject = tokenService.getSubject(tokenJWT);
-	            var usuarioAutenticado = usuarioService.loadUserByUsername(subject);
+	            var usuarioAutenticado = usuarioAutenticadoService.buscarPorEmail(subject);
 
-	            var authentication = new UsernamePasswordAuthenticationToken(
-	                    usuarioAutenticado,
-	                    null,
-	                    usuarioAutenticado.getAuthorities()
-	            );
+	            if (usuarioAutenticado != null) {
+	                var authentication = new UsernamePasswordAuthenticationToken(
+	                        usuarioAutenticado,
+	                        null,
+	                        usuarioAutenticado.getAuthorities()
+	                );
 
-	            SecurityContextHolder.getContext().setAuthentication(authentication);
+	                SecurityContextHolder.getContext().setAuthentication(authentication);
+	            }
 	        }
 
 	        filterChain.doFilter(request, response);

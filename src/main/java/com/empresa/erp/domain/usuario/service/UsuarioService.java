@@ -1,10 +1,7 @@
 package com.empresa.erp.domain.usuario.service;
 
-import java.util.Set;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,8 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.core.security.model.UsuarioAutenticado;
-import com.empresa.erp.domain.acesso.usuarioPerfil.repository.UsuarioPerfilRepository;
+import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.AtualizaSenhaUsuarioRecord;
@@ -32,8 +28,8 @@ public class UsuarioService implements UserDetailsService {
 
     private final UsuarioRepository repository;
     private final PasswordEncoder passwordEncoder;
-
-    private final UsuarioPerfilRepository usuarioPerfilRepository;
+    
+    private final UsuarioAutenticadoService usuarioAutenticadoService;
     
     @Transactional
     public UsuarioModel cadastrar(UsuarioRecord dados) {
@@ -82,23 +78,13 @@ public class UsuarioService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UsuarioModel usuario = repository.findByEmailIgnoreCase(username);
+        var usuarioAutenticado = usuarioAutenticadoService.buscarPorEmail(username);
 
-        if (usuario == null || !usuario.isEnabled()) {
+        if (usuarioAutenticado == null) {
             throw new UsernameNotFoundException("Usuario nao encontrado");
         }
 
-        return montarUsuarioAutenticado(usuario);
-    }
-    
-    private UsuarioAutenticado montarUsuarioAutenticado(UsuarioModel usuario) {
-        Set<String> permissoes = usuarioPerfilRepository.buscarChavesPermissoesAtivasPorUsuario(usuario.getId(), StatusEnum.ATIVO);
-
-        var authorities = permissoes.stream()
-                .map(SimpleGrantedAuthority::new)
-                .toList();
-
-        return new UsuarioAutenticado(usuario, authorities);
+        return usuarioAutenticado;
     }
     
 }
