@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
+import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.AtualizaSenhaUsuarioRecord;
@@ -28,6 +29,8 @@ public class UsuarioService implements UserDetailsService {
 
     private final UsuarioRepository repository;
     private final PasswordEncoder passwordEncoder;
+    
+    private final UsuarioLogadoService usuarioLogadoService;
     
     private final UsuarioAutenticadoService usuarioAutenticadoService;
     
@@ -61,7 +64,10 @@ public class UsuarioService implements UserDetailsService {
 
     @Transactional
     public void excluir(Long id) {
-    	repository.getReferenceById(id).remover();
+        Long idUsuario = usuarioLogadoService.getId();
+
+        UsuarioModel usuario = repository.getReferenceById(id);
+        usuario.remover(idUsuario);
     }
 
     @Transactional(readOnly = true)

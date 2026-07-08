@@ -49,8 +49,9 @@ public class UsuarioPerfilModel extends AuditoriaModel {
         this.status = StatusEnum.ATIVO;
     }
 
-    public void remover() {
+    public void remover(Long idUsuario) {
         this.status = StatusEnum.REMOVIDO;
+        registrarRemocao(idUsuario);
     }
     
 }

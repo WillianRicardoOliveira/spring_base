@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.perfil.model.PerfilModel;
 import com.empresa.erp.domain.acesso.perfil.repository.PerfilRepository;
 import com.empresa.erp.domain.acesso.perfilPermissao.model.PerfilPermissaoModel;
@@ -26,6 +27,8 @@ public class PerfilPermissaoService {
     private final PerfilPermissaoRepository repository;
     private final PerfilRepository perfilRepository;
     private final PermissaoRepository permissaoRepository;
+    
+    private final UsuarioLogadoService usuarioLogadoService;
 
     @Transactional
     public PerfilPermissaoModel cadastrar(PerfilPermissaoRecord dados) {
@@ -46,7 +49,10 @@ public class PerfilPermissaoService {
 
     @Transactional
     public void excluir(Long id) {
-        repository.getReferenceById(id).remover();
+        Long idUsuario = usuarioLogadoService.getId();
+
+        PerfilPermissaoModel perfilPermissao = repository.getReferenceById(id);
+        perfilPermissao.remover(idUsuario);
     }
 
     @Transactional(readOnly = true)

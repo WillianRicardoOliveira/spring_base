@@ -53,8 +53,9 @@ public class PermissaoModel extends AuditoriaModel {
         this.status = StatusEnum.INATIVO;
     }
 
-    public void remover() {
+    public void remover(Long idUsuario) {
         this.status = StatusEnum.REMOVIDO;
+        registrarRemocao(idUsuario);
     }
     
 }
