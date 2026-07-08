@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -86,8 +87,8 @@ class PerfilControllerTest {
     @DisplayName("Deve listar perfis")
     void deveListarPerfis() throws Exception {
         var lista = List.of(new ListaPerfilRecord(1L, "Administrador", "Perfil administrador", StatusEnum.ATIVO));
-        var pagina = new PageImpl<>(lista);
-
+        var pagina = new PageImpl<>(lista, PageRequest.of(0, 10), lista.size());
+        
         when(service.listar(any(Pageable.class), isNull())).thenReturn(pagina);
 
         mockMvc.perform(get("/perfil"))
@@ -100,7 +101,7 @@ class PerfilControllerTest {
     @DisplayName("Deve listar perfis com filtro")
     void deveListarPerfisComFiltro() throws Exception {
         var lista = List.of(new ListaPerfilRecord(2L, "Financeiro", "Perfil financeiro", StatusEnum.ATIVO));
-        var pagina = new PageImpl<>(lista);
+        var pagina = new PageImpl<>(lista, PageRequest.of(0, 10), lista.size());
 
         when(service.listar(any(Pageable.class), eq("fin"))).thenReturn(pagina);
 
