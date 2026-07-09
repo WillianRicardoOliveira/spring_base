@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,11 +41,7 @@ class PermissaoServiceTest {
     @Test
     @DisplayName("Deve cadastrar permissao quando chave ainda nao existe")
     void deveCadastrarPermissaoQuandoChaveNaoExiste() {
-        var dados = new PermissaoRecord(
-                "Listar perfis",
-                "ACESSO_PERFIL_LISTAR",
-                "Permite listar perfis"
-        );
+        var dados = new PermissaoRecord("Listar perfis", "ACESSO_PERFIL_LISTAR", "Permite listar perfis");
 
         when(repository.existsByChaveIgnoreCaseAndStatus("ACESSO_PERFIL_LISTAR", StatusEnum.ATIVO))
                 .thenReturn(false);
@@ -62,11 +59,7 @@ class PermissaoServiceTest {
     @Test
     @DisplayName("Deve bloquear cadastro de permissao duplicada ativa")
     void deveBloquearCadastroDePermissaoDuplicadaAtiva() {
-        var dados = new PermissaoRecord(
-                "Listar perfis",
-                "ACESSO_PERFIL_LISTAR",
-                "Permite listar perfis"
-        );
+        var dados = new PermissaoRecord("Listar perfis", "ACESSO_PERFIL_LISTAR", "Permite listar perfis");
 
         when(repository.existsByChaveIgnoreCaseAndStatus("ACESSO_PERFIL_LISTAR", StatusEnum.ATIVO))
                 .thenReturn(true);
@@ -80,12 +73,7 @@ class PermissaoServiceTest {
     @DisplayName("Deve listar permissoes ativas sem filtro")
     void deveListarPermissoesAtivasSemFiltro() {
         var paginacao = PageRequest.of(0, 10);
-        var permissao = criarPermissao(
-                1L,
-                "Listar perfis",
-                "ACESSO_PERFIL_LISTAR",
-                "Permite listar perfis"
-        );
+        var permissao = criarPermissao(1L, "Listar perfis", "ACESSO_PERFIL_LISTAR", "Permite listar perfis");
 
         when(repository.findAllByStatus(paginacao, StatusEnum.ATIVO))
                 .thenReturn(new PageImpl<>(List.of(permissao)));
@@ -103,12 +91,7 @@ class PermissaoServiceTest {
     @DisplayName("Deve listar permissoes ativas com filtro")
     void deveListarPermissoesAtivasComFiltro() {
         var paginacao = PageRequest.of(0, 10);
-        var permissao = criarPermissao(
-                2L,
-                "Criar perfis",
-                "ACESSO_PERFIL_CRIAR",
-                "Permite criar perfis"
-        );
+        var permissao = criarPermissao(2L, "Criar perfis", "ACESSO_PERFIL_CRIAR", "Permite criar perfis");
 
         when(repository.findByNomeContainingIgnoreCaseAndStatus(paginacao, "criar", StatusEnum.ATIVO))
                 .thenReturn(new PageImpl<>(List.of(permissao)));
@@ -124,12 +107,7 @@ class PermissaoServiceTest {
     @Test
     @DisplayName("Deve detalhar permissao")
     void deveDetalharPermissao() {
-        var permissao = criarPermissao(
-                1L,
-                "Listar perfis",
-                "ACESSO_PERFIL_LISTAR",
-                "Permite listar perfis"
-        );
+        var permissao = criarPermissao(1L, "Listar perfis", "ACESSO_PERFIL_LISTAR", "Permite listar perfis");
 
         when(repository.getReferenceById(1L)).thenReturn(permissao);
 
@@ -145,24 +123,13 @@ class PermissaoServiceTest {
     @Test
     @DisplayName("Deve atualizar permissao quando chave nao esta duplicada")
     void deveAtualizarPermissaoQuandoChaveNaoEstaDuplicada() {
-        var dados = new AtualizaPermissaoRecord(
-                1L,
-                "Listar perfil",
-                "ACESSO_PERFIL_LISTAR",
-                "Permite listar perfil"
-        );
-
-        var permissao = criarPermissao(
-                1L,
-                "Listar perfis",
-                "ACESSO_PERFIL_LISTAR_ANTIGA",
-                "Permite listar perfis"
-        );
+        var dados = new AtualizaPermissaoRecord(1L, "Listar perfil", "ACESSO_PERFIL_LISTAR", "Permite listar perfil");
+        var permissao = criarPermissao(1L, "Listar perfis", "ACESSO_PERFIL_LISTAR_ANTIGA", "Permite listar perfis");
 
         when(repository.existsByChaveIgnoreCaseAndStatusAndIdNot("ACESSO_PERFIL_LISTAR", StatusEnum.ATIVO, 1L))
                 .thenReturn(false);
 
-        when(repository.getReferenceById(1L)).thenReturn(permissao);
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.of(permissao));
 
         var resultado = service.atualizar(dados);
 
@@ -176,12 +143,7 @@ class PermissaoServiceTest {
     @Test
     @DisplayName("Deve bloquear atualizacao quando chave pertence a outra permissao ativa")
     void deveBloquearAtualizacaoQuandoChavePertenceAOutraPermissaoAtiva() {
-        var dados = new AtualizaPermissaoRecord(
-                1L,
-                "Listar perfis",
-                "ACESSO_PERFIL_LISTAR",
-                "Permite listar perfis"
-        );
+        var dados = new AtualizaPermissaoRecord(1L, "Listar perfis", "ACESSO_PERFIL_LISTAR", "Permite listar perfis");
 
         when(repository.existsByChaveIgnoreCaseAndStatusAndIdNot("ACESSO_PERFIL_LISTAR", StatusEnum.ATIVO, 1L))
                 .thenReturn(true);
@@ -192,14 +154,25 @@ class PermissaoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve bloquear atualizacao de permissao removida")
+    void deveBloquearAtualizacaoDePermissaoRemovida() {
+        var dados = new AtualizaPermissaoRecord(1L, "Listar perfil", "ACESSO_PERFIL_LISTAR", "Permite listar perfil");
+
+        when(repository.existsByChaveIgnoreCaseAndStatusAndIdNot("ACESSO_PERFIL_LISTAR", StatusEnum.ATIVO, 1L))
+                .thenReturn(false);
+
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.atualizar(dados))
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage("Permissao nao encontrada ou removida.");
+    }
+
+    @Test
     @DisplayName("Deve remover permissao com auditoria")
     void deveRemoverPermissaoComAuditoria() {
-        var permissao = criarPermissao(
-                1L,
-                "Listar perfis",
-                "ACESSO_PERFIL_LISTAR",
-                "Permite listar perfis"
-        );
+        var permissao = criarPermissao(1L, "Listar perfis", "ACESSO_PERFIL_LISTAR", "Permite listar perfis");
 
         when(usuarioLogadoService.getId()).thenReturn(10L);
         when(repository.getReferenceById(1L)).thenReturn(permissao);

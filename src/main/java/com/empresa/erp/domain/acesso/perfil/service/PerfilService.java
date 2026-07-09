@@ -58,7 +58,9 @@ public class PerfilService {
             throw new ValidacaoException("Perfil ja cadastrado.");
         }
 
-        PerfilModel perfil = repository.getReferenceById(dados.id());
+        PerfilModel perfil = repository.findByIdAndStatus(dados.id(), StatusEnum.ATIVO)
+                .orElseThrow(() -> new ValidacaoException("Perfil nao encontrado ou removido."));
+
         perfil.atualizar(dados);
 
         return new DetalhePerfilRecord(perfil);

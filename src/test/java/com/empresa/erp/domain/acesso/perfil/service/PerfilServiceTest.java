@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -124,7 +125,7 @@ class PerfilServiceTest {
         when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Administrador Master", StatusEnum.ATIVO, 1L))
                 .thenReturn(false);
 
-        when(repository.getReferenceById(1L)).thenReturn(perfil);
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.of(perfil));
 
         var resultado = service.atualizar(dados);
 
@@ -145,6 +146,22 @@ class PerfilServiceTest {
         assertThatThrownBy(() -> service.atualizar(dados))
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Perfil ja cadastrado.");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear atualizacao de perfil removido")
+    void deveBloquearAtualizacaoDePerfilRemovido() {
+        var dados = new AtualizaPerfilRecord(1L, "Administrador Master", "Perfil atualizado");
+
+        when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Administrador Master", StatusEnum.ATIVO, 1L))
+                .thenReturn(false);
+
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.atualizar(dados))
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage("Perfil nao encontrado ou removido.");
     }
 
     @Test

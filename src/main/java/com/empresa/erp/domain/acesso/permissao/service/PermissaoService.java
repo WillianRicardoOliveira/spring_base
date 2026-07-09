@@ -48,7 +48,9 @@ public class PermissaoService {
         if (repository.existsByChaveIgnoreCaseAndStatusAndIdNot(dados.chave(), StatusEnum.ATIVO, dados.id())) {
             throw new ValidacaoException("Permissao ja cadastrada.");
         }
-        PermissaoModel permissao = repository.getReferenceById(dados.id());
+        PermissaoModel permissao = repository.findByIdAndStatus(dados.id(), StatusEnum.ATIVO)
+                .orElseThrow(() -> new ValidacaoException("Permissao nao encontrada ou removida."));
+
         permissao.atualizar(dados);
         return new DetalhePermissaoRecord(permissao);
     }

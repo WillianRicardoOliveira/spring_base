@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -131,7 +132,7 @@ class UsuarioServiceTest {
         var usuario = criarUsuario(1L, "usuario@teste.com");
 
         when(repository.existsByEmailIgnoreCaseAndIdNot("Novo@Teste.com", 1L)).thenReturn(false);
-        when(repository.getReferenceById(1L)).thenReturn(usuario);
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.of(usuario));
 
         var resultado = service.atualizar(dados);
 
@@ -153,12 +154,28 @@ class UsuarioServiceTest {
     }
 
     @Test
+    @DisplayName("Deve bloquear atualizacao de usuario removido")
+    void deveBloquearAtualizacaoDeUsuarioRemovido() {
+        var dados = new AtualizaUsuarioRecord(1L, "novo@teste.com");
+
+        when(repository.existsByEmailIgnoreCaseAndIdNot("novo@teste.com", 1L))
+                .thenReturn(false);
+
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.atualizar(dados))
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage("Usuario nao encontrado ou removido.");
+    }
+
+    @Test
     @DisplayName("Deve atualizar senha do usuario")
     void deveAtualizarSenhaDoUsuario() {
         var dados = new AtualizaSenhaUsuarioRecord(1L, "nova-senha");
         var usuario = criarUsuario(1L, "usuario@teste.com");
 
-        when(repository.getReferenceById(1L)).thenReturn(usuario);
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.of(usuario));
         when(passwordEncoder.encode("nova-senha")).thenReturn("nova-senha-criptografada");
 
         var resultado = service.atualizarSenha(dados);
@@ -166,6 +183,19 @@ class UsuarioServiceTest {
         assertThat(resultado.id()).isEqualTo(1L);
         assertThat(resultado.email()).isEqualTo("usuario@teste.com");
         assertThat(usuario.getSenha()).isEqualTo("nova-senha-criptografada");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear alteracao de senha de usuario removido")
+    void deveBloquearAlteracaoDeSenhaDeUsuarioRemovido() {
+        var dados = new AtualizaSenhaUsuarioRecord(1L, "nova-senha");
+
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.atualizarSenha(dados))
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage("Usuario nao encontrado ou removido.");
     }
 
     @Test

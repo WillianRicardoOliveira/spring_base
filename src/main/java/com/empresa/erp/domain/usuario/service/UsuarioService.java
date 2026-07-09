@@ -57,7 +57,9 @@ public class UsuarioService implements UserDetailsService {
         if (repository.existsByEmailIgnoreCaseAndIdNot(dados.email(), dados.id())) {
             throw new ValidacaoException("Usuario ja cadastrado.");
         }
-        UsuarioModel usuario = repository.getReferenceById(dados.id());
+        UsuarioModel usuario = repository.findByIdAndStatus(dados.id(), StatusEnum.ATIVO)
+                .orElseThrow(() -> new ValidacaoException("Usuario nao encontrado ou removido."));
+
         usuario.atualizar(dados);
         return new DetalheUsuarioRecord(usuario);
     }
@@ -77,8 +79,11 @@ public class UsuarioService implements UserDetailsService {
     
     @Transactional
     public DetalheUsuarioRecord atualizarSenha(AtualizaSenhaUsuarioRecord dados) {
-        UsuarioModel usuario = repository.getReferenceById(dados.id());
+        UsuarioModel usuario = repository.findByIdAndStatus(dados.id(), StatusEnum.ATIVO)
+                .orElseThrow(() -> new ValidacaoException("Usuario nao encontrado ou removido."));
+
         usuario.atualizarSenha(passwordEncoder.encode(dados.senha()));
+
         return new DetalheUsuarioRecord(usuario);
     }
     
