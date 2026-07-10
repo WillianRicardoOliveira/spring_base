@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PermissaoService {
-
+	
     private final PermissaoRepository repository;
     
     private final UsuarioLogadoService usuarioLogadoService;
@@ -51,7 +51,10 @@ public class PermissaoService {
         PermissaoModel permissao = repository.findByIdAndStatus(dados.id(), StatusEnum.ATIVO)
                 .orElseThrow(() -> new ValidacaoException("Permissao nao encontrada ou removida."));
 
+        validarPermissaoCritica(permissao);
+        
         permissao.atualizar(dados);
+        
         return new DetalhePermissaoRecord(permissao);
     }
 
@@ -60,6 +63,9 @@ public class PermissaoService {
         Long idUsuario = usuarioLogadoService.getId();
 
         PermissaoModel permissao = repository.getReferenceById(id);
+        
+        validarPermissaoCritica(permissao);
+        
         permissao.remover(idUsuario);
     }
 
@@ -69,4 +75,9 @@ public class PermissaoService {
         return new DetalhePermissaoRecord(permissao);
     }
     
+    private void validarPermissaoCritica(PermissaoModel permissao) {
+        if (Boolean.TRUE.equals(permissao.getSistema())) {
+            throw new ValidacaoException("Permissao critica do sistema nao pode ser alterada.");
+        }
+    }
 }

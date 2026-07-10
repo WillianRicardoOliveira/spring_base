@@ -119,18 +119,18 @@ class PerfilServiceTest {
     @Test
     @DisplayName("Deve atualizar perfil quando nome nao esta duplicado")
     void deveAtualizarPerfilQuandoNomeNaoEstaDuplicado() {
-        var dados = new AtualizaPerfilRecord(1L, "Administrador Master", "Perfil atualizado");
-        var perfil = criarPerfil(1L, "Administrador", "Perfil administrador");
+        var dados = new AtualizaPerfilRecord(2L, "Financeiro Master", "Perfil atualizado");
+        var perfil = criarPerfil(2L, "Financeiro", "Perfil financeiro");
 
-        when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Administrador Master", StatusEnum.ATIVO, 1L))
+        when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Financeiro Master", StatusEnum.ATIVO, 2L))
                 .thenReturn(false);
 
-        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.of(perfil));
+        when(repository.findByIdAndStatus(2L, StatusEnum.ATIVO)).thenReturn(Optional.of(perfil));
 
         var resultado = service.atualizar(dados);
 
-        assertThat(resultado.id()).isEqualTo(1L);
-        assertThat(resultado.nome()).isEqualTo("Administrador Master");
+        assertThat(resultado.id()).isEqualTo(2L);
+        assertThat(resultado.nome()).isEqualTo("Financeiro Master");
         assertThat(resultado.descricao()).isEqualTo("Perfil atualizado");
         assertThat(resultado.status()).isEqualTo(StatusEnum.ATIVO);
     }
@@ -138,9 +138,9 @@ class PerfilServiceTest {
     @Test
     @DisplayName("Deve bloquear atualizacao quando nome pertence a outro perfil ativo")
     void deveBloquearAtualizacaoQuandoNomePertenceAOutroPerfilAtivo() {
-        var dados = new AtualizaPerfilRecord(1L, "Financeiro", "Perfil financeiro");
+        var dados = new AtualizaPerfilRecord(2L, "Financeiro", "Perfil financeiro");
 
-        when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Financeiro", StatusEnum.ATIVO, 1L))
+        when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Financeiro", StatusEnum.ATIVO, 2L))
                 .thenReturn(true);
 
         assertThatThrownBy(() -> service.atualizar(dados))
@@ -151,12 +151,12 @@ class PerfilServiceTest {
     @Test
     @DisplayName("Deve bloquear atualizacao de perfil removido")
     void deveBloquearAtualizacaoDePerfilRemovido() {
-        var dados = new AtualizaPerfilRecord(1L, "Administrador Master", "Perfil atualizado");
+        var dados = new AtualizaPerfilRecord(2L, "Financeiro Master", "Perfil atualizado");
 
-        when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Administrador Master", StatusEnum.ATIVO, 1L))
+        when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Financeiro Master", StatusEnum.ATIVO, 2L))
                 .thenReturn(false);
 
-        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO))
+        when(repository.findByIdAndStatus(2L, StatusEnum.ATIVO))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.atualizar(dados))
@@ -165,18 +165,50 @@ class PerfilServiceTest {
     }
 
     @Test
+    @DisplayName("Deve bloquear atualizacao de perfil critico do sistema")
+    void deveBloquearAtualizacaoDePerfilCriticoDoSistema() {
+        var dados = new AtualizaPerfilRecord(2L, "Financeiro Master", "Perfil atualizado");
+        var perfil = criarPerfil(2L, "Financeiro", "Perfil financeiro");
+        ReflectionTestUtils.setField(perfil, "sistema", true);
+
+        when(repository.existsByNomeIgnoreCaseAndStatusAndIdNot("Financeiro Master", StatusEnum.ATIVO, 2L))
+                .thenReturn(false);
+
+        when(repository.findByIdAndStatus(2L, StatusEnum.ATIVO))
+                .thenReturn(Optional.of(perfil));
+
+        assertThatThrownBy(() -> service.atualizar(dados))
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage("Perfil critico do sistema nao pode ser alterado.");
+    }
+
+    @Test
     @DisplayName("Deve remover perfil com auditoria")
     void deveRemoverPerfilComAuditoria() {
-        var perfil = criarPerfil(1L, "Financeiro", "Perfil financeiro");
+        var perfil = criarPerfil(2L, "Financeiro", "Perfil financeiro");
 
         when(usuarioLogadoService.getId()).thenReturn(10L);
-        when(repository.getReferenceById(1L)).thenReturn(perfil);
+        when(repository.getReferenceById(2L)).thenReturn(perfil);
 
-        service.excluir(1L);
+        service.excluir(2L);
 
         assertThat(perfil.getStatus()).isEqualTo(StatusEnum.REMOVIDO);
         assertThat(perfil.getRemovidoEm()).isNotNull();
         assertThat(perfil.getRemovidoPor()).isEqualTo(10L);
+    }
+
+    @Test
+    @DisplayName("Deve bloquear remocao de perfil critico do sistema")
+    void deveBloquearRemocaoDePerfilCriticoDoSistema() {
+        var perfil = criarPerfil(2L, "Financeiro", "Perfil financeiro");
+        ReflectionTestUtils.setField(perfil, "sistema", true);
+
+        when(usuarioLogadoService.getId()).thenReturn(10L);
+        when(repository.getReferenceById(2L)).thenReturn(perfil);
+
+        assertThatThrownBy(() -> service.excluir(2L))
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage("Perfil critico do sistema nao pode ser alterado.");
     }
 
     private PerfilModel criarPerfil(Long id, String nome, String descricao) {

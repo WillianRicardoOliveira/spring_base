@@ -32,6 +32,7 @@ public class PermissaoModel extends AuditoriaModel {
     private String nome;
     private String chave;
     private String descricao;
+    private Boolean sistema;
 
     @Enumerated(EnumType.ORDINAL)
     private StatusEnum status;
@@ -40,6 +41,7 @@ public class PermissaoModel extends AuditoriaModel {
         this.nome = dados.nome();
         this.chave = dados.chave();
         this.descricao = dados.descricao();
+        this.sistema = false;
         this.status = StatusEnum.ATIVO;
     }
 

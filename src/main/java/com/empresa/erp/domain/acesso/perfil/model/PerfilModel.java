@@ -31,6 +31,7 @@ public class PerfilModel extends AuditoriaModel {
 
     private String nome;
     private String descricao;
+    private Boolean sistema;
     
     @Enumerated(EnumType.ORDINAL)
     private StatusEnum status;
@@ -38,6 +39,7 @@ public class PerfilModel extends AuditoriaModel {
     public PerfilModel(PerfilRecord dados) {
         this.nome = dados.nome();
         this.descricao = dados.descricao();
+        this.sistema = false;
         this.status = StatusEnum.ATIVO;
     }
 

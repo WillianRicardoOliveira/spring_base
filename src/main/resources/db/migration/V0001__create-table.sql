@@ -19,6 +19,7 @@ CREATE TABLE perfil (
     nome VARCHAR(100) NOT NULL,
     descricao VARCHAR(255),
     status TINYINT NOT NULL DEFAULT 0,
+    sistema BOOLEAN NOT NULL DEFAULT FALSE,
     criado_em DATETIME,
     criado_por BIGINT,
     atualizado_em DATETIME,
@@ -50,6 +51,7 @@ CREATE TABLE permissao (
     chave VARCHAR(100) NOT NULL,
     descricao VARCHAR(255),
     status TINYINT NOT NULL DEFAULT 0,
+    sistema BOOLEAN NOT NULL DEFAULT FALSE,
     criado_em DATETIME,
     criado_por BIGINT,
     atualizado_em DATETIME,
@@ -79,38 +81,38 @@ CREATE TABLE perfil_permissao (
 INSERT INTO usuario (id, email, senha, status) VALUES 
 (1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 0);
 
-INSERT INTO perfil (id, nome, descricao, status) VALUES
-(1, 'Administrador', 'Perfil com acesso total ao sistema', 0);
+INSERT INTO perfil (id, nome, descricao, status, sistema) VALUES
+(1, 'Administrador', 'Perfil com acesso total ao sistema', 0, TRUE);
 
-INSERT INTO permissao (id, nome, chave, descricao, status) VALUES
-(1, 'Criar perfis', 'ACESSO_PERFIL_CRIAR', 'Permite criar perfis de acesso', 0),
-(2, 'Listar perfis', 'ACESSO_PERFIL_LISTAR', 'Permite listar perfis de acesso', 0),
-(3, 'Detalhar perfil', 'ACESSO_PERFIL_DETALHAR', 'Permite detalhar perfil de acesso', 0),
-(4, 'Editar perfil', 'ACESSO_PERFIL_EDITAR', 'Permite editar perfil de acesso', 0),
-(5, 'Excluir perfil', 'ACESSO_PERFIL_EXCLUIR', 'Permite remover perfil de acesso', 0),
+INSERT INTO permissao (id, nome, chave, descricao, status, sistema) VALUES
+(1, 'Criar perfis', 'ACESSO_PERFIL_CRIAR', 'Permite criar perfis de acesso', 0, TRUE),
+(2, 'Listar perfis', 'ACESSO_PERFIL_LISTAR', 'Permite listar perfis de acesso', 0, TRUE),
+(3, 'Detalhar perfil', 'ACESSO_PERFIL_DETALHAR', 'Permite detalhar perfil de acesso', 0, TRUE),
+(4, 'Editar perfil', 'ACESSO_PERFIL_EDITAR', 'Permite editar perfil de acesso', 0, TRUE),
+(5, 'Excluir perfil', 'ACESSO_PERFIL_EXCLUIR', 'Permite remover perfil de acesso', 0, TRUE),
 
-(6, 'Criar permissões', 'ACESSO_PERMISSAO_CRIAR', 'Permite criar permissões', 0),
-(7, 'Listar permissões', 'ACESSO_PERMISSAO_LISTAR', 'Permite listar permissões', 0),
-(8, 'Detalhar permissão', 'ACESSO_PERMISSAO_DETALHAR', 'Permite detalhar permissão', 0),
-(9, 'Editar permissão', 'ACESSO_PERMISSAO_EDITAR', 'Permite editar permissão', 0),
-(10, 'Excluir permissão', 'ACESSO_PERMISSAO_EXCLUIR', 'Permite remover permissão', 0),
+(6, 'Criar permissões', 'ACESSO_PERMISSAO_CRIAR', 'Permite criar permissões', 0, TRUE),
+(7, 'Listar permissões', 'ACESSO_PERMISSAO_LISTAR', 'Permite listar permissões', 0, TRUE),
+(8, 'Detalhar permissão', 'ACESSO_PERMISSAO_DETALHAR', 'Permite detalhar permissão', 0, TRUE),
+(9, 'Editar permissão', 'ACESSO_PERMISSAO_EDITAR', 'Permite editar permissão', 0, TRUE),
+(10, 'Excluir permissão', 'ACESSO_PERMISSAO_EXCLUIR', 'Permite remover permissão', 0, TRUE),
 
-(11, 'Vincular permissão ao perfil', 'ACESSO_PERFIL_PERMISSAO_CRIAR', 'Permite vincular permissão ao perfil', 0),
-(12, 'Listar permissões do perfil', 'ACESSO_PERFIL_PERMISSAO_LISTAR', 'Permite listar permissões vinculadas ao perfil', 0),
-(13, 'Detalhar vínculo perfil permissão', 'ACESSO_PERFIL_PERMISSAO_DETALHAR', 'Permite detalhar vínculo entre perfil e permissão', 0),
-(14, 'Remover permissão do perfil', 'ACESSO_PERFIL_PERMISSAO_EXCLUIR', 'Permite remover permissão vinculada ao perfil', 0),
+(11, 'Vincular permissão ao perfil', 'ACESSO_PERFIL_PERMISSAO_CRIAR', 'Permite vincular permissão ao perfil', 0, TRUE),
+(12, 'Listar permissões do perfil', 'ACESSO_PERFIL_PERMISSAO_LISTAR', 'Permite listar permissões vinculadas ao perfil', 0, TRUE),
+(13, 'Detalhar vínculo perfil permissão', 'ACESSO_PERFIL_PERMISSAO_DETALHAR', 'Permite detalhar vínculo entre perfil e permissão', 0, TRUE),
+(14, 'Remover permissão do perfil', 'ACESSO_PERFIL_PERMISSAO_EXCLUIR', 'Permite remover permissão vinculada ao perfil', 0, TRUE),
 
-(15, 'Vincular perfil ao usuário', 'ACESSO_USUARIO_PERFIL_CRIAR', 'Permite vincular perfil ao usuário', 0),
-(16, 'Listar perfis do usuário', 'ACESSO_USUARIO_PERFIL_LISTAR', 'Permite listar perfis vinculados ao usuário', 0),
-(17, 'Detalhar vínculo usuário perfil', 'ACESSO_USUARIO_PERFIL_DETALHAR', 'Permite detalhar vínculo entre usuário e perfil', 0),
-(18, 'Remover perfil do usuário', 'ACESSO_USUARIO_PERFIL_EXCLUIR', 'Permite remover perfil vinculado ao usuário', 0),
+(15, 'Vincular perfil ao usuário', 'ACESSO_USUARIO_PERFIL_CRIAR', 'Permite vincular perfil ao usuário', 0, TRUE),
+(16, 'Listar perfis do usuário', 'ACESSO_USUARIO_PERFIL_LISTAR', 'Permite listar perfis vinculados ao usuário', 0, TRUE),
+(17, 'Detalhar vínculo usuário perfil', 'ACESSO_USUARIO_PERFIL_DETALHAR', 'Permite detalhar vínculo entre usuário e perfil', 0, TRUE),
+(18, 'Remover perfil do usuário', 'ACESSO_USUARIO_PERFIL_EXCLUIR', 'Permite remover perfil vinculado ao usuário', 0, TRUE),
 
-(19, 'Criar usuários', 'ACESSO_USUARIO_CRIAR', 'Permite criar usuários', 0),
-(20, 'Listar usuários', 'ACESSO_USUARIO_LISTAR', 'Permite listar usuários', 0),
-(21, 'Detalhar usuário', 'ACESSO_USUARIO_DETALHAR', 'Permite detalhar usuário', 0),
-(22, 'Editar usuário', 'ACESSO_USUARIO_EDITAR', 'Permite editar usuário', 0),
-(23, 'Excluir usuário', 'ACESSO_USUARIO_EXCLUIR', 'Permite remover usuário', 0),
-(24, 'Alterar senha de usuário', 'ACESSO_USUARIO_SENHA_EDITAR', 'Permite alterar senha de usuário', 0);
+(19, 'Criar usuários', 'ACESSO_USUARIO_CRIAR', 'Permite criar usuários', 0, TRUE),
+(20, 'Listar usuários', 'ACESSO_USUARIO_LISTAR', 'Permite listar usuários', 0, TRUE),
+(21, 'Detalhar usuário', 'ACESSO_USUARIO_DETALHAR', 'Permite detalhar usuário', 0, TRUE),
+(22, 'Editar usuário', 'ACESSO_USUARIO_EDITAR', 'Permite editar usuário', 0, TRUE),
+(23, 'Excluir usuário', 'ACESSO_USUARIO_EXCLUIR', 'Permite remover usuário', 0, TRUE),
+(24, 'Alterar senha de usuário', 'ACESSO_USUARIO_SENHA_EDITAR', 'Permite alterar senha de usuário', 0, TRUE);
 
 INSERT INTO perfil_permissao (id_perfil, id_permissao, status) VALUES
 (1, 1, 0),

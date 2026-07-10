@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PerfilService {
-
+	
     private final PerfilRepository repository;
     private final UsuarioLogadoService usuarioLogadoService;
 
@@ -61,6 +61,8 @@ public class PerfilService {
         PerfilModel perfil = repository.findByIdAndStatus(dados.id(), StatusEnum.ATIVO)
                 .orElseThrow(() -> new ValidacaoException("Perfil nao encontrado ou removido."));
 
+        validarPerfilCritico(perfil);
+
         perfil.atualizar(dados);
 
         return new DetalhePerfilRecord(perfil);
@@ -71,6 +73,15 @@ public class PerfilService {
         Long idUsuario = usuarioLogadoService.getId();
 
         PerfilModel perfil = repository.getReferenceById(id);
+
+        validarPerfilCritico(perfil);
+
         perfil.remover(idUsuario);
+    }
+    
+    private void validarPerfilCritico(PerfilModel perfil) {
+        if (Boolean.TRUE.equals(perfil.getSistema())) {
+            throw new ValidacaoException("Perfil critico do sistema nao pode ser alterado.");
+        }
     }
 }
