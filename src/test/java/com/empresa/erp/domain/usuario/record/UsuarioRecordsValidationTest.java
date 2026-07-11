@@ -3,39 +3,39 @@ package com.empresa.erp.domain.usuario.record;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
 class UsuarioRecordsValidationTest {
 
-    private static ValidatorFactory validatorFactory;
-    private static Validator validator;
+    private ValidatorFactory factory;
+    private Validator validator;
 
-    @BeforeAll
-    static void setUp() {
-        validatorFactory = Validation.buildDefaultValidatorFactory();
-        validator = validatorFactory.getValidator();
+    @BeforeEach
+    void setUp() {
+        factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
-    @AfterAll
-    static void tearDown() {
-        validatorFactory.close();
+    @AfterEach
+    void tearDown() {
+        factory.close();
     }
 
     @Test
     @DisplayName("Deve validar UsuarioRecord valido")
     void deveValidarUsuarioRecordValido() {
-        var dados = new UsuarioRecord("usuario@teste.com", "123456");
+        var dados = new UsuarioRecord("usuario@teste.com", "Senha@123");
 
-        var violacoes = validator.validate(dados);
+        var violacoes = validar(dados);
 
         assertThat(violacoes).isEmpty();
     }
@@ -43,17 +43,21 @@ class UsuarioRecordsValidationTest {
     @Test
     @DisplayName("Deve invalidar UsuarioRecord com email em branco")
     void deveInvalidarUsuarioRecordComEmailEmBranco() {
-        var dados = new UsuarioRecord("", "123456");
+        var dados = new UsuarioRecord("", "Senha@123");
 
-        assertThat(camposComErro(dados)).contains("email");
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "email"));
     }
 
     @Test
     @DisplayName("Deve invalidar UsuarioRecord com email invalido")
     void deveInvalidarUsuarioRecordComEmailInvalido() {
-        var dados = new UsuarioRecord("email-invalido", "123456");
+        var dados = new UsuarioRecord("email-invalido", "Senha@123");
 
-        assertThat(camposComErro(dados)).contains("email");
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "email"));
     }
 
     @Test
@@ -61,7 +65,59 @@ class UsuarioRecordsValidationTest {
     void deveInvalidarUsuarioRecordComSenhaEmBranco() {
         var dados = new UsuarioRecord("usuario@teste.com", "");
 
-        assertThat(camposComErro(dados)).contains("senha");
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+    }
+
+    @Test
+    @DisplayName("Deve invalidar UsuarioRecord com senha curta")
+    void deveInvalidarUsuarioRecordComSenhaCurta() {
+        var dados = new UsuarioRecord("usuario@teste.com", "Se@1");
+
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+    }
+
+    @Test
+    @DisplayName("Deve invalidar UsuarioRecord com senha sem letra maiuscula")
+    void deveInvalidarUsuarioRecordComSenhaSemMaiuscula() {
+        var dados = new UsuarioRecord("usuario@teste.com", "senha@123");
+
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+    }
+
+    @Test
+    @DisplayName("Deve invalidar UsuarioRecord com senha sem letra minuscula")
+    void deveInvalidarUsuarioRecordComSenhaSemMinuscula() {
+        var dados = new UsuarioRecord("usuario@teste.com", "SENHA@123");
+
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+    }
+
+    @Test
+    @DisplayName("Deve invalidar UsuarioRecord com senha sem numero")
+    void deveInvalidarUsuarioRecordComSenhaSemNumero() {
+        var dados = new UsuarioRecord("usuario@teste.com", "Senha@abc");
+
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+    }
+
+    @Test
+    @DisplayName("Deve invalidar UsuarioRecord com senha sem caractere especial")
+    void deveInvalidarUsuarioRecordComSenhaSemCaractereEspecial() {
+        var dados = new UsuarioRecord("usuario@teste.com", "Senha123");
+
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
     }
 
     @Test
@@ -69,7 +125,7 @@ class UsuarioRecordsValidationTest {
     void deveValidarAtualizaUsuarioRecordValido() {
         var dados = new AtualizaUsuarioRecord(1L, "usuario@teste.com");
 
-        var violacoes = validator.validate(dados);
+        var violacoes = validar(dados);
 
         assertThat(violacoes).isEmpty();
     }
@@ -79,7 +135,9 @@ class UsuarioRecordsValidationTest {
     void deveInvalidarAtualizaUsuarioRecordSemId() {
         var dados = new AtualizaUsuarioRecord(null, "usuario@teste.com");
 
-        assertThat(camposComErro(dados)).contains("id");
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "id"));
     }
 
     @Test
@@ -87,7 +145,9 @@ class UsuarioRecordsValidationTest {
     void deveInvalidarAtualizaUsuarioRecordComEmailEmBranco() {
         var dados = new AtualizaUsuarioRecord(1L, "");
 
-        assertThat(camposComErro(dados)).contains("email");
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "email"));
     }
 
     @Test
@@ -95,15 +155,17 @@ class UsuarioRecordsValidationTest {
     void deveInvalidarAtualizaUsuarioRecordComEmailInvalido() {
         var dados = new AtualizaUsuarioRecord(1L, "email-invalido");
 
-        assertThat(camposComErro(dados)).contains("email");
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "email"));
     }
 
     @Test
     @DisplayName("Deve validar AtualizaSenhaUsuarioRecord valido")
     void deveValidarAtualizaSenhaUsuarioRecordValido() {
-        var dados = new AtualizaSenhaUsuarioRecord(1L, "nova-senha");
+        var dados = new AtualizaSenhaUsuarioRecord(1L, "Senha@123");
 
-        var violacoes = validator.validate(dados);
+        var violacoes = validar(dados);
 
         assertThat(violacoes).isEmpty();
     }
@@ -111,9 +173,11 @@ class UsuarioRecordsValidationTest {
     @Test
     @DisplayName("Deve invalidar AtualizaSenhaUsuarioRecord sem id")
     void deveInvalidarAtualizaSenhaUsuarioRecordSemId() {
-        var dados = new AtualizaSenhaUsuarioRecord(null, "nova-senha");
+        var dados = new AtualizaSenhaUsuarioRecord(null, "Senha@123");
 
-        assertThat(camposComErro(dados)).contains("id");
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "id"));
     }
 
     @Test
@@ -121,12 +185,26 @@ class UsuarioRecordsValidationTest {
     void deveInvalidarAtualizaSenhaUsuarioRecordComSenhaEmBranco() {
         var dados = new AtualizaSenhaUsuarioRecord(1L, "");
 
-        assertThat(camposComErro(dados)).contains("senha");
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
     }
 
-    private Set<String> camposComErro(Object dados) {
-        return validator.validate(dados).stream()
-                .map(violacao -> violacao.getPropertyPath().toString())
-                .collect(Collectors.toSet());
+    @Test
+    @DisplayName("Deve invalidar AtualizaSenhaUsuarioRecord com senha fraca")
+    void deveInvalidarAtualizaSenhaUsuarioRecordComSenhaFraca() {
+        var dados = new AtualizaSenhaUsuarioRecord(1L, "12345678");
+
+        var violacoes = validar(dados);
+
+        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+    }
+
+    private Set<ConstraintViolation<Object>> validar(Object dados) {
+        return validator.validate(dados);
+    }
+
+    private boolean ehCampo(ConstraintViolation<?> violacao, String campo) {
+        return violacao.getPropertyPath().toString().equals(campo);
     }
 }

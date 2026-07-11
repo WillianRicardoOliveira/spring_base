@@ -52,10 +52,10 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve cadastrar usuario quando email ainda nao existe")
     void deveCadastrarUsuarioQuandoEmailNaoExiste() {
-        var dados = new UsuarioRecord("Usuario@Teste.com", "123456");
+        var dados = new UsuarioRecord("Usuario@Teste.com", "Senha@123");
 
         when(repository.existsByEmailIgnoreCase("Usuario@Teste.com")).thenReturn(false);
-        when(passwordEncoder.encode("123456")).thenReturn("senha-criptografada");
+        when(passwordEncoder.encode("Senha@123")).thenReturn("senha-criptografada");
 
         UsuarioModel usuario = service.cadastrar(dados);
 
@@ -69,7 +69,7 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve bloquear cadastro de usuario duplicado")
     void deveBloquearCadastroDeUsuarioDuplicado() {
-        var dados = new UsuarioRecord("usuario@teste.com", "123456");
+        var dados = new UsuarioRecord("usuario@teste.com", "Senha@123");
 
         when(repository.existsByEmailIgnoreCase("usuario@teste.com")).thenReturn(true);
 
@@ -172,23 +172,23 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve atualizar senha do usuario")
     void deveAtualizarSenhaDoUsuario() {
-        var dados = new AtualizaSenhaUsuarioRecord(1L, "nova-senha");
+        var dados = new AtualizaSenhaUsuarioRecord(1L, "Senha@123");
         var usuario = criarUsuario(1L, "usuario@teste.com");
 
         when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.of(usuario));
-        when(passwordEncoder.encode("nova-senha")).thenReturn("nova-senha-criptografada");
+        when(passwordEncoder.encode("Senha@123")).thenReturn("senha-criptografada-nova");
 
         var resultado = service.atualizarSenha(dados);
 
         assertThat(resultado.id()).isEqualTo(1L);
         assertThat(resultado.email()).isEqualTo("usuario@teste.com");
-        assertThat(usuario.getSenha()).isEqualTo("nova-senha-criptografada");
+        assertThat(usuario.getSenha()).isEqualTo("senha-criptografada-nova");
     }
 
     @Test
     @DisplayName("Deve bloquear alteracao de senha de usuario removido")
     void deveBloquearAlteracaoDeSenhaDeUsuarioRemovido() {
-        var dados = new AtualizaSenhaUsuarioRecord(1L, "nova-senha");
+        var dados = new AtualizaSenhaUsuarioRecord(1L, "Senha@123");
 
         when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO))
                 .thenReturn(Optional.empty());
@@ -238,7 +238,7 @@ class UsuarioServiceTest {
     }
 
     private UsuarioModel criarUsuario(Long id, String email) {
-        var usuario = new UsuarioModel(new UsuarioRecord(email, "123456"), "senha-criptografada");
+        var usuario = new UsuarioModel(new UsuarioRecord(email, "Senha@123"), "senha-criptografada");
         ReflectionTestUtils.setField(usuario, "id", id);
         return usuario;
     }

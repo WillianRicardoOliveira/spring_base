@@ -58,7 +58,7 @@ class UsuarioControllerTest {
     @Test
     @DisplayName("Deve cadastrar usuario e retornar status 201")
     void deveCadastrarUsuarioERetornarStatus201() throws Exception {
-        var dados = new UsuarioRecord("usuario@teste.com", "123456");
+        var dados = new UsuarioRecord("usuario@teste.com", "Senha@123");
         var usuario = criarUsuario(1L, "usuario@teste.com");
 
         when(service.cadastrar(any(UsuarioRecord.class))).thenReturn(usuario);
@@ -76,7 +76,7 @@ class UsuarioControllerTest {
     @Test
     @DisplayName("Deve retornar 400 ao cadastrar usuario com email em branco")
     void deveRetornar400AoCadastrarUsuarioComEmailEmBranco() throws Exception {
-        var dados = new UsuarioRecord("", "123456");
+        var dados = new UsuarioRecord("", "Senha@123");
 
         mockMvc.perform(post("/usuario")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ class UsuarioControllerTest {
     @Test
     @DisplayName("Deve retornar 400 ao cadastrar usuario com email invalido")
     void deveRetornar400AoCadastrarUsuarioComEmailInvalido() throws Exception {
-        var dados = new UsuarioRecord("email-invalido", "123456");
+        var dados = new UsuarioRecord("email-invalido", "Senha@123");
 
         mockMvc.perform(post("/usuario")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,7 +193,7 @@ class UsuarioControllerTest {
     @Test
     @DisplayName("Deve alterar senha do usuario")
     void deveAlterarSenhaDoUsuario() throws Exception {
-        var dados = new AtualizaSenhaUsuarioRecord(1L, "nova-senha");
+        var dados = new AtualizaSenhaUsuarioRecord(1L, "Senha@123");
         var detalhe = new DetalheUsuarioRecord(1L, "usuario@teste.com", StatusEnum.ATIVO);
 
         when(service.atualizarSenha(any(AtualizaSenhaUsuarioRecord.class))).thenReturn(detalhe);
@@ -230,7 +230,7 @@ class UsuarioControllerTest {
     }
 
     private UsuarioModel criarUsuario(Long id, String email) {
-        var usuario = new UsuarioModel(new UsuarioRecord(email, "123456"), "senha-criptografada");
+        var usuario = new UsuarioModel(new UsuarioRecord(email, "Senha@123"), "senha-criptografada");
         ReflectionTestUtils.setField(usuario, "id", id);
         return usuario;
     }

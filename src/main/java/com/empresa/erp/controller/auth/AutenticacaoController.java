@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
+import com.empresa.erp.core.security.record.LoginSecurity;
 import com.empresa.erp.core.security.record.SsoLoginSecurity;
 import com.empresa.erp.core.security.record.TokenJwtSecurity;
 import com.empresa.erp.core.security.service.SsoSecurity;
-import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class AutenticacaoController {
     private final SsoSecurity ssoSecurity;
 
     @PostMapping
-    public ResponseEntity<TokenJwtSecurity> efetuarLogin(@RequestBody @Valid UsuarioRecord dados) {
+    public ResponseEntity<TokenJwtSecurity> efetuarLogin(@RequestBody @Valid LoginSecurity dados) {
         var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
         var authentication = manager.authenticate(authenticationToken);
 
