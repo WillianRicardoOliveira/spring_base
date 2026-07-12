@@ -28,6 +28,50 @@ class TokenSecurityTest {
 
         ReflectionTestUtils.setField(tokenService, "secret", SECRET);
         ReflectionTestUtils.setField(tokenService, "issuer", ISSUER);
+
+        tokenService.validarConfiguracao();
+    }
+
+    @Test
+    @DisplayName("Deve validar configuracao com secret seguro")
+    void deveValidarConfiguracaoComSecretSeguro() {
+        assertThat(SECRET).hasSizeGreaterThanOrEqualTo(32);
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com secret nulo")
+    void deveBloquearInicializacaoComSecretNulo() {
+        var tokenSecurity = new TokenSecurity();
+
+        ReflectionTestUtils.setField(tokenSecurity, "secret", null);
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_SECRET/api.security.token.secret deve ser configurado com no minimo 32 caracteres");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com secret em branco")
+    void deveBloquearInicializacaoComSecretEmBranco() {
+        var tokenSecurity = new TokenSecurity();
+
+        ReflectionTestUtils.setField(tokenSecurity, "secret", " ");
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_SECRET/api.security.token.secret deve ser configurado com no minimo 32 caracteres");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com secret fraco")
+    void deveBloquearInicializacaoComSecretFraco() {
+        var tokenSecurity = new TokenSecurity();
+
+        ReflectionTestUtils.setField(tokenSecurity, "secret", "12345678");
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_SECRET/api.security.token.secret deve ser configurado com no minimo 32 caracteres");
     }
 
     @Test
@@ -101,7 +145,7 @@ class TokenSecurityTest {
     }
 
     private UsuarioModel criarUsuario(Long id, String email) {
-        var usuario = new UsuarioModel(new UsuarioRecord(email, "123456"), "senha-criptografada");
+        var usuario = new UsuarioModel(new UsuarioRecord(email, "Senha@123"), "senha-criptografada");
         ReflectionTestUtils.setField(usuario, "id", id);
         return usuario;
     }
