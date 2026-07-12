@@ -21,6 +21,7 @@ class TokenSecurityTest {
 
     private static final String SECRET = "segredo-super-seguro-para-testes";
     private static final String ISSUER = "erp-test";
+    private static final Long EXPIRATION_MINUTES = 120L;
 
     private TokenSecurity tokenService;
 
@@ -30,22 +31,24 @@ class TokenSecurityTest {
 
         ReflectionTestUtils.setField(tokenService, "secret", SECRET);
         ReflectionTestUtils.setField(tokenService, "issuer", ISSUER);
+        ReflectionTestUtils.setField(tokenService, "expirationMinutes", EXPIRATION_MINUTES);
 
         tokenService.validarConfiguracao();
     }
 
     @Test
-    @DisplayName("Deve validar configuracao com secret e issuer seguros")
-    void deveValidarConfiguracaoComSecretEIssuerSeguros() {
+    @DisplayName("Deve validar configuracao com secret, issuer e expiracao seguros")
+    void deveValidarConfiguracaoComSecretIssuerEExpiracaoSeguros() {
         assertThat(SECRET).hasSizeGreaterThanOrEqualTo(32);
         assertThat(ISSUER).isNotBlank();
         assertThat(ISSUER).doesNotContain("\"", "'");
+        assertThat(EXPIRATION_MINUTES).isGreaterThanOrEqualTo(5L);
     }
 
     @Test
     @DisplayName("Deve bloquear inicializacao com secret nulo")
     void deveBloquearInicializacaoComSecretNulo() {
-        var tokenSecurity = criarTokenSecurity(null, ISSUER);
+        var tokenSecurity = criarTokenSecurity(null, ISSUER, EXPIRATION_MINUTES);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
@@ -55,7 +58,7 @@ class TokenSecurityTest {
     @Test
     @DisplayName("Deve bloquear inicializacao com secret em branco")
     void deveBloquearInicializacaoComSecretEmBranco() {
-        var tokenSecurity = criarTokenSecurity(" ", ISSUER);
+        var tokenSecurity = criarTokenSecurity(" ", ISSUER, EXPIRATION_MINUTES);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
@@ -65,7 +68,7 @@ class TokenSecurityTest {
     @Test
     @DisplayName("Deve bloquear inicializacao com secret fraco")
     void deveBloquearInicializacaoComSecretFraco() {
-        var tokenSecurity = criarTokenSecurity("12345678", ISSUER);
+        var tokenSecurity = criarTokenSecurity("12345678", ISSUER, EXPIRATION_MINUTES);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
@@ -75,7 +78,7 @@ class TokenSecurityTest {
     @Test
     @DisplayName("Deve bloquear inicializacao com issuer nulo")
     void deveBloquearInicializacaoComIssuerNulo() {
-        var tokenSecurity = criarTokenSecurity(SECRET, null);
+        var tokenSecurity = criarTokenSecurity(SECRET, null, EXPIRATION_MINUTES);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
@@ -85,7 +88,7 @@ class TokenSecurityTest {
     @Test
     @DisplayName("Deve bloquear inicializacao com issuer em branco")
     void deveBloquearInicializacaoComIssuerEmBranco() {
-        var tokenSecurity = criarTokenSecurity(SECRET, " ");
+        var tokenSecurity = criarTokenSecurity(SECRET, " ", EXPIRATION_MINUTES);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
@@ -95,7 +98,7 @@ class TokenSecurityTest {
     @Test
     @DisplayName("Deve bloquear inicializacao com issuer contendo aspas duplas")
     void deveBloquearInicializacaoComIssuerContendoAspasDuplas() {
-        var tokenSecurity = criarTokenSecurity(SECRET, "\"API futuro\"");
+        var tokenSecurity = criarTokenSecurity(SECRET, "\"API futuro\"", EXPIRATION_MINUTES);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
@@ -105,11 +108,31 @@ class TokenSecurityTest {
     @Test
     @DisplayName("Deve bloquear inicializacao com issuer contendo aspas simples")
     void deveBloquearInicializacaoComIssuerContendoAspasSimples() {
-        var tokenSecurity = criarTokenSecurity(SECRET, "'API futuro'");
+        var tokenSecurity = criarTokenSecurity(SECRET, "'API futuro'", EXPIRATION_MINUTES);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("JWT_ISSUER/api.security.token.issuer nao deve conter aspas");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com expiracao nula")
+    void deveBloquearInicializacaoComExpiracaoNula() {
+        var tokenSecurity = criarTokenSecurity(SECRET, ISSUER, null);
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_EXPIRATION_MINUTES/api.security.token.expiration-minutes deve ser configurado com no minimo 5 minutos");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com expiracao menor que minimo")
+    void deveBloquearInicializacaoComExpiracaoMenorQueMinimo() {
+        var tokenSecurity = criarTokenSecurity(SECRET, ISSUER, 4L);
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_EXPIRATION_MINUTES/api.security.token.expiration-minutes deve ser configurado com no minimo 5 minutos");
     }
 
     @Test
@@ -134,6 +157,30 @@ class TokenSecurityTest {
         var properties = carregarProperties("application-prod.properties");
 
         assertThat(properties.getProperty("api.security.token.issuer")).isEqualTo("${JWT_ISSUER}");
+    }
+
+    @Test
+    @DisplayName("Deve manter expiracao externalizada no application properties")
+    void deveManterExpiracaoExternalizadaNoApplicationProperties() throws Exception {
+        var properties = carregarProperties("application.properties");
+
+        assertThat(properties.getProperty("api.security.token.expiration-minutes")).isEqualTo("${JWT_EXPIRATION_MINUTES}");
+    }
+
+    @Test
+    @DisplayName("Deve configurar expiracao local no profile dev")
+    void deveConfigurarExpiracaoLocalNoProfileDev() throws Exception {
+        var properties = carregarProperties("application-dev.properties");
+
+        assertThat(properties.getProperty("api.security.token.expiration-minutes")).isEqualTo("480");
+    }
+
+    @Test
+    @DisplayName("Deve manter expiracao externalizada no profile prod")
+    void deveManterExpiracaoExternalizadaNoProfileProd() throws Exception {
+        var properties = carregarProperties("application-prod.properties");
+
+        assertThat(properties.getProperty("api.security.token.expiration-minutes")).isEqualTo("${JWT_EXPIRATION_MINUTES}");
     }
 
     @Test
@@ -206,11 +253,12 @@ class TokenSecurityTest {
                 .hasMessage("Token JWT invalido ou expirado");
     }
 
-    private TokenSecurity criarTokenSecurity(String secret, String issuer) {
+    private TokenSecurity criarTokenSecurity(String secret, String issuer, Long expirationMinutes) {
         var tokenSecurity = new TokenSecurity();
 
         ReflectionTestUtils.setField(tokenSecurity, "secret", secret);
         ReflectionTestUtils.setField(tokenSecurity, "issuer", issuer);
+        ReflectionTestUtils.setField(tokenSecurity, "expirationMinutes", expirationMinutes);
 
         return tokenSecurity;
     }

@@ -1,8 +1,7 @@
 package com.empresa.erp.core.security.jwt;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import jakarta.annotation.PostConstruct;
 public class TokenSecurity {
 
     private static final int TAMANHO_MINIMO_SECRET = 32;
+    private static final long TEMPO_MINIMO_EXPIRACAO_MINUTOS = 5;
 
     @Value("${api.security.token.secret}")
     private String secret;
@@ -27,10 +27,14 @@ public class TokenSecurity {
     @Value("${api.security.token.issuer}")
     private String issuer;
 
+    @Value("${api.security.token.expiration-minutes}")
+    private Long expirationMinutes;
+
     @PostConstruct
     void validarConfiguracao() {
         validarSecret();
         validarIssuer();
+        validarExpiracao();
     }
 
     private void validarSecret() {
@@ -51,6 +55,14 @@ public class TokenSecurity {
         if (issuer.contains("\"") || issuer.contains("'")) {
             throw new IllegalStateException(
                     "JWT_ISSUER/api.security.token.issuer nao deve conter aspas"
+            );
+        }
+    }
+
+    private void validarExpiracao() {
+        if (expirationMinutes == null || expirationMinutes < TEMPO_MINIMO_EXPIRACAO_MINUTOS) {
+            throw new IllegalStateException(
+                    "JWT_EXPIRATION_MINUTES/api.security.token.expiration-minutes deve ser configurado com no minimo 5 minutos"
             );
         }
     }
@@ -83,7 +95,7 @@ public class TokenSecurity {
     }
 
     private Instant dataExpiracao() {
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+        return Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES);
     }
 
 }
