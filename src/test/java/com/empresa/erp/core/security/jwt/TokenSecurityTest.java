@@ -184,8 +184,8 @@ class TokenSecurityTest {
     }
 
     @Test
-    @DisplayName("Deve gerar token JWT com issuer, subject, id e expiracao")
-    void deveGerarTokenJwtComIssuerSubjectIdEExpiracao() {
+    @DisplayName("Deve gerar token JWT com issuer, subject, id, jti e expiracao")
+    void deveGerarTokenJwtComIssuerSubjectIdJtiEExpiracao() {
         var usuario = criarUsuario(1L, "usuario@teste.com");
 
         var token = tokenService.gerarToken(usuario);
@@ -197,7 +197,31 @@ class TokenSecurityTest {
 
         assertThat(jwt.getSubject()).isEqualTo("usuario@teste.com");
         assertThat(jwt.getClaim("id").asLong()).isEqualTo(1L);
+        assertThat(jwt.getId()).isNotBlank();
         assertThat(jwt.getExpiresAt().toInstant()).isAfter(Instant.now());
+    }
+
+    @Test
+    @DisplayName("Deve gerar tokens com jti diferentes")
+    void deveGerarTokensComJtiDiferentes() {
+        var usuario = criarUsuario(1L, "usuario@teste.com");
+
+        var primeiroToken = tokenService.gerarToken(usuario);
+        var segundoToken = tokenService.gerarToken(usuario);
+
+        var primeiroJwt = JWT.require(Algorithm.HMAC256(SECRET))
+                .withIssuer(ISSUER)
+                .build()
+                .verify(primeiroToken);
+
+        var segundoJwt = JWT.require(Algorithm.HMAC256(SECRET))
+                .withIssuer(ISSUER)
+                .build()
+                .verify(segundoToken);
+
+        assertThat(primeiroJwt.getId()).isNotBlank();
+        assertThat(segundoJwt.getId()).isNotBlank();
+        assertThat(primeiroJwt.getId()).isNotEqualTo(segundoJwt.getId());
     }
 
     @Test
@@ -207,6 +231,7 @@ class TokenSecurityTest {
                 .withIssuer(ISSUER)
                 .withSubject("usuario@teste.com")
                 .withClaim("id", 1L)
+                .withJWTId("jti-teste")
                 .withExpiresAt(Instant.now().plusSeconds(3600))
                 .sign(Algorithm.HMAC256(SECRET));
 
@@ -230,6 +255,7 @@ class TokenSecurityTest {
                 .withIssuer("outro-issuer")
                 .withSubject("usuario@teste.com")
                 .withClaim("id", 1L)
+                .withJWTId("jti-teste")
                 .withExpiresAt(Instant.now().plusSeconds(3600))
                 .sign(Algorithm.HMAC256(SECRET));
 
@@ -245,6 +271,7 @@ class TokenSecurityTest {
                 .withIssuer(ISSUER)
                 .withSubject("usuario@teste.com")
                 .withClaim("id", 1L)
+                .withJWTId("jti-teste")
                 .withExpiresAt(Instant.now().minusSeconds(60))
                 .sign(Algorithm.HMAC256(SECRET));
 

@@ -2,6 +2,7 @@ package com.empresa.erp.core.security.jwt;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -74,6 +75,7 @@ public class TokenSecurity {
                     .withIssuer(issuer)
                     .withSubject(usuario.getEmail())
                     .withClaim("id", usuario.getId())
+                    .withJWTId(UUID.randomUUID().toString())
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);
         } catch (JWTCreationException exception) {
