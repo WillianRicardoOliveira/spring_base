@@ -13,9 +13,9 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 class CorsSecurityTest {
 
     @Test
-    @DisplayName("Deve configurar CORS para frontend local")
-    void deveConfigurarCorsParaFrontendLocal() {
-        var corsSecurity = new CorsSecurity();
+    @DisplayName("Deve configurar CORS com origem parametrizada")
+    void deveConfigurarCorsComOrigemParametrizada() {
+        var corsSecurity = new CorsSecurity(new String[] { "http://localhost:4200" });
         var registry = new CorsRegistry();
 
         corsSecurity.addCorsMappings(registry);
@@ -28,6 +28,25 @@ class CorsSecurityTest {
         assertThat(config.getAllowedMethods())
                 .containsExactly("GET", "POST", "PUT", "DELETE", "OPTIONS");
         assertThat(config.getAllowedHeaders()).containsExactly("*");
+    }
+
+    @Test
+    @DisplayName("Deve configurar CORS com multiplas origens")
+    void deveConfigurarCorsComMultiplasOrigens() {
+        var corsSecurity = new CorsSecurity(new String[] {
+                "http://localhost:4200",
+                "https://erp.suaempresa.com.br"
+        });
+        var registry = new CorsRegistry();
+
+        corsSecurity.addCorsMappings(registry);
+
+        var configuracoes = obterConfiguracoesCors(registry);
+        var config = configuracoes.get("/**");
+
+        assertThat(config).isNotNull();
+        assertThat(config.getAllowedOrigins())
+                .containsExactly("http://localhost:4200", "https://erp.suaempresa.com.br");
     }
 
     @SuppressWarnings("unchecked")
