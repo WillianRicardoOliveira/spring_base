@@ -1,6 +1,7 @@
 package com.empresa.erp.core.exception;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -38,16 +39,19 @@ class TratarErrosTest {
     }
 
     @Test
-    @DisplayName("Deve retornar 404 quando entidade nao for encontrada")
-    void deveRetornar404QuandoEntidadeNaoForEncontrada() throws Exception {
+    @DisplayName("Deve retornar 404 em JSON quando entidade nao for encontrada")
+    void deveRetornar404EmJsonQuandoEntidadeNaoForEncontrada() throws Exception {
         mockMvc.perform(get("/teste/entity-not-found"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string(""));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.erro").value("NAO_ENCONTRADO"))
+                .andExpect(jsonPath("$.mensagem").value("Recurso nao encontrado"));
     }
 
     @Test
-    @DisplayName("Deve retornar 400 com erros de validacao")
-    void deveRetornar400ComErrosDeValidacao() throws Exception {
+    @DisplayName("Deve retornar 400 em JSON com erros de validacao")
+    void deveRetornar400EmJsonComErrosDeValidacao() throws Exception {
         var json = """
                 {
                     "nome": ""
@@ -58,66 +62,92 @@ class TratarErrosTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].campo").value("nome"))
-                .andExpect(jsonPath("$[0].mensagem").value("nome obrigatorio"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.erro").value("VALIDACAO"))
+                .andExpect(jsonPath("$.mensagem").value("Dados invalidos"))
+                .andExpect(jsonPath("$.campos[0].campo").value("nome"))
+                .andExpect(jsonPath("$.campos[0].mensagem").value("nome obrigatorio"));
     }
 
     @Test
-    @DisplayName("Deve retornar 400 quando JSON for invalido")
-    void deveRetornar400QuandoJsonForInvalido() throws Exception {
+    @DisplayName("Deve retornar 400 em JSON quando JSON for invalido")
+    void deveRetornar400EmJsonQuandoJsonForInvalido() throws Exception {
         mockMvc.perform(post("/teste/validacao-bean")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("JSON")));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.erro").value("REQUISICAO_INVALIDA"))
+                .andExpect(jsonPath("$.mensagem").value("Corpo da requisicao invalido"));
     }
 
     @Test
-    @DisplayName("Deve retornar 400 para regra de negocio")
-    void deveRetornar400ParaRegraDeNegocio() throws Exception {
+    @DisplayName("Deve retornar 400 em JSON para regra de negocio")
+    void deveRetornar400EmJsonParaRegraDeNegocio() throws Exception {
         mockMvc.perform(get("/teste/validacao-negocio"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Regra de negocio invalida"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.erro").value("REGRA_DE_NEGOCIO"))
+                .andExpect(jsonPath("$.mensagem").value("Regra de negocio invalida"));
     }
 
     @Test
-    @DisplayName("Deve retornar 401 para credenciais invalidas")
-    void deveRetornar401ParaCredenciaisInvalidas() throws Exception {
+    @DisplayName("Deve retornar 401 em JSON para credenciais invalidas")
+    void deveRetornar401EmJsonParaCredenciaisInvalidas() throws Exception {
         mockMvc.perform(get("/teste/bad-credentials"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Credenciais invalidas"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.erro").value("NAO_AUTENTICADO"))
+                .andExpect(jsonPath("$.mensagem").value("Credenciais invalidas"));
     }
 
     @Test
-    @DisplayName("Deve retornar 401 para falha de autenticacao")
-    void deveRetornar401ParaFalhaDeAutenticacao() throws Exception {
+    @DisplayName("Deve retornar 401 em JSON para falha de autenticacao")
+    void deveRetornar401EmJsonParaFalhaDeAutenticacao() throws Exception {
         mockMvc.perform(get("/teste/authentication"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Falha na autenticacao"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.erro").value("NAO_AUTENTICADO"))
+                .andExpect(jsonPath("$.mensagem").value("Falha na autenticacao"));
     }
 
     @Test
-    @DisplayName("Deve retornar 403 para acesso negado")
-    void deveRetornar403ParaAcessoNegado() throws Exception {
+    @DisplayName("Deve retornar 403 em JSON para acesso negado")
+    void deveRetornar403EmJsonParaAcessoNegado() throws Exception {
         mockMvc.perform(get("/teste/access-denied"))
                 .andExpect(status().isForbidden())
-                .andExpect(content().string("Acesso negado"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.erro").value("ACESSO_NEGADO"))
+                .andExpect(jsonPath("$.mensagem").value("Acesso negado"));
     }
 
     @Test
-    @DisplayName("Deve retornar 401 para erro de SSO")
-    void deveRetornar401ParaErroDeSso() throws Exception {
+    @DisplayName("Deve retornar 401 em JSON para erro de SSO")
+    void deveRetornar401EmJsonParaErroDeSso() throws Exception {
         mockMvc.perform(get("/teste/sso"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Token SSO invalido"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.erro").value("SSO_INVALIDO"))
+                .andExpect(jsonPath("$.mensagem").value("Token SSO invalido"));
     }
 
     @Test
-    @DisplayName("Deve retornar 500 para erro inesperado")
-    void deveRetornar500ParaErroInesperado() throws Exception {
+    @DisplayName("Deve retornar 500 em JSON sem expor detalhes internos")
+    void deveRetornar500EmJsonSemExporDetalhesInternos() throws Exception {
         mockMvc.perform(get("/teste/erro-inesperado"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(content().string("Erro: Erro inesperado"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.erro").value("ERRO_INTERNO"))
+                .andExpect(jsonPath("$.mensagem").value("Erro interno do servidor"))
+                .andExpect(content().string(not(containsString("Erro inesperado"))));
     }
 
     @RestController
