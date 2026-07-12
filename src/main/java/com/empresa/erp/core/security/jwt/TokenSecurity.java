@@ -29,9 +29,28 @@ public class TokenSecurity {
 
     @PostConstruct
     void validarConfiguracao() {
+        validarSecret();
+        validarIssuer();
+    }
+
+    private void validarSecret() {
         if (!StringUtils.hasText(secret) || secret.length() < TAMANHO_MINIMO_SECRET) {
             throw new IllegalStateException(
                     "JWT_SECRET/api.security.token.secret deve ser configurado com no minimo 32 caracteres"
+            );
+        }
+    }
+
+    private void validarIssuer() {
+        if (!StringUtils.hasText(issuer)) {
+            throw new IllegalStateException(
+                    "JWT_ISSUER/api.security.token.issuer deve ser configurado"
+            );
+        }
+
+        if (issuer.contains("\"") || issuer.contains("'")) {
+            throw new IllegalStateException(
+                    "JWT_ISSUER/api.security.token.issuer nao deve conter aspas"
             );
         }
     }

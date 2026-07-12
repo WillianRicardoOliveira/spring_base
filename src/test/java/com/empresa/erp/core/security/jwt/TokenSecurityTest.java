@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
+import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.JWT;
@@ -33,17 +35,17 @@ class TokenSecurityTest {
     }
 
     @Test
-    @DisplayName("Deve validar configuracao com secret seguro")
-    void deveValidarConfiguracaoComSecretSeguro() {
+    @DisplayName("Deve validar configuracao com secret e issuer seguros")
+    void deveValidarConfiguracaoComSecretEIssuerSeguros() {
         assertThat(SECRET).hasSizeGreaterThanOrEqualTo(32);
+        assertThat(ISSUER).isNotBlank();
+        assertThat(ISSUER).doesNotContain("\"", "'");
     }
 
     @Test
     @DisplayName("Deve bloquear inicializacao com secret nulo")
     void deveBloquearInicializacaoComSecretNulo() {
-        var tokenSecurity = new TokenSecurity();
-
-        ReflectionTestUtils.setField(tokenSecurity, "secret", null);
+        var tokenSecurity = criarTokenSecurity(null, ISSUER);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
@@ -53,9 +55,7 @@ class TokenSecurityTest {
     @Test
     @DisplayName("Deve bloquear inicializacao com secret em branco")
     void deveBloquearInicializacaoComSecretEmBranco() {
-        var tokenSecurity = new TokenSecurity();
-
-        ReflectionTestUtils.setField(tokenSecurity, "secret", " ");
+        var tokenSecurity = criarTokenSecurity(" ", ISSUER);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
@@ -65,13 +65,75 @@ class TokenSecurityTest {
     @Test
     @DisplayName("Deve bloquear inicializacao com secret fraco")
     void deveBloquearInicializacaoComSecretFraco() {
-        var tokenSecurity = new TokenSecurity();
-
-        ReflectionTestUtils.setField(tokenSecurity, "secret", "12345678");
+        var tokenSecurity = criarTokenSecurity("12345678", ISSUER);
 
         assertThatThrownBy(tokenSecurity::validarConfiguracao)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("JWT_SECRET/api.security.token.secret deve ser configurado com no minimo 32 caracteres");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com issuer nulo")
+    void deveBloquearInicializacaoComIssuerNulo() {
+        var tokenSecurity = criarTokenSecurity(SECRET, null);
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_ISSUER/api.security.token.issuer deve ser configurado");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com issuer em branco")
+    void deveBloquearInicializacaoComIssuerEmBranco() {
+        var tokenSecurity = criarTokenSecurity(SECRET, " ");
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_ISSUER/api.security.token.issuer deve ser configurado");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com issuer contendo aspas duplas")
+    void deveBloquearInicializacaoComIssuerContendoAspasDuplas() {
+        var tokenSecurity = criarTokenSecurity(SECRET, "\"API futuro\"");
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_ISSUER/api.security.token.issuer nao deve conter aspas");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear inicializacao com issuer contendo aspas simples")
+    void deveBloquearInicializacaoComIssuerContendoAspasSimples() {
+        var tokenSecurity = criarTokenSecurity(SECRET, "'API futuro'");
+
+        assertThatThrownBy(tokenSecurity::validarConfiguracao)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_ISSUER/api.security.token.issuer nao deve conter aspas");
+    }
+
+    @Test
+    @DisplayName("Deve manter issuer externalizado no application properties")
+    void deveManterIssuerExternalizadoNoApplicationProperties() throws Exception {
+        var properties = carregarProperties("application.properties");
+
+        assertThat(properties.getProperty("api.security.token.issuer")).isEqualTo("${JWT_ISSUER}");
+    }
+
+    @Test
+    @DisplayName("Deve configurar issuer local no profile dev")
+    void deveConfigurarIssuerLocalNoProfileDev() throws Exception {
+        var properties = carregarProperties("application-dev.properties");
+
+        assertThat(properties.getProperty("api.security.token.issuer")).isEqualTo("erp-api-dev");
+    }
+
+    @Test
+    @DisplayName("Deve manter issuer externalizado no profile prod")
+    void deveManterIssuerExternalizadoNoProfileProd() throws Exception {
+        var properties = carregarProperties("application-prod.properties");
+
+        assertThat(properties.getProperty("api.security.token.issuer")).isEqualTo("${JWT_ISSUER}");
     }
 
     @Test
@@ -142,6 +204,26 @@ class TokenSecurityTest {
         assertThatThrownBy(() -> tokenService.getSubject(token))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Token JWT invalido ou expirado");
+    }
+
+    private TokenSecurity criarTokenSecurity(String secret, String issuer) {
+        var tokenSecurity = new TokenSecurity();
+
+        ReflectionTestUtils.setField(tokenSecurity, "secret", secret);
+        ReflectionTestUtils.setField(tokenSecurity, "issuer", issuer);
+
+        return tokenSecurity;
+    }
+
+    private Properties carregarProperties(String arquivo) throws Exception {
+        var properties = new Properties();
+        var resource = new ClassPathResource(arquivo);
+
+        try (var inputStream = resource.getInputStream()) {
+            properties.load(inputStream);
+        }
+
+        return properties;
     }
 
     private UsuarioModel criarUsuario(Long id, String email) {
