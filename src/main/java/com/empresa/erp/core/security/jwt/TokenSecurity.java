@@ -12,6 +12,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.empresa.erp.core.security.record.TokenGeradoSecurity;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
 import jakarta.annotation.PostConstruct;
@@ -69,15 +70,23 @@ public class TokenSecurity {
     }
 
     public String gerarToken(UsuarioModel usuario) {
+        return gerarTokenComJti(usuario).token();
+    }
+
+    public TokenGeradoSecurity gerarTokenComJti(UsuarioModel usuario) {
         try {
+            String jti = UUID.randomUUID().toString();
+
             Algorithm algoritmo = Algorithm.HMAC256(secret);
-            return JWT.create()
+            String token = JWT.create()
                     .withIssuer(issuer)
                     .withSubject(usuario.getEmail())
                     .withClaim("id", usuario.getId())
-                    .withJWTId(UUID.randomUUID().toString())
+                    .withJWTId(jti)
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);
+
+            return new TokenGeradoSecurity(token, jti);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("erro ao gerar token jwt", exception);
         }
@@ -99,5 +108,4 @@ public class TokenSecurity {
     private Instant dataExpiracao() {
         return Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES);
     }
-
 }

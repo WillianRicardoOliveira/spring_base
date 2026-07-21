@@ -14,6 +14,38 @@ CREATE TABLE usuario (
     CONSTRAINT uk_usuario_email UNIQUE (email)
 );
 
+CREATE TABLE usuario_sessao (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_usuario BIGINT NOT NULL,
+    refresh_token_hash VARCHAR(255) NOT NULL,
+    access_token_jti VARCHAR(100),
+    status TINYINT NOT NULL DEFAULT 0,
+    expira_em DATETIME NOT NULL,
+    revogado_em DATETIME,
+    revogado_por BIGINT,
+    motivo_revogacao VARCHAR(100),
+    ip VARCHAR(45),
+    user_agent VARCHAR(255),
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_usuario_sessao_usuario_id FOREIGN KEY (id_usuario) REFERENCES usuario (id),
+    CONSTRAINT uk_usuario_sessao_refresh_token_hash UNIQUE (refresh_token_hash)
+);
+
+CREATE INDEX idx_usuario_sessao_usuario_status
+ON usuario_sessao (id_usuario, status);
+
+CREATE INDEX idx_usuario_sessao_expira_em
+ON usuario_sessao (expira_em);
+
+CREATE INDEX idx_usuario_sessao_access_token_jti
+ON usuario_sessao (access_token_jti);
+
 CREATE TABLE perfil (
     id BIGINT NOT NULL AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,

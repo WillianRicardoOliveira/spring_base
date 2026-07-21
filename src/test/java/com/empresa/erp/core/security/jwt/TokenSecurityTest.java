@@ -202,26 +202,36 @@ class TokenSecurityTest {
     }
 
     @Test
+    @DisplayName("Deve gerar token JWT retornando o jti gerado")
+    void deveGerarTokenJwtRetornandoJtiGerado() {
+        var usuario = criarUsuario(1L, "usuario@teste.com");
+
+        var tokenGerado = tokenService.gerarTokenComJti(usuario);
+
+        var jwt = JWT.require(Algorithm.HMAC256(SECRET))
+                .withIssuer(ISSUER)
+                .build()
+                .verify(tokenGerado.token());
+
+        assertThat(tokenGerado.token()).isNotBlank();
+        assertThat(tokenGerado.jti()).isNotBlank();
+        assertThat(jwt.getId()).isEqualTo(tokenGerado.jti());
+        assertThat(jwt.getSubject()).isEqualTo("usuario@teste.com");
+        assertThat(jwt.getClaim("id").asLong()).isEqualTo(1L);
+    }
+
+    @Test
     @DisplayName("Deve gerar tokens com jti diferentes")
     void deveGerarTokensComJtiDiferentes() {
         var usuario = criarUsuario(1L, "usuario@teste.com");
 
-        var primeiroToken = tokenService.gerarToken(usuario);
-        var segundoToken = tokenService.gerarToken(usuario);
+        var primeiroToken = tokenService.gerarTokenComJti(usuario);
+        var segundoToken = tokenService.gerarTokenComJti(usuario);
 
-        var primeiroJwt = JWT.require(Algorithm.HMAC256(SECRET))
-                .withIssuer(ISSUER)
-                .build()
-                .verify(primeiroToken);
-
-        var segundoJwt = JWT.require(Algorithm.HMAC256(SECRET))
-                .withIssuer(ISSUER)
-                .build()
-                .verify(segundoToken);
-
-        assertThat(primeiroJwt.getId()).isNotBlank();
-        assertThat(segundoJwt.getId()).isNotBlank();
-        assertThat(primeiroJwt.getId()).isNotEqualTo(segundoJwt.getId());
+        assertThat(primeiroToken.jti()).isNotBlank();
+        assertThat(segundoToken.jti()).isNotBlank();
+        assertThat(primeiroToken.jti()).isNotEqualTo(segundoToken.jti());
+        assertThat(primeiroToken.token()).isNotEqualTo(segundoToken.token());
     }
 
     @Test

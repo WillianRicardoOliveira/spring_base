@@ -51,6 +51,8 @@ public class ConfigSecurity {
                 )
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/login/refresh").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/login/logout").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/login/sso").permitAll();
 
                     if (swaggerPublic) {

@@ -3,6 +3,7 @@ package com.empresa.erp.domain.usuario.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
+import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.AtualizaSenhaUsuarioRecord;
@@ -46,6 +48,9 @@ class UsuarioServiceTest {
     @Mock
     private UsuarioAutenticadoService usuarioAutenticadoService;
 
+    @Mock
+    private UsuarioSessaoService usuarioSessaoService;
+
     @InjectMocks
     private UsuarioService service;
 
@@ -64,6 +69,7 @@ class UsuarioServiceTest {
         assertThat(usuario.getStatus()).isEqualTo(StatusEnum.ATIVO);
 
         verify(repository).save(usuario);
+        verifyNoInteractions(usuarioSessaoService);
     }
 
     @Test
@@ -76,6 +82,8 @@ class UsuarioServiceTest {
         assertThatThrownBy(() -> service.cadastrar(dados))
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Usuario ja cadastrado.");
+
+        verifyNoInteractions(usuarioSessaoService);
     }
 
     @Test
@@ -139,6 +147,8 @@ class UsuarioServiceTest {
         assertThat(resultado.id()).isEqualTo(1L);
         assertThat(resultado.email()).isEqualTo("novo@teste.com");
         assertThat(resultado.status()).isEqualTo(StatusEnum.ATIVO);
+
+        verifyNoInteractions(usuarioSessaoService);
     }
 
     @Test
@@ -151,6 +161,8 @@ class UsuarioServiceTest {
         assertThatThrownBy(() -> service.atualizar(dados))
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Usuario ja cadastrado.");
+
+        verifyNoInteractions(usuarioSessaoService);
     }
 
     @Test
@@ -158,23 +170,23 @@ class UsuarioServiceTest {
     void deveBloquearAtualizacaoDeUsuarioRemovido() {
         var dados = new AtualizaUsuarioRecord(1L, "novo@teste.com");
 
-        when(repository.existsByEmailIgnoreCaseAndIdNot("novo@teste.com", 1L))
-                .thenReturn(false);
-
-        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO))
-                .thenReturn(Optional.empty());
+        when(repository.existsByEmailIgnoreCaseAndIdNot("novo@teste.com", 1L)).thenReturn(false);
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.atualizar(dados))
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Usuario nao encontrado ou removido.");
+
+        verifyNoInteractions(usuarioSessaoService);
     }
 
     @Test
-    @DisplayName("Deve atualizar senha do usuario")
-    void deveAtualizarSenhaDoUsuario() {
+    @DisplayName("Deve atualizar senha do usuario e revogar sessoes")
+    void deveAtualizarSenhaDoUsuarioERevogarSessoes() {
         var dados = new AtualizaSenhaUsuarioRecord(1L, "Senha@123");
         var usuario = criarUsuario(1L, "usuario@teste.com");
 
+        when(usuarioLogadoService.getId()).thenReturn(10L);
         when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.of(usuario));
         when(passwordEncoder.encode("Senha@123")).thenReturn("senha-criptografada-nova");
 
@@ -183,6 +195,8 @@ class UsuarioServiceTest {
         assertThat(resultado.id()).isEqualTo(1L);
         assertThat(resultado.email()).isEqualTo("usuario@teste.com");
         assertThat(usuario.getSenha()).isEqualTo("senha-criptografada-nova");
+
+        verify(usuarioSessaoService).revogarSessoesDoUsuario(1L, 10L, "ALTERACAO_SENHA");
     }
 
     @Test
@@ -190,17 +204,19 @@ class UsuarioServiceTest {
     void deveBloquearAlteracaoDeSenhaDeUsuarioRemovido() {
         var dados = new AtualizaSenhaUsuarioRecord(1L, "Senha@123");
 
-        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO))
-                .thenReturn(Optional.empty());
+        when(usuarioLogadoService.getId()).thenReturn(10L);
+        when(repository.findByIdAndStatus(1L, StatusEnum.ATIVO)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.atualizarSenha(dados))
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Usuario nao encontrado ou removido.");
+
+        verifyNoInteractions(usuarioSessaoService);
     }
 
     @Test
-    @DisplayName("Deve remover usuario com auditoria")
-    void deveRemoverUsuarioComAuditoria() {
+    @DisplayName("Deve remover usuario com auditoria e revogar sessoes")
+    void deveRemoverUsuarioComAuditoriaERevogarSessoes() {
         var usuario = criarUsuario(1L, "usuario@teste.com");
 
         when(usuarioLogadoService.getId()).thenReturn(10L);
@@ -211,6 +227,8 @@ class UsuarioServiceTest {
         assertThat(usuario.getStatus()).isEqualTo(StatusEnum.REMOVIDO);
         assertThat(usuario.getRemovidoEm()).isNotNull();
         assertThat(usuario.getRemovidoPor()).isEqualTo(10L);
+
+        verify(usuarioSessaoService).revogarSessoesDoUsuario(1L, 10L, "USUARIO_REMOVIDO");
     }
 
     @Test
