@@ -118,6 +118,38 @@ Toda nova funcionalidade deve considerar esse contexto antes da definição ou a
 - Validações;
 - Regras de negócio.
 
+## Documentação funcional
+
+A documentação funcional está localizada em `docs/dominios/`.
+
+Antes de criar, analisar ou alterar uma funcionalidade, consulte a documentação do domínio correspondente.
+
+Não presumir regras de negócio ausentes ou indefinidas na documentação.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Projeto Spring Boot
