@@ -12,6 +12,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.empresa.erp.core.security.record.TokenGeradoSecurity;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
@@ -93,13 +94,21 @@ public class TokenSecurity {
     }
 
     public String getSubject(String tokenJWT) {
+        return verificarToken(tokenJWT).getSubject();
+    }
+
+    public String getJti(String tokenJWT) {
+        return verificarToken(tokenJWT).getId();
+    }
+
+    private DecodedJWT verificarToken(String tokenJWT) {
         try {
             var algoritmo = Algorithm.HMAC256(secret);
+
             return JWT.require(algoritmo)
                     .withIssuer(issuer)
                     .build()
-                    .verify(tokenJWT)
-                    .getSubject();
+                    .verify(tokenJWT);
         } catch (JWTVerificationException exception) {
             throw new RuntimeException("Token JWT invalido ou expirado");
         }

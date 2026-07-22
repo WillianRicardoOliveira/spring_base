@@ -10,6 +10,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
+import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +26,8 @@ public class FilterSecurity extends OncePerRequestFilter {
 
     private final UsuarioAutenticadoService usuarioAutenticadoService;
 
+    private final UsuarioSessaoService usuarioSessaoService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -33,6 +36,12 @@ public class FilterSecurity extends OncePerRequestFilter {
         try {
             if (tokenJWT != null) {
                 var subject = tokenService.getSubject(tokenJWT);
+                var accessTokenJti = tokenService.getJti(tokenJWT);
+
+                if (!usuarioSessaoService.accessTokenEstaAtivo(accessTokenJti)) {
+                    throw new RuntimeException("Token JWT revogado");
+                }
+
                 var usuarioAutenticado = usuarioAutenticadoService.buscarPorEmail(subject);
 
                 if (usuarioAutenticado != null) {

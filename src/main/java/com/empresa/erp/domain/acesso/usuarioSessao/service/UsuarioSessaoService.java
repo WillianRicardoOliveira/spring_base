@@ -139,6 +139,15 @@ public class UsuarioSessaoService {
 
         sessao.revogar(sessao.getUsuario().getId(), "LOGOUT");
     }
+    
+    @Transactional(readOnly = true)
+    public boolean accessTokenEstaAtivo(String accessTokenJti) {
+        if (!StringUtils.hasText(accessTokenJti)) {
+            return false;
+        }
+
+        return repository.existsByAccessTokenJtiAndStatus(accessTokenJti, StatusEnum.ATIVO);
+    }
 
     public String gerarHash(String refreshToken) {
         try {

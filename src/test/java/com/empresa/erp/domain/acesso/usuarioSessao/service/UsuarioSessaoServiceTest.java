@@ -335,6 +335,42 @@ class UsuarioSessaoServiceTest {
         service.validarConfiguracao();
     }
 
+    @Test
+    @DisplayName("Deve retornar true quando access token estiver ativo")
+    void deveRetornarTrueQuandoAccessTokenEstiverAtivo() {
+        when(repository.existsByAccessTokenJtiAndStatus("jti-ativo", StatusEnum.ATIVO))
+                .thenReturn(true);
+
+        boolean resultado = service.accessTokenEstaAtivo("jti-ativo");
+
+        assertThat(resultado).isTrue();
+
+        verify(repository).existsByAccessTokenJtiAndStatus("jti-ativo", StatusEnum.ATIVO);
+    }
+
+    @Test
+    @DisplayName("Deve retornar false quando access token nao estiver ativo")
+    void deveRetornarFalseQuandoAccessTokenNaoEstiverAtivo() {
+        when(repository.existsByAccessTokenJtiAndStatus("jti-inativo", StatusEnum.ATIVO))
+                .thenReturn(false);
+
+        boolean resultado = service.accessTokenEstaAtivo("jti-inativo");
+
+        assertThat(resultado).isFalse();
+
+        verify(repository).existsByAccessTokenJtiAndStatus("jti-inativo", StatusEnum.ATIVO);
+    }
+
+    @Test
+    @DisplayName("Deve retornar false quando jti nao for informado")
+    void deveRetornarFalseQuandoJtiNaoForInformado() {
+        boolean resultadoNulo = service.accessTokenEstaAtivo(null);
+        boolean resultadoBranco = service.accessTokenEstaAtivo(" ");
+
+        assertThat(resultadoNulo).isFalse();
+        assertThat(resultadoBranco).isFalse();
+    }
+    
     private UsuarioSessaoModel criarSessao(UsuarioModel usuario, String refreshTokenHash, String accessTokenJti) {
         return new UsuarioSessaoModel(
                 usuario,
