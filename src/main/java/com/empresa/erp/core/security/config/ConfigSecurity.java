@@ -17,8 +17,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.empresa.erp.core.security.filter.FilterSecurity;
+import com.empresa.erp.core.security.handler.AcessoNegadoHandler;
+import com.empresa.erp.core.security.handler.AutenticacaoEntryPoint;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -28,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class ConfigSecurity {
 
     private final FilterSecurity filter;
+    private final AutenticacaoEntryPoint autenticacaoEntryPoint;
+    private final AcessoNegadoHandler acessoNegadoHandler;
 
     @Value("${app.security.swagger-public:false}")
     private boolean swaggerPublic;
@@ -38,16 +41,8 @@ public class ConfigSecurity {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("text/plain;charset=UTF-8");
-                            response.getWriter().write("Nao autenticado");
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setContentType("text/plain;charset=UTF-8");
-                            response.getWriter().write("Acesso negado");
-                        })
+                        .authenticationEntryPoint(autenticacaoEntryPoint)
+                        .accessDeniedHandler(acessoNegadoHandler)
                 )
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();

@@ -2,6 +2,7 @@ package com.empresa.erp.core.security.filter;
 
 import java.io.IOException;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -20,46 +21,51 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FilterSecurity extends OncePerRequestFilter {
 
-	private final TokenSecurity tokenService;
-	
-	private final UsuarioAutenticadoService usuarioAutenticadoService;
-	
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-	        throws ServletException, IOException {
-	    var tokenJWT = recuperarToken(request);
+    private final TokenSecurity tokenService;
 
-	    try {
-	        if (tokenJWT != null) {
-	            var subject = tokenService.getSubject(tokenJWT);
-	            var usuarioAutenticado = usuarioAutenticadoService.buscarPorEmail(subject);
+    private final UsuarioAutenticadoService usuarioAutenticadoService;
 
-	            if (usuarioAutenticado != null) {
-	                var authentication = new UsernamePasswordAuthenticationToken(
-	                        usuarioAutenticado,
-	                        null,
-	                        usuarioAutenticado.getAuthorities()
-	                );
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        var tokenJWT = recuperarToken(request);
 
-	                SecurityContextHolder.getContext().setAuthentication(authentication);
-	            }
-	        }
+        try {
+            if (tokenJWT != null) {
+                var subject = tokenService.getSubject(tokenJWT);
+                var usuarioAutenticado = usuarioAutenticadoService.buscarPorEmail(subject);
 
-	        filterChain.doFilter(request, response);
-	    } catch (Exception e) {
-	        SecurityContextHolder.clearContext();
-	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	        response.setContentType("text/plain;charset=UTF-8");
-	        response.getWriter().write("Token invalido ou expirado");
-	    }
-	}
+                if (usuarioAutenticado != null) {
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            usuarioAutenticado,
+                            null,
+                            usuarioAutenticado.getAuthorities()
+                    );
 
-	private String recuperarToken(HttpServletRequest request) {
-		var authorizationHeader = request.getHeader("Authorization");
-		if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-			return authorizationHeader.substring(7).trim();
-		}
-		return null;
-	}
-	
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }
+
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("""
+                    {"status":401,"erro":"TOKEN_INVALIDO","mensagem":"Token invalido ou expirado"}
+                    """);
+        }
+    }
+
+    private String recuperarToken(HttpServletRequest request) {
+        var authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7).trim();
+        }
+
+        return null;
+    }
 }

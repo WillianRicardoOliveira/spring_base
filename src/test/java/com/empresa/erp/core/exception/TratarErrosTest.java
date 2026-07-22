@@ -95,6 +95,17 @@ class TratarErrosTest {
     }
 
     @Test
+    @DisplayName("Deve retornar 401 em JSON para refresh token invalido")
+    void deveRetornar401EmJsonParaRefreshTokenInvalido() throws Exception {
+        mockMvc.perform(get("/teste/refresh-token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.erro").value("REFRESH_TOKEN_INVALIDO"))
+                .andExpect(jsonPath("$.mensagem").value("Refresh token invalido."));
+    }
+
+    @Test
     @DisplayName("Deve retornar 401 em JSON para credenciais invalidas")
     void deveRetornar401EmJsonParaCredenciaisInvalidas() throws Exception {
         mockMvc.perform(get("/teste/bad-credentials"))
@@ -165,6 +176,11 @@ class TratarErrosTest {
         @GetMapping("/teste/validacao-negocio")
         void validacaoNegocio() {
             throw new ValidacaoException("Regra de negocio invalida");
+        }
+
+        @GetMapping("/teste/refresh-token")
+        void refreshToken() {
+            throw new RefreshTokenException("Refresh token invalido.");
         }
 
         @GetMapping("/teste/bad-credentials")

@@ -19,6 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.core.security.filter.FilterSecurity;
+import com.empresa.erp.core.security.handler.AcessoNegadoHandler;
+import com.empresa.erp.core.security.handler.AutenticacaoEntryPoint;
 
 class ConfigSecurityTest {
 
@@ -39,10 +41,12 @@ class ConfigSecurityTest {
     @DisplayName("Deve obter AuthenticationManager da configuracao")
     void deveObterAuthenticationManagerDaConfiguracao() throws Exception {
         var filter = org.mockito.Mockito.mock(FilterSecurity.class);
+        var autenticacaoEntryPoint = org.mockito.Mockito.mock(AutenticacaoEntryPoint.class);
+        var acessoNegadoHandler = org.mockito.Mockito.mock(AcessoNegadoHandler.class);
         var configuration = org.mockito.Mockito.mock(AuthenticationConfiguration.class);
         var authenticationManager = org.mockito.Mockito.mock(AuthenticationManager.class);
 
-        var configSecurity = new ConfigSecurity(filter);
+        var configSecurity = new ConfigSecurity(filter, autenticacaoEntryPoint, acessoNegadoHandler);
 
         when(configuration.getAuthenticationManager()).thenReturn(authenticationManager);
 
@@ -57,7 +61,9 @@ class ConfigSecurityTest {
     @DisplayName("Deve criar PasswordEncoder BCrypt")
     void deveCriarPasswordEncoderBCrypt() {
         var filter = org.mockito.Mockito.mock(FilterSecurity.class);
-        var configSecurity = new ConfigSecurity(filter);
+        var autenticacaoEntryPoint = org.mockito.Mockito.mock(AutenticacaoEntryPoint.class);
+        var acessoNegadoHandler = org.mockito.Mockito.mock(AcessoNegadoHandler.class);
+        var configSecurity = new ConfigSecurity(filter, autenticacaoEntryPoint, acessoNegadoHandler);
 
         var passwordEncoder = configSecurity.passwordEncoder();
 
@@ -69,7 +75,9 @@ class ConfigSecurityTest {
     @DisplayName("Deve manter Swagger privado por padrao")
     void deveManterSwaggerPrivadoPorPadrao() {
         var filter = org.mockito.Mockito.mock(FilterSecurity.class);
-        var configSecurity = new ConfigSecurity(filter);
+        var autenticacaoEntryPoint = org.mockito.Mockito.mock(AutenticacaoEntryPoint.class);
+        var acessoNegadoHandler = org.mockito.Mockito.mock(AcessoNegadoHandler.class);
+        var configSecurity = new ConfigSecurity(filter, autenticacaoEntryPoint, acessoNegadoHandler);
 
         var swaggerPublic = ReflectionTestUtils.getField(configSecurity, "swaggerPublic");
 
@@ -91,7 +99,9 @@ class ConfigSecurityTest {
     @DisplayName("Deve permitir habilitar Swagger publico por configuracao")
     void devePermitirHabilitarSwaggerPublicoPorConfiguracao() {
         var filter = org.mockito.Mockito.mock(FilterSecurity.class);
-        var configSecurity = new ConfigSecurity(filter);
+        var autenticacaoEntryPoint = org.mockito.Mockito.mock(AutenticacaoEntryPoint.class);
+        var acessoNegadoHandler = org.mockito.Mockito.mock(AcessoNegadoHandler.class);
+        var configSecurity = new ConfigSecurity(filter, autenticacaoEntryPoint, acessoNegadoHandler);
 
         ReflectionTestUtils.setField(configSecurity, "swaggerPublic", true);
 

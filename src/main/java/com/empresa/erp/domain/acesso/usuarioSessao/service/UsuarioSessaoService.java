@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.empresa.erp.core.exception.RefreshTokenException;
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.record.TokenJwtSecurity;
@@ -79,10 +80,10 @@ public class UsuarioSessaoService {
         String refreshTokenHash = gerarHash(refreshToken);
 
         UsuarioSessaoModel sessao = repository.findByRefreshTokenHashAndStatus(refreshTokenHash, StatusEnum.ATIVO)
-                .orElseThrow(() -> new ValidacaoException("Refresh token invalido."));
+                .orElseThrow(() -> new RefreshTokenException("Refresh token invalido."));
 
         if (!sessao.estaAtiva()) {
-            throw new ValidacaoException("Refresh token expirado ou revogado.");
+            throw new RefreshTokenException("Refresh token expirado ou revogado.");
         }
 
         var tokenGerado = tokenSecurity.gerarTokenComJti(sessao.getUsuario());
@@ -98,7 +99,7 @@ public class UsuarioSessaoService {
 
         return new TokenJwtSecurity(tokenGerado.token(), novoRefreshToken);
     }
-    
+
     @Transactional
     public void revogarSessoesDoUsuario(Long idUsuario, Long idUsuarioResponsavel, String motivo) {
         if (idUsuario == null) {
@@ -117,7 +118,7 @@ public class UsuarioSessaoService {
 
         sessoes.forEach(sessao -> sessao.revogar(idUsuarioResponsavel, motivo));
     }
-    
+
     @Transactional
     public void revogarSessoesExpiradas() {
         var sessoes = repository.findAllByExpiraEmBeforeAndStatus(LocalDateTime.now(), StatusEnum.ATIVO);
@@ -134,7 +135,7 @@ public class UsuarioSessaoService {
         String refreshTokenHash = gerarHash(refreshToken);
 
         UsuarioSessaoModel sessao = repository.findByRefreshTokenHashAndStatus(refreshTokenHash, StatusEnum.ATIVO)
-                .orElseThrow(() -> new ValidacaoException("Refresh token invalido."));
+                .orElseThrow(() -> new RefreshTokenException("Refresh token invalido."));
 
         sessao.revogar(sessao.getUsuario().getId(), "LOGOUT");
     }

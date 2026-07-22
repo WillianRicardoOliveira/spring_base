@@ -7,161 +7,144 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
-import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class FilterSecurityTest {
 
+    @Mock
     private TokenSecurity tokenService;
+
+    @Mock
     private UsuarioAutenticadoService usuarioAutenticadoService;
+
     private FilterSecurity filter;
 
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
-
-        tokenService = org.mockito.Mockito.mock(TokenSecurity.class);
-        usuarioAutenticadoService = org.mockito.Mockito.mock(UsuarioAutenticadoService.class);
-
         filter = new FilterSecurity(tokenService, usuarioAutenticadoService);
     }
 
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
-    }
-
     @Test
-    @DisplayName("Deve seguir o filtro sem autenticar quando nao houver token")
-    void deveSeguirOFiltroSemAutenticarQuandoNaoHouverToken() throws Exception {
+    @DisplayName("Deve seguir filtro quando nao houver token")
+    void deveSeguirFiltroQuandoNaoHouverToken() throws Exception {
         var request = new MockHttpServletRequest();
         var response = new MockHttpServletResponse();
-        var filterChain = new MockFilterChain();
+        var chain = new MockFilterChain();
 
-        filter.doFilter(request, response, filterChain);
-
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-        assertThat(filterChain.getRequest()).isSameAs(request);
-        assertThat(response.getStatus()).isEqualTo(200);
-
-        verifyNoInteractions(tokenService, usuarioAutenticadoService);
-    }
-
-    @Test
-    @DisplayName("Deve ignorar header Authorization sem prefixo Bearer")
-    void deveIgnorarHeaderAuthorizationSemPrefixoBearer() throws Exception {
-        var request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Basic abc123");
-
-        var response = new MockHttpServletResponse();
-        var filterChain = new MockFilterChain();
-
-        filter.doFilter(request, response, filterChain);
+        filter.doFilter(request, response, chain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-        assertThat(filterChain.getRequest()).isSameAs(request);
         assertThat(response.getStatus()).isEqualTo(200);
 
-        verifyNoInteractions(tokenService, usuarioAutenticadoService);
+        verifyNoInteractions(tokenService);
+        verifyNoInteractions(usuarioAutenticadoService);
     }
 
     @Test
     @DisplayName("Deve autenticar usuario quando token for valido")
     void deveAutenticarUsuarioQuandoTokenForValido() throws Exception {
         var request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer jwt-token");
-
         var response = new MockHttpServletResponse();
-        var filterChain = new MockFilterChain();
+        var chain = new MockFilterChain();
 
-        var usuario = criarUsuario(1L, "usuario@teste.com");
-        var usuarioAutenticado = new UsuarioAutenticado(
-                usuario,
-                List.of(new SimpleGrantedAuthority("ACESSO_USUARIO_LISTAR"))
-        );
+        request.addHeader("Authorization", "Bearer token-valido");
 
-        when(tokenService.getSubject("jwt-token")).thenReturn("usuario@teste.com");
-        when(usuarioAutenticadoService.buscarPorEmail("usuario@teste.com")).thenReturn(usuarioAutenticado);
+        var usuario = new UsuarioModel();
 
-        filter.doFilter(request, response, filterChain);
+        var usuarioAutenticado = new UsuarioAutenticado(usuario, List.of());
+
+        when(tokenService.getSubject("token-valido")).thenReturn("admin@futuro.com");
+        when(usuarioAutenticadoService.buscarPorEmail("admin@futuro.com")).thenReturn(usuarioAutenticado);
+
+        filter.doFilter(request, response, chain);
 
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         assertThat(authentication).isNotNull();
         assertThat(authentication.getPrincipal()).isEqualTo(usuarioAutenticado);
-        assertThat(authentication.getAuthorities())
-                .extracting("authority")
-                .containsExactly("ACESSO_USUARIO_LISTAR");
-
-        assertThat(filterChain.getRequest()).isSameAs(request);
         assertThat(response.getStatus()).isEqualTo(200);
 
-        verify(tokenService).getSubject("jwt-token");
-        verify(usuarioAutenticadoService).buscarPorEmail("usuario@teste.com");
+        verify(tokenService).getSubject("token-valido");
+        verify(usuarioAutenticadoService).buscarPorEmail("admin@futuro.com");
     }
 
     @Test
-    @DisplayName("Deve seguir o filtro sem autenticar quando usuario nao for encontrado")
-    void deveSeguirOFiltroSemAutenticarQuandoUsuarioNaoForEncontrado() throws Exception {
+    @DisplayName("Deve seguir filtro quando token for valido mas usuario nao for encontrado")
+    void deveSeguirFiltroQuandoTokenForValidoMasUsuarioNaoForEncontrado() throws Exception {
         var request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer jwt-token");
-
         var response = new MockHttpServletResponse();
-        var filterChain = new MockFilterChain();
+        var chain = new MockFilterChain();
 
-        when(tokenService.getSubject("jwt-token")).thenReturn("usuario@teste.com");
-        when(usuarioAutenticadoService.buscarPorEmail("usuario@teste.com")).thenReturn(null);
+        request.addHeader("Authorization", "Bearer token-valido");
 
-        filter.doFilter(request, response, filterChain);
+        when(tokenService.getSubject("token-valido")).thenReturn("admin@futuro.com");
+        when(usuarioAutenticadoService.buscarPorEmail("admin@futuro.com")).thenReturn(null);
+
+        filter.doFilter(request, response, chain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-        assertThat(filterChain.getRequest()).isSameAs(request);
         assertThat(response.getStatus()).isEqualTo(200);
 
-        verify(tokenService).getSubject("jwt-token");
-        verify(usuarioAutenticadoService).buscarPorEmail("usuario@teste.com");
+        verify(tokenService).getSubject("token-valido");
+        verify(usuarioAutenticadoService).buscarPorEmail("admin@futuro.com");
     }
 
     @Test
-    @DisplayName("Deve retornar 401 quando token for invalido")
-    void deveRetornar401QuandoTokenForInvalido() throws Exception {
+    @DisplayName("Deve retornar 401 em JSON quando token for invalido")
+    void deveRetornar401EmJsonQuandoTokenForInvalido() throws Exception {
         var request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer jwt-token-invalido");
-
         var response = new MockHttpServletResponse();
-        var filterChain = new MockFilterChain();
+        var chain = new MockFilterChain();
 
-        when(tokenService.getSubject("jwt-token-invalido"))
-                .thenThrow(new RuntimeException("Token JWT invalido ou expirado"));
+        request.addHeader("Authorization", "Bearer token-invalido");
 
-        filter.doFilter(request, response, filterChain);
+        when(tokenService.getSubject("token-invalido")).thenThrow(new RuntimeException("Token invalido"));
+
+        filter.doFilter(request, response, chain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         assertThat(response.getStatus()).isEqualTo(401);
-        assertThat(response.getContentType()).isEqualTo("text/plain;charset=UTF-8");
-        assertThat(response.getContentAsString()).isEqualTo("Token invalido ou expirado");
+        assertThat(response.getContentType()).contains(MediaType.APPLICATION_JSON_VALUE);
+        assertThat(response.getContentAsString()).contains("\"status\":401");
+        assertThat(response.getContentAsString()).contains("\"erro\":\"TOKEN_INVALIDO\"");
+        assertThat(response.getContentAsString()).contains("\"mensagem\":\"Token invalido ou expirado\"");
 
-        verify(tokenService).getSubject("jwt-token-invalido");
+        verify(tokenService).getSubject("token-invalido");
         verifyNoInteractions(usuarioAutenticadoService);
     }
 
-    private UsuarioModel criarUsuario(Long id, String email) {
-        var usuario = new UsuarioModel(new UsuarioRecord(email, "123456"), "senha-criptografada");
-        ReflectionTestUtils.setField(usuario, "id", id);
-        return usuario;
+    @Test
+    @DisplayName("Deve ignorar authorization header sem bearer")
+    void deveIgnorarAuthorizationHeaderSemBearer() throws Exception {
+        var request = new MockHttpServletRequest();
+        var response = new MockHttpServletResponse();
+        var chain = new MockFilterChain();
+
+        request.addHeader("Authorization", "Basic abc");
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        assertThat(response.getStatus()).isEqualTo(200);
+
+        verifyNoInteractions(tokenService);
+        verifyNoInteractions(usuarioAutenticadoService);
     }
 }

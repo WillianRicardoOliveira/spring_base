@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.empresa.erp.core.exception.RefreshTokenException;
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.record.TokenGeradoSecurity;
@@ -134,7 +135,7 @@ class UsuarioSessaoServiceTest {
 
         verify(repository).findAllByUsuarioIdAndStatus(1L, StatusEnum.ATIVO);
     }
-    
+
     @Test
     @DisplayName("Deve revogar sessoes expiradas")
     void deveRevogarSessoesExpiradas() {
@@ -229,7 +230,7 @@ class UsuarioSessaoServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.revogarSessao(refreshToken))
-                .isInstanceOf(ValidacaoException.class)
+                .isInstanceOf(RefreshTokenException.class)
                 .hasMessage("Refresh token invalido.");
     }
 
@@ -237,6 +238,14 @@ class UsuarioSessaoServiceTest {
     @DisplayName("Deve bloquear renovacao com refresh token nulo")
     void deveBloquearRenovacaoComRefreshTokenNulo() {
         assertThatThrownBy(() -> service.renovarSessao(null))
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage("Refresh token obrigatorio.");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear renovacao com refresh token em branco")
+    void deveBloquearRenovacaoComRefreshTokenEmBranco() {
+        assertThatThrownBy(() -> service.renovarSessao(" "))
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Refresh token obrigatorio.");
     }
@@ -251,7 +260,7 @@ class UsuarioSessaoServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.renovarSessao(refreshToken))
-                .isInstanceOf(ValidacaoException.class)
+                .isInstanceOf(RefreshTokenException.class)
                 .hasMessage("Refresh token invalido.");
     }
 
@@ -275,7 +284,7 @@ class UsuarioSessaoServiceTest {
                 .thenReturn(Optional.of(sessao));
 
         assertThatThrownBy(() -> service.renovarSessao(refreshToken))
-                .isInstanceOf(ValidacaoException.class)
+                .isInstanceOf(RefreshTokenException.class)
                 .hasMessage("Refresh token expirado ou revogado.");
     }
 

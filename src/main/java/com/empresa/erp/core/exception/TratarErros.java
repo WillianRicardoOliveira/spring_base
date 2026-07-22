@@ -46,6 +46,12 @@ public class TratarErros {
                 .body(new ErroResponse(400, "REGRA_DE_NEGOCIO", ex.getMessage()));
     }
 
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<ErroResponse> tratarErroRefreshToken(RefreshTokenException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErroResponse(401, "REFRESH_TOKEN_INVALIDO", ex.getMessage()));
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErroResponse> tratarErroBadCredentials() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
