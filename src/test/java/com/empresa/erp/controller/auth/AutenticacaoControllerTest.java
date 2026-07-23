@@ -1,6 +1,7 @@
 package com.empresa.erp.controller.auth;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -15,11 +16,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.empresa.erp.core.exception.TratarErros;
+import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.core.security.record.LoginSecurity;
@@ -28,6 +32,7 @@ import com.empresa.erp.core.security.record.SsoLoginSecurity;
 import com.empresa.erp.core.security.record.TokenGeradoSecurity;
 import com.empresa.erp.core.security.record.TokenJwtSecurity;
 import com.empresa.erp.core.security.service.SsoSecurity;
+import com.empresa.erp.domain.acesso.usuarioLoginTentativa.service.UsuarioLoginTentativaService;
 import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -41,6 +46,7 @@ class AutenticacaoControllerTest {
     private TokenSecurity tokenService;
     private SsoSecurity ssoSecurity;
     private UsuarioSessaoService usuarioSessaoService;
+    private UsuarioLoginTentativaService usuarioLoginTentativaService;
 
     @BeforeEach
     void setUp() {
@@ -48,6 +54,7 @@ class AutenticacaoControllerTest {
         tokenService = org.mockito.Mockito.mock(TokenSecurity.class);
         ssoSecurity = org.mockito.Mockito.mock(SsoSecurity.class);
         usuarioSessaoService = org.mockito.Mockito.mock(UsuarioSessaoService.class);
+        usuarioLoginTentativaService = org.mockito.Mockito.mock(UsuarioLoginTentativaService.class);
         objectMapper = new ObjectMapper();
 
         mockMvc = MockMvcBuilders
@@ -55,8 +62,10 @@ class AutenticacaoControllerTest {
                         manager,
                         tokenService,
                         ssoSecurity,
-                        usuarioSessaoService
+                        usuarioSessaoService,
+                        usuarioLoginTentativaService
                 ))
+                .setControllerAdvice(new TratarErros())
                 .build();
     }
 
@@ -82,9 +91,50 @@ class AutenticacaoControllerTest {
                 .andExpect(jsonPath("$.token").value("jwt-token"))
                 .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
 
+        verify(usuarioLoginTentativaService).validarLoginPermitido("usuario@teste.com");
         verify(manager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(usuarioLoginTentativaService).registrarSucesso("usuario@teste.com");
         verify(tokenService).gerarTokenComJti(usuario);
         verify(usuarioSessaoService).criarSessao(usuario, "jti-token", "192.168.0.10", "Postman");
+    }
+
+    @Test
+    @DisplayName("Deve registrar falha quando login tiver credenciais invalidas")
+    void deveRegistrarFalhaQuandoLoginTiverCredenciaisInvalidas() throws Exception {
+        var dados = new LoginSecurity("usuario@teste.com", "senha-errada");
+
+        when(manager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new BadCredentialsException("Credenciais invalidas"));
+
+        mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dados)))
+                .andExpect(status().isUnauthorized());
+
+        verify(usuarioLoginTentativaService).validarLoginPermitido("usuario@teste.com");
+        verify(manager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(usuarioLoginTentativaService).registrarFalha("usuario@teste.com");
+        verifyNoInteractions(tokenService, usuarioSessaoService, ssoSecurity);
+    }
+
+    @Test
+    @DisplayName("Deve bloquear login quando email estiver temporariamente bloqueado")
+    void deveBloquearLoginQuandoEmailEstiverTemporariamenteBloqueado() throws Exception {
+        var dados = new LoginSecurity("usuario@teste.com", "Senha@123");
+
+        doThrow(new ValidacaoException("Login temporariamente bloqueado. Tente novamente mais tarde."))
+                .when(usuarioLoginTentativaService)
+                .validarLoginPermitido("usuario@teste.com");
+
+        mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dados)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("REGRA_DE_NEGOCIO"))
+                .andExpect(jsonPath("$.mensagem").value("Login temporariamente bloqueado. Tente novamente mais tarde."));
+
+        verify(usuarioLoginTentativaService).validarLoginPermitido("usuario@teste.com");
+        verifyNoInteractions(manager, tokenService, usuarioSessaoService, ssoSecurity);
     }
 
     @Test
@@ -103,7 +153,7 @@ class AutenticacaoControllerTest {
                 .andExpect(jsonPath("$.refreshToken").value("novo-refresh-token"));
 
         verify(usuarioSessaoService).renovarSessao("refresh-token");
-        verifyNoInteractions(manager, tokenService, ssoSecurity);
+        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioLoginTentativaService);
     }
 
     @Test
@@ -117,7 +167,7 @@ class AutenticacaoControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(usuarioSessaoService).revogarSessao("refresh-token");
-        verifyNoInteractions(manager, tokenService, ssoSecurity);
+        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioLoginTentativaService);
     }
 
     @Test
@@ -130,7 +180,7 @@ class AutenticacaoControllerTest {
                         .content(objectMapper.writeValueAsString(dados)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService);
+        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService, usuarioLoginTentativaService);
     }
 
     @Test
@@ -143,7 +193,7 @@ class AutenticacaoControllerTest {
                         .content(objectMapper.writeValueAsString(dados)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService);
+        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService, usuarioLoginTentativaService);
     }
 
     @Test
@@ -156,7 +206,7 @@ class AutenticacaoControllerTest {
                         .content(objectMapper.writeValueAsString(dados)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService);
+        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService, usuarioLoginTentativaService);
     }
 
     @Test
@@ -169,7 +219,7 @@ class AutenticacaoControllerTest {
                         .content(objectMapper.writeValueAsString(dados)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService);
+        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService, usuarioLoginTentativaService);
     }
 
     @Test
@@ -182,7 +232,7 @@ class AutenticacaoControllerTest {
                         .content(objectMapper.writeValueAsString(dados)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService);
+        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService, usuarioLoginTentativaService);
     }
 
     @Test
@@ -200,7 +250,7 @@ class AutenticacaoControllerTest {
                 .andExpect(jsonPath("$.token").value("jwt-sso-token"));
 
         verify(ssoSecurity).autenticar(any(SsoLoginSecurity.class));
-        verifyNoInteractions(manager, tokenService, usuarioSessaoService);
+        verifyNoInteractions(manager, tokenService, usuarioSessaoService, usuarioLoginTentativaService);
     }
 
     @Test
@@ -213,7 +263,7 @@ class AutenticacaoControllerTest {
                         .content(objectMapper.writeValueAsString(dados)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService);
+        verifyNoInteractions(manager, tokenService, ssoSecurity, usuarioSessaoService, usuarioLoginTentativaService);
     }
 
     private UsuarioModel criarUsuario(Long id, String email) {

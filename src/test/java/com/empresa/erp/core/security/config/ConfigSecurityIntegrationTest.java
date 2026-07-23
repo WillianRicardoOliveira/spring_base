@@ -22,6 +22,7 @@ import com.empresa.erp.core.security.handler.AutenticacaoEntryPoint;
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.service.SsoSecurity;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
+import com.empresa.erp.domain.acesso.usuarioLoginTentativa.service.UsuarioLoginTentativaService;
 import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
 
 @WebMvcTest(
@@ -50,6 +51,9 @@ class ConfigSecurityIntegrationTest {
 
     @MockitoBean
     private UsuarioSessaoService usuarioSessaoService;
+
+    @MockitoBean
+    private UsuarioLoginTentativaService usuarioLoginTentativaService;
 
     @MockitoBean
     private UsuarioAutenticadoService usuarioAutenticadoService;

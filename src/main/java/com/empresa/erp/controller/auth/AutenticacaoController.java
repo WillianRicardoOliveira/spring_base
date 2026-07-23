@@ -17,6 +17,7 @@ import com.empresa.erp.core.security.record.RefreshTokenSecurity;
 import com.empresa.erp.core.security.record.SsoLoginSecurity;
 import com.empresa.erp.core.security.record.TokenJwtSecurity;
 import com.empresa.erp.core.security.service.SsoSecurity;
+import com.empresa.erp.domain.acesso.usuarioLoginTentativa.service.UsuarioLoginTentativaService;
 import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,27 +37,38 @@ public class AutenticacaoController {
 
     private final UsuarioSessaoService usuarioSessaoService;
 
+    private final UsuarioLoginTentativaService usuarioLoginTentativaService;
+
     @PostMapping
     public ResponseEntity<TokenJwtSecurity> efetuarLogin(
             @RequestBody @Valid LoginSecurity dados,
             HttpServletRequest request,
             @RequestHeader(value = "User-Agent", required = false) String userAgent
     ) {
-        var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
-        var authentication = manager.authenticate(authenticationToken);
+        usuarioLoginTentativaService.validarLoginPermitido(dados.email());
 
-        UsuarioAutenticado usuarioAutenticado = (UsuarioAutenticado) authentication.getPrincipal();
+        try {
+            var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
+            var authentication = manager.authenticate(authenticationToken);
 
-        var tokenGerado = tokenService.gerarTokenComJti(usuarioAutenticado.getUsuario());
+            usuarioLoginTentativaService.registrarSucesso(dados.email());
 
-        var refreshToken = usuarioSessaoService.criarSessao(
-                usuarioAutenticado.getUsuario(),
-                tokenGerado.jti(),
-                recuperarIp(request),
-                userAgent
-        );
+            UsuarioAutenticado usuarioAutenticado = (UsuarioAutenticado) authentication.getPrincipal();
 
-        return ResponseEntity.ok(new TokenJwtSecurity(tokenGerado.token(), refreshToken));
+            var tokenGerado = tokenService.gerarTokenComJti(usuarioAutenticado.getUsuario());
+
+            var refreshToken = usuarioSessaoService.criarSessao(
+                    usuarioAutenticado.getUsuario(),
+                    tokenGerado.jti(),
+                    recuperarIp(request),
+                    userAgent
+            );
+
+            return ResponseEntity.ok(new TokenJwtSecurity(tokenGerado.token(), refreshToken));
+        } catch (RuntimeException exception) {
+            usuarioLoginTentativaService.registrarFalha(dados.email());
+            throw exception;
+        }
     }
 
     @PostMapping("/refresh")

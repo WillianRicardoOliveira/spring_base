@@ -251,6 +251,46 @@ class TokenSecurityTest {
     }
 
     @Test
+    @DisplayName("Deve retornar jti de token JWT valido")
+    void deveRetornarJtiDeTokenJwtValido() {
+        var token = JWT.create()
+                .withIssuer(ISSUER)
+                .withSubject("usuario@teste.com")
+                .withClaim("id", 1L)
+                .withJWTId("jti-teste")
+                .withExpiresAt(Instant.now().plusSeconds(3600))
+                .sign(Algorithm.HMAC256(SECRET));
+
+        var jti = tokenService.getJti(token);
+
+        assertThat(jti).isEqualTo("jti-teste");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear leitura de jti quando token JWT for invalido")
+    void deveBloquearLeituraDeJtiQuandoTokenJwtForInvalido() {
+        assertThatThrownBy(() -> tokenService.getJti("token-invalido"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Token JWT invalido ou expirado");
+    }
+
+    @Test
+    @DisplayName("Deve bloquear leitura de jti quando issuer for invalido")
+    void deveBloquearLeituraDeJtiQuandoIssuerForInvalido() {
+        var token = JWT.create()
+                .withIssuer("outro-issuer")
+                .withSubject("usuario@teste.com")
+                .withClaim("id", 1L)
+                .withJWTId("jti-teste")
+                .withExpiresAt(Instant.now().plusSeconds(3600))
+                .sign(Algorithm.HMAC256(SECRET));
+
+        assertThatThrownBy(() -> tokenService.getJti(token))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Token JWT invalido ou expirado");
+    }
+    
+    @Test
     @DisplayName("Deve bloquear token JWT invalido")
     void deveBloquearTokenJwtInvalido() {
         assertThatThrownBy(() -> tokenService.getSubject("token-invalido"))
