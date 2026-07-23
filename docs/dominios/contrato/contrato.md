@@ -31,11 +31,16 @@ Código único utilizado para identificar e consultar o contrato.
 ✓ Não permitir dois contratos com o mesmo número.<br>
 ✓ Não permitir a gravação do contrato sem a geração do número.
 
-- **Subsidiária:**
+- **Subsidiária**
 
 Empresa do grupo responsável pelo contrato.
   
 **Obrigatório:** 🔴 Sim
+    
+    
+    
+    Cadastro de Subsidiária
+    
     
 **Preenchimento:** Automático
   
@@ -53,7 +58,7 @@ Empresa do grupo responsável pelo contrato.
 
 Fornecedor com o qual o contrato foi firmado.
 
-**Origem:** Cadastro de fornecedor<br>
+**Origem:** Cadastro de Fornecedor<br>
 
 **Obrigatório:** 🔴 Sim<br>
 
@@ -99,13 +104,16 @@ Fornecedor com o qual o contrato foi firmado.
 
 
 
-- **Centro de Custo:**
+- **Centro de Custo**
 
 Identifica a área ou unidade à qual os custos do contrato estão vinculados para fins de controle gerencial.
 
 **Obrigatório:** 🔴 Sim<br>
 **Preenchimento:** Automático<br>
 **Origem:** Configuração do processo de compra internacional<br>
+
+Cadastro de Centro de Custo
+
 **Exibição:** Não exibido no cadastro<br>
 **Editável:** Não
 
@@ -128,9 +136,75 @@ Identifica a área ou unidade à qual os custos do contrato estão vinculados pa
   
   
 
-- **Localidade:** `Filial`
+- **Localidade**
+
+		Identifica a unidade ou filial à qual o contrato está vinculado.
+
+**Obrigatório:** 🔴 Sim<br>
+**Preenchimento:** Seleção<br>
+
+
+**Origem:** Cadastro de Localidades<br>
+Cadastro de Localidade
+
+
+**Exibição:** Exibido no cadastro e nas consultas<br>
+**Editável:** Condicional
+
+**Regras:**<br>
+✓ Deve ser selecionada a partir do cadastro de Localidades.<br>
+✓ Somente Localidades ativas podem ser selecionadas.<br>
+✓ A Localidade deve estar vinculada à subsidiária do contrato.<br>
+✓ O contrato deve possuir uma única Localidade principal.<br>
+✓ Deve ser utilizada como padrão nos Pedidos de Compra vinculados ao contrato.<br>
+✓ Pode ser alterada somente enquanto o contrato não possuir Pedidos de Compra vinculados.
+
+**Validações:**<br>
+✓ Não permitir a gravação do contrato sem uma Localidade.<br>
+✓ Não permitir a seleção de uma Localidade inativa.<br>
+✓ Não permitir uma Localidade incompatível com a subsidiária do contrato.<br>
+✓ Não permitir a alteração quando existirem Pedidos de Compra vinculados.
   
-  Unidade ou filial à qual o contrato está vinculado.
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 - **Status:** `Em aberto` 
  
