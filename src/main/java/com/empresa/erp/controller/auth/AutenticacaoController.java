@@ -3,7 +3,9 @@ package com.empresa.erp.controller.auth;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.core.security.record.LoginSecurity;
+import com.empresa.erp.core.security.record.PermissoesUsuarioSecurity;
 import com.empresa.erp.core.security.record.RefreshTokenSecurity;
 import com.empresa.erp.core.security.record.SsoLoginSecurity;
 import com.empresa.erp.core.security.record.TokenJwtSecurity;
@@ -35,63 +38,197 @@ public class AutenticacaoController {
 
     private final SsoSecurity ssoSecurity;
 
-    private final UsuarioSessaoService usuarioSessaoService;
+    private final UsuarioSessaoService
+            usuarioSessaoService;
 
-    private final UsuarioLoginTentativaService usuarioLoginTentativaService;
+    private final UsuarioLoginTentativaService
+            usuarioLoginTentativaService;
 
     @PostMapping
-    public ResponseEntity<TokenJwtSecurity> efetuarLogin(
-            @RequestBody @Valid LoginSecurity dados,
-            HttpServletRequest request,
-            @RequestHeader(value = "User-Agent", required = false) String userAgent
-    ) {
-        usuarioLoginTentativaService.validarLoginPermitido(dados.email());
+    public ResponseEntity<TokenJwtSecurity>
+            efetuarLogin(
+                    @RequestBody
+                    @Valid
+                    LoginSecurity dados,
+                    HttpServletRequest request,
+                    @RequestHeader(
+                            value = "User-Agent",
+                            required = false
+                    )
+                    String userAgent
+            ) {
+        usuarioLoginTentativaService
+                .validarLoginPermitido(
+                        dados.email()
+                );
 
         try {
-            var authenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
-            var authentication = manager.authenticate(authenticationToken);
+            var authenticationToken =
+                    new UsernamePasswordAuthenticationToken(
+                            dados.email(),
+                            dados.senha()
+                    );
 
-            usuarioLoginTentativaService.registrarSucesso(dados.email());
+            var authentication =
+                    manager.authenticate(
+                            authenticationToken
+                    );
 
-            UsuarioAutenticado usuarioAutenticado = (UsuarioAutenticado) authentication.getPrincipal();
+            usuarioLoginTentativaService
+                    .registrarSucesso(
+                            dados.email()
+                    );
 
-            var tokenGerado = tokenService.gerarTokenComJti(usuarioAutenticado.getUsuario());
+            UsuarioAutenticado
+                    usuarioAutenticado =
+                    (UsuarioAutenticado)
+                            authentication
+                                    .getPrincipal();
 
-            var refreshToken = usuarioSessaoService.criarSessao(
-                    usuarioAutenticado.getUsuario(),
-                    tokenGerado.jti(),
-                    recuperarIp(request),
-                    userAgent
+            var usuario =
+                    usuarioAutenticado
+                            .getUsuario();
+
+            var tokenGerado =
+                    tokenService
+                            .gerarTokenComJti(
+                                    usuario
+                            );
+
+            var refreshToken =
+                    usuarioSessaoService
+                            .criarSessao(
+                                    usuario,
+                                    tokenGerado.jti(),
+                                    recuperarIp(request),
+                                    userAgent
+                            );
+
+            return ResponseEntity.ok(
+                    new TokenJwtSecurity(
+                            tokenGerado.token(),
+                            refreshToken
+                    )
             );
-
-            return ResponseEntity.ok(new TokenJwtSecurity(tokenGerado.token(), refreshToken));
         } catch (RuntimeException exception) {
-            usuarioLoginTentativaService.registrarFalha(dados.email());
+            usuarioLoginTentativaService
+                    .registrarFalha(
+                            dados.email()
+                    );
+
             throw exception;
         }
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenJwtSecurity> renovarToken(@RequestBody @Valid RefreshTokenSecurity dados) {
-        return ResponseEntity.ok(usuarioSessaoService.renovarSessao(dados.refreshToken()));
+    public ResponseEntity<TokenJwtSecurity>
+            renovarToken(
+                    @RequestBody
+                    @Valid
+                    RefreshTokenSecurity dados
+            ) {
+        return ResponseEntity.ok(
+                usuarioSessaoService
+                        .renovarSessao(
+                                dados.refreshToken()
+                        )
+        );
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody @Valid RefreshTokenSecurity dados) {
-        usuarioSessaoService.revogarSessao(dados.refreshToken());
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> logout(
+            @RequestBody
+            @Valid
+            RefreshTokenSecurity dados
+    ) {
+        usuarioSessaoService
+                .revogarSessao(
+                        dados.refreshToken()
+                );
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     @PostMapping("/sso")
-    public ResponseEntity<TokenJwtSecurity> efetuarLoginSso(@RequestBody @Valid SsoLoginSecurity dados) {
-        return ResponseEntity.ok(ssoSecurity.autenticar(dados));
+    public ResponseEntity<TokenJwtSecurity>
+            efetuarLoginSso(
+                    @RequestBody
+                    @Valid
+                    SsoLoginSecurity dados,
+                    HttpServletRequest request,
+                    @RequestHeader(
+                            value = "User-Agent",
+                            required = false
+                    )
+                    String userAgent
+            ) {
+        var usuario =
+                ssoSecurity
+                        .autenticar(dados);
+
+        var tokenGerado =
+                tokenService
+                        .gerarTokenComJti(
+                                usuario
+                        );
+
+        var refreshToken =
+                usuarioSessaoService
+                        .criarSessao(
+                                usuario,
+                                tokenGerado.jti(),
+                                recuperarIp(request),
+                                userAgent
+                        );
+
+        return ResponseEntity.ok(
+                new TokenJwtSecurity(
+                        tokenGerado.token(),
+                        refreshToken
+                )
+        );
     }
 
-    private String recuperarIp(HttpServletRequest request) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
+    @GetMapping("/permissoes")
+    public ResponseEntity<PermissoesUsuarioSecurity>
+            consultarPermissoes(
+                    @AuthenticationPrincipal
+                    UsuarioAutenticado
+                            usuarioAutenticado
+            ) {
+        var permissoes =
+                usuarioAutenticado
+                        .getAuthorities()
+                        .stream()
+                        .map(
+                                authority ->
+                                        authority
+                                                .getAuthority()
+                        )
+                        .sorted()
+                        .toList();
+
+        return ResponseEntity.ok(
+                new PermissoesUsuarioSecurity(
+                        permissoes
+                )
+        );
+    }
+
+    private String recuperarIp(
+            HttpServletRequest request
+    ) {
+        String forwardedFor =
+                request.getHeader(
+                        "X-Forwarded-For"
+                );
 
         if (StringUtils.hasText(forwardedFor)) {
-            return forwardedFor.split(",")[0].trim();
+            return forwardedFor
+                    .split(",")[0]
+                    .trim();
         }
 
         return request.getRemoteAddr();

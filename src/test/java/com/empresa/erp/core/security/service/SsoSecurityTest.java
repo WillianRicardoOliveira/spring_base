@@ -20,7 +20,6 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.core.exception.SsoAuthenticationException;
-import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.record.SsoLoginSecurity;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -28,23 +27,35 @@ import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
 class SsoSecurityTest {
 
-    private ObjectProvider<JwtDecoder> jwtDecoderProvider;
+    private ObjectProvider<JwtDecoder>
+            jwtDecoderProvider;
+
     private JwtDecoder jwtDecoder;
+
     private UsuarioRepository usuarioRepository;
-    private TokenSecurity tokenSecurity;
+
     private SsoSecurity service;
 
     @BeforeEach
     void setUp() {
-        jwtDecoderProvider = org.mockito.Mockito.mock(ObjectProvider.class);
-        jwtDecoder = org.mockito.Mockito.mock(JwtDecoder.class);
-        usuarioRepository = org.mockito.Mockito.mock(UsuarioRepository.class);
-        tokenSecurity = org.mockito.Mockito.mock(TokenSecurity.class);
+        jwtDecoderProvider =
+                org.mockito.Mockito.mock(
+                        ObjectProvider.class
+                );
+
+        jwtDecoder =
+                org.mockito.Mockito.mock(
+                        JwtDecoder.class
+                );
+
+        usuarioRepository =
+                org.mockito.Mockito.mock(
+                        UsuarioRepository.class
+                );
 
         service = new SsoSecurity(
                 jwtDecoderProvider,
                 usuarioRepository,
-                tokenSecurity,
                 "email",
                 "",
                 ""
@@ -52,206 +63,417 @@ class SsoSecurityTest {
     }
 
     @Test
-    @DisplayName("Deve autenticar com token SSO valido")
+    @DisplayName(
+            "Deve autenticar com token SSO valido"
+    )
     void deveAutenticarComTokenSsoValido() {
-        var dados = new SsoLoginSecurity("sso-token");
-        var jwt = criarJwt(Map.of("email", "usuario@teste.com"));
-        var usuario = criarUsuario(1L, "usuario@teste.com");
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
-        when(jwtDecoder.decode("sso-token")).thenReturn(jwt);
-        when(usuarioRepository.findByEmailIgnoreCase("usuario@teste.com")).thenReturn(usuario);
-        when(tokenSecurity.gerarToken(usuario)).thenReturn("jwt-token");
+        var jwt = criarJwt(
+                Map.of(
+                        "email",
+                        "usuario@teste.com"
+                )
+        );
 
-        var resultado = service.autenticar(dados);
+        var usuario = criarUsuario(
+                1L,
+                "usuario@teste.com"
+        );
 
-        assertThat(resultado.token()).isEqualTo("jwt-token");
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(jwtDecoder);
 
-        verify(jwtDecoder).decode("sso-token");
-        verify(usuarioRepository).findByEmailIgnoreCase("usuario@teste.com");
-        verify(tokenSecurity).gerarToken(usuario);
+        when(
+                jwtDecoder.decode("sso-token")
+        ).thenReturn(jwt);
+
+        when(
+                usuarioRepository
+                        .findByEmailIgnoreCase(
+                                "usuario@teste.com"
+                        )
+        ).thenReturn(usuario);
+
+        var resultado =
+                service.autenticar(dados);
+
+        assertThat(resultado)
+                .isSameAs(usuario);
+
+        verify(jwtDecoder)
+                .decode("sso-token");
+
+        verify(usuarioRepository)
+                .findByEmailIgnoreCase(
+                        "usuario@teste.com"
+                );
     }
 
     @Test
-    @DisplayName("Deve extrair email de preferred_username quando email nao existir")
+    @DisplayName(
+            "Deve extrair email de preferred_username quando email nao existir"
+    )
     void deveExtrairEmailDePreferredUsernameQuandoEmailNaoExistir() {
-        var dados = new SsoLoginSecurity("sso-token");
-        var jwt = criarJwt(Map.of("preferred_username", "Usuario@Teste.com"));
-        var usuario = criarUsuario(1L, "usuario@teste.com");
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
-        when(jwtDecoder.decode("sso-token")).thenReturn(jwt);
-        when(usuarioRepository.findByEmailIgnoreCase("usuario@teste.com")).thenReturn(usuario);
-        when(tokenSecurity.gerarToken(usuario)).thenReturn("jwt-token");
+        var jwt = criarJwt(
+                Map.of(
+                        "preferred_username",
+                        "Usuario@Teste.com"
+                )
+        );
 
-        var resultado = service.autenticar(dados);
+        var usuario = criarUsuario(
+                1L,
+                "usuario@teste.com"
+        );
 
-        assertThat(resultado.token()).isEqualTo("jwt-token");
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(jwtDecoder);
 
-        verify(usuarioRepository).findByEmailIgnoreCase("usuario@teste.com");
+        when(
+                jwtDecoder.decode("sso-token")
+        ).thenReturn(jwt);
+
+        when(
+                usuarioRepository
+                        .findByEmailIgnoreCase(
+                                "usuario@teste.com"
+                        )
+        ).thenReturn(usuario);
+
+        var resultado =
+                service.autenticar(dados);
+
+        assertThat(resultado)
+                .isSameAs(usuario);
+
+        verify(usuarioRepository)
+                .findByEmailIgnoreCase(
+                        "usuario@teste.com"
+                );
     }
 
     @Test
-    @DisplayName("Deve autenticar quando audience e scope forem validos")
+    @DisplayName(
+            "Deve autenticar quando audience e scope forem validos"
+    )
     void deveAutenticarQuandoAudienceEScopeForemValidos() {
         service = new SsoSecurity(
                 jwtDecoderProvider,
                 usuarioRepository,
-                tokenSecurity,
                 "email",
                 "erp-api",
                 "erp.login"
         );
 
-        var dados = new SsoLoginSecurity("sso-token");
-        var jwt = criarJwt(Map.of(
-                "email", "usuario@teste.com",
-                "aud", List.of("erp-api"),
-                "scp", "openid profile erp.login"
-        ));
-        var usuario = criarUsuario(1L, "usuario@teste.com");
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
-        when(jwtDecoder.decode("sso-token")).thenReturn(jwt);
-        when(usuarioRepository.findByEmailIgnoreCase("usuario@teste.com")).thenReturn(usuario);
-        when(tokenSecurity.gerarToken(usuario)).thenReturn("jwt-token");
+        var jwt = criarJwt(
+                Map.of(
+                        "email",
+                        "usuario@teste.com",
+                        "aud",
+                        List.of("erp-api"),
+                        "scp",
+                        "openid profile erp.login"
+                )
+        );
 
-        var resultado = service.autenticar(dados);
+        var usuario = criarUsuario(
+                1L,
+                "usuario@teste.com"
+        );
 
-        assertThat(resultado.token()).isEqualTo("jwt-token");
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(jwtDecoder);
+
+        when(
+                jwtDecoder.decode("sso-token")
+        ).thenReturn(jwt);
+
+        when(
+                usuarioRepository
+                        .findByEmailIgnoreCase(
+                                "usuario@teste.com"
+                        )
+        ).thenReturn(usuario);
+
+        var resultado =
+                service.autenticar(dados);
+
+        assertThat(resultado)
+                .isSameAs(usuario);
     }
 
     @Test
-    @DisplayName("Deve bloquear token SSO nao informado")
+    @DisplayName(
+            "Deve bloquear token SSO nao informado"
+    )
     void deveBloquearTokenSsoNaoInformado() {
-        var dados = new SsoLoginSecurity("");
+        var dados =
+                new SsoLoginSecurity("");
 
-        assertThatThrownBy(() -> service.autenticar(dados))
-                .isInstanceOf(SsoAuthenticationException.class)
-                .hasMessage("Token SSO nao informado");
+        assertThatThrownBy(
+                () -> service.autenticar(dados)
+        )
+                .isInstanceOf(
+                        SsoAuthenticationException.class
+                )
+                .hasMessage(
+                        "Token SSO nao informado"
+                );
 
-        verifyNoInteractions(jwtDecoderProvider, usuarioRepository, tokenSecurity);
+        verifyNoInteractions(
+                jwtDecoderProvider,
+                usuarioRepository
+        );
     }
 
     @Test
-    @DisplayName("Deve bloquear quando SSO nao estiver configurado")
+    @DisplayName(
+            "Deve bloquear quando SSO nao estiver configurado"
+    )
     void deveBloquearQuandoSsoNaoEstiverConfigurado() {
-        var dados = new SsoLoginSecurity("sso-token");
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(null);
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(null);
 
-        assertThatThrownBy(() -> service.autenticar(dados))
-                .isInstanceOf(SsoAuthenticationException.class)
-                .hasMessage("SSO nao configurado");
+        assertThatThrownBy(
+                () -> service.autenticar(dados)
+        )
+                .isInstanceOf(
+                        SsoAuthenticationException.class
+                )
+                .hasMessage(
+                        "SSO nao configurado"
+                );
 
-        verifyNoInteractions(usuarioRepository, tokenSecurity);
+        verifyNoInteractions(
+                usuarioRepository
+        );
     }
 
     @Test
-    @DisplayName("Deve bloquear token SSO invalido ou expirado")
+    @DisplayName(
+            "Deve bloquear token SSO invalido ou expirado"
+    )
     void deveBloquearTokenSsoInvalidoOuExpirado() {
-        var dados = new SsoLoginSecurity("sso-token");
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
-        when(jwtDecoder.decode("sso-token")).thenThrow(new JwtException("token invalido"));
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(jwtDecoder);
 
-        assertThatThrownBy(() -> service.autenticar(dados))
-                .isInstanceOf(SsoAuthenticationException.class)
-                .hasMessage("Token SSO invalido ou expirado");
+        when(
+                jwtDecoder.decode("sso-token")
+        ).thenThrow(
+                new JwtException(
+                        "token invalido"
+                )
+        );
 
-        verifyNoInteractions(usuarioRepository, tokenSecurity);
+        assertThatThrownBy(
+                () -> service.autenticar(dados)
+        )
+                .isInstanceOf(
+                        SsoAuthenticationException.class
+                )
+                .hasMessage(
+                        "Token SSO invalido ou expirado"
+                );
+
+        verifyNoInteractions(
+                usuarioRepository
+        );
     }
 
     @Test
-    @DisplayName("Deve bloquear quando email nao existir no token SSO")
+    @DisplayName(
+            "Deve bloquear quando email nao existir no token SSO"
+    )
     void deveBloquearQuandoEmailNaoExistirNoTokenSso() {
-        var dados = new SsoLoginSecurity("sso-token");
-        var jwt = criarJwt(Map.of("sub", "123"));
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
-        when(jwtDecoder.decode("sso-token")).thenReturn(jwt);
+        var jwt = criarJwt(
+                Map.of("sub", "123")
+        );
 
-        assertThatThrownBy(() -> service.autenticar(dados))
-                .isInstanceOf(SsoAuthenticationException.class)
-                .hasMessage("E-mail nao encontrado no token SSO");
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(jwtDecoder);
 
-        verifyNoInteractions(usuarioRepository, tokenSecurity);
+        when(
+                jwtDecoder.decode("sso-token")
+        ).thenReturn(jwt);
+
+        assertThatThrownBy(
+                () -> service.autenticar(dados)
+        )
+                .isInstanceOf(
+                        SsoAuthenticationException.class
+                )
+                .hasMessage(
+                        "E-mail nao encontrado no token SSO"
+                );
+
+        verifyNoInteractions(
+                usuarioRepository
+        );
     }
 
     @Test
-    @DisplayName("Deve bloquear usuario nao autorizado para SSO")
+    @DisplayName(
+            "Deve bloquear usuario nao autorizado para SSO"
+    )
     void deveBloquearUsuarioNaoAutorizadoParaSso() {
-        var dados = new SsoLoginSecurity("sso-token");
-        var jwt = criarJwt(Map.of("email", "usuario@teste.com"));
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
-        when(jwtDecoder.decode("sso-token")).thenReturn(jwt);
-        when(usuarioRepository.findByEmailIgnoreCase("usuario@teste.com")).thenReturn(null);
+        var jwt = criarJwt(
+                Map.of(
+                        "email",
+                        "usuario@teste.com"
+                )
+        );
 
-        assertThatThrownBy(() -> service.autenticar(dados))
-                .isInstanceOf(SsoAuthenticationException.class)
-                .hasMessage("Usuario nao autorizado para SSO");
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(jwtDecoder);
 
-        verifyNoInteractions(tokenSecurity);
+        when(
+                jwtDecoder.decode("sso-token")
+        ).thenReturn(jwt);
+
+        when(
+                usuarioRepository
+                        .findByEmailIgnoreCase(
+                                "usuario@teste.com"
+                        )
+        ).thenReturn(null);
+
+        assertThatThrownBy(
+                () -> service.autenticar(dados)
+        )
+                .isInstanceOf(
+                        SsoAuthenticationException.class
+                )
+                .hasMessage(
+                        "Usuario nao autorizado para SSO"
+                );
     }
 
     @Test
-    @DisplayName("Deve bloquear token SSO com audience invalida")
+    @DisplayName(
+            "Deve bloquear token SSO com audience invalida"
+    )
     void deveBloquearTokenSsoComAudienceInvalida() {
         service = new SsoSecurity(
                 jwtDecoderProvider,
                 usuarioRepository,
-                tokenSecurity,
                 "email",
                 "erp-api",
                 ""
         );
 
-        var dados = new SsoLoginSecurity("sso-token");
-        var jwt = criarJwt(Map.of(
-                "email", "usuario@teste.com",
-                "aud", List.of("outra-api")
-        ));
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
-        when(jwtDecoder.decode("sso-token")).thenReturn(jwt);
+        var jwt = criarJwt(
+                Map.of(
+                        "email",
+                        "usuario@teste.com",
+                        "aud",
+                        List.of("outra-api")
+                )
+        );
 
-        assertThatThrownBy(() -> service.autenticar(dados))
-                .isInstanceOf(SsoAuthenticationException.class)
-                .hasMessage("Token SSO nao pertence a esta aplicacao");
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(jwtDecoder);
 
-        verifyNoInteractions(usuarioRepository, tokenSecurity);
+        when(
+                jwtDecoder.decode("sso-token")
+        ).thenReturn(jwt);
+
+        assertThatThrownBy(
+                () -> service.autenticar(dados)
+        )
+                .isInstanceOf(
+                        SsoAuthenticationException.class
+                )
+                .hasMessage(
+                        "Token SSO nao pertence a esta aplicacao"
+                );
+
+        verifyNoInteractions(
+                usuarioRepository
+        );
     }
 
     @Test
-    @DisplayName("Deve bloquear token SSO sem scope autorizado")
+    @DisplayName(
+            "Deve bloquear token SSO sem scope autorizado"
+    )
     void deveBloquearTokenSsoSemScopeAutorizado() {
         service = new SsoSecurity(
                 jwtDecoderProvider,
                 usuarioRepository,
-                tokenSecurity,
                 "email",
                 "",
                 "erp.login"
         );
 
-        var dados = new SsoLoginSecurity("sso-token");
-        var jwt = criarJwt(Map.of(
-                "email", "usuario@teste.com",
-                "scp", "openid profile"
-        ));
+        var dados =
+                new SsoLoginSecurity("sso-token");
 
-        when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
-        when(jwtDecoder.decode("sso-token")).thenReturn(jwt);
+        var jwt = criarJwt(
+                Map.of(
+                        "email",
+                        "usuario@teste.com",
+                        "scp",
+                        "openid profile"
+                )
+        );
 
-        assertThatThrownBy(() -> service.autenticar(dados))
-                .isInstanceOf(SsoAuthenticationException.class)
-                .hasMessage("Token SSO sem permissao para login");
+        when(
+                jwtDecoderProvider.getIfAvailable()
+        ).thenReturn(jwtDecoder);
 
-        verifyNoInteractions(usuarioRepository, tokenSecurity);
+        when(
+                jwtDecoder.decode("sso-token")
+        ).thenReturn(jwt);
+
+        assertThatThrownBy(
+                () -> service.autenticar(dados)
+        )
+                .isInstanceOf(
+                        SsoAuthenticationException.class
+                )
+                .hasMessage(
+                        "Token SSO sem permissao para login"
+                );
+
+        verifyNoInteractions(
+                usuarioRepository
+        );
     }
 
-    private Jwt criarJwt(Map<String, Object> claims) {
+    private Jwt criarJwt(
+            Map<String, Object> claims
+    ) {
         return new Jwt(
                 "sso-token",
                 Instant.now(),
@@ -261,9 +483,25 @@ class SsoSecurityTest {
         );
     }
 
-    private UsuarioModel criarUsuario(Long id, String email) {
-        var usuario = new UsuarioModel(new UsuarioRecord(email, "123456"), "senha-criptografada");
-        ReflectionTestUtils.setField(usuario, "id", id);
+    private UsuarioModel criarUsuario(
+            Long id,
+            String email
+    ) {
+        var usuario =
+                new UsuarioModel(
+                        new UsuarioRecord(
+                                email,
+                                "123456"
+                        ),
+                        "senha-criptografada"
+                );
+
+        ReflectionTestUtils.setField(
+                usuario,
+                "id",
+                id
+        );
+
         return usuario;
     }
 }

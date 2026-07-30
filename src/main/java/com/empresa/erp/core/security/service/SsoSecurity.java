@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.empresa.erp.core.exception.SsoAuthenticationException;
-import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.record.SsoLoginSecurity;
-import com.empresa.erp.core.security.record.TokenJwtSecurity;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
@@ -22,7 +20,6 @@ public class SsoSecurity {
 
     private final ObjectProvider<JwtDecoder> jwtDecoderProvider;
     private final UsuarioRepository usuarioRepository;
-    private final TokenSecurity tokenSecurity;
     private final String emailClaim;
     private final String audience;
     private final String scope;
@@ -30,56 +27,79 @@ public class SsoSecurity {
     public SsoSecurity(
             ObjectProvider<JwtDecoder> jwtDecoderProvider,
             UsuarioRepository usuarioRepository,
-            TokenSecurity tokenSecurity,
             @Value("${sso.claim.email:email}") String emailClaim,
             @Value("${sso.audience:}") String audience,
-            @Value("${sso.scope:}") String scope) {
+            @Value("${sso.scope:}") String scope
+    ) {
         this.jwtDecoderProvider = jwtDecoderProvider;
         this.usuarioRepository = usuarioRepository;
-        this.tokenSecurity = tokenSecurity;
         this.emailClaim = emailClaim;
-        this.audience = audience;        
+        this.audience = audience;
         this.scope = scope;
     }
 
-    public TokenJwtSecurity autenticar(SsoLoginSecurity dados) {
-    	
-        if (dados == null || !StringUtils.hasText(dados.token())) {
-            throw new SsoAuthenticationException("Token SSO nao informado");
+    public UsuarioModel autenticar(SsoLoginSecurity dados) {
+        if (
+                dados == null ||
+                !StringUtils.hasText(dados.token())
+        ) {
+            throw new SsoAuthenticationException(
+                    "Token SSO nao informado"
+            );
         }
 
-        var jwtDecoder = jwtDecoderProvider.getIfAvailable();
+        var jwtDecoder =
+                jwtDecoderProvider.getIfAvailable();
 
         if (jwtDecoder == null) {
-            throw new SsoAuthenticationException("SSO nao configurado");
+            throw new SsoAuthenticationException(
+                    "SSO nao configurado"
+            );
         }
 
         try {
             Jwt jwt = jwtDecoder.decode(dados.token());
+
             validarAudience(jwt);
             validarScope(jwt);
-            String email = extrairEmail(jwt);
-            UsuarioModel usuario = usuarioRepository.findByEmailIgnoreCase(email);
 
-            if (usuario == null || !usuario.isEnabled()) {
-                throw new SsoAuthenticationException("Usuario nao autorizado para SSO");
+            String email = extrairEmail(jwt);
+
+            UsuarioModel usuario =
+                    usuarioRepository
+                            .findByEmailIgnoreCase(email);
+
+            if (
+                    usuario == null ||
+                    !usuario.isEnabled()
+            ) {
+                throw new SsoAuthenticationException(
+                        "Usuario nao autorizado para SSO"
+                );
             }
 
-            return new TokenJwtSecurity(tokenSecurity.gerarToken(usuario));
-        } catch (JwtException e) {
-            throw new SsoAuthenticationException("Token SSO invalido ou expirado", e);
+            return usuario;
+        } catch (JwtException exception) {
+            throw new SsoAuthenticationException(
+                    "Token SSO invalido ou expirado",
+                    exception
+            );
         }
     }
 
     private String extrairEmail(Jwt jwt) {
-        String email = claimComoTexto(jwt, emailClaim);
+        String email =
+                claimComoTexto(jwt, emailClaim);
 
         if (!StringUtils.hasText(email)) {
             email = claimComoTexto(jwt, "email");
         }
 
         if (!StringUtils.hasText(email)) {
-            email = claimComoTexto(jwt, "preferred_username");
+            email = claimComoTexto(
+                    jwt,
+                    "preferred_username"
+            );
         }
 
         if (!StringUtils.hasText(email)) {
@@ -87,39 +107,64 @@ public class SsoSecurity {
         }
 
         if (!StringUtils.hasText(email)) {
-            throw new SsoAuthenticationException("E-mail nao encontrado no token SSO");
+            throw new SsoAuthenticationException(
+                    "E-mail nao encontrado no token SSO"
+            );
         }
 
-        return email.trim().toLowerCase();
+        return email
+                .trim()
+                .toLowerCase();
     }
 
-    private String claimComoTexto(Jwt jwt, String claim) {
-        Object valor = jwt.getClaims().get(claim);
-        return valor instanceof String texto ? texto : null;
+    private String claimComoTexto(
+            Jwt jwt,
+            String claim
+    ) {
+        Object valor =
+                jwt.getClaims().get(claim);
+
+        return valor instanceof String texto
+                ? texto
+                : null;
     }
-    
+
     private void validarAudience(Jwt jwt) {
-        if (StringUtils.hasText(audience) && !jwt.getAudience().contains(audience)) {
-            throw new SsoAuthenticationException("Token SSO nao pertence a esta aplicacao");
+        if (
+                StringUtils.hasText(audience) &&
+                !jwt.getAudience().contains(audience)
+        ) {
+            throw new SsoAuthenticationException(
+                    "Token SSO nao pertence a esta aplicacao"
+            );
         }
     }
-    
+
     private void validarScope(Jwt jwt) {
         if (!StringUtils.hasText(scope)) {
             return;
         }
 
-        String scopes = claimComoTexto(jwt, "scp");
+        String scopes =
+                claimComoTexto(jwt, "scp");
 
         if (!StringUtils.hasText(scopes)) {
-            throw new SsoAuthenticationException("Token SSO sem escopo autorizado");
+            throw new SsoAuthenticationException(
+                    "Token SSO sem escopo autorizado"
+            );
         }
 
-        boolean autorizado = List.of(scopes.trim().split("\\s+")).contains(scope);
+        boolean autorizado =
+                List.of(
+                        scopes
+                                .trim()
+                                .split("\\s+")
+                ).contains(scope);
 
         if (!autorizado) {
-            throw new SsoAuthenticationException("Token SSO sem permissao para login");
+            throw new SsoAuthenticationException(
+                    "Token SSO sem permissao para login"
+            );
         }
     }
-    
 }
