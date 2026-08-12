@@ -22,7 +22,9 @@ jobs:
           cache: maven
 
       - name: Compilar e testar com Maven
-        run: ./mvnw --batch-mode clean package
+        run: |
+          chmod +x mvnw
+          ./mvnw --batch-mode clean package
 
       - name: Preparar o JAR para envio
         id: jar
