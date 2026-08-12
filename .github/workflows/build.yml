@@ -48,6 +48,14 @@ jobs:
           echo "jar_name=$JAR_NAME" >> "$GITHUB_OUTPUT"
           echo "JAR preparado: $JAR_NAME.jar"
 
+      - name: Disponibilizar JAR para download
+        uses: actions/upload-artifact@v4
+        with:
+          name: erp-jar
+          path: jar-upload/*.jar
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Enviar o JAR por FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
