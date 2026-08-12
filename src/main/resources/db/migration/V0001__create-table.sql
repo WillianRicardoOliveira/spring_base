@@ -17,7 +17,7 @@ CREATE TABLE usuario (
 CREATE TABLE usuario_sessao (
     id BIGINT NOT NULL AUTO_INCREMENT,
     id_usuario BIGINT NOT NULL,
-    refresh_token_hash VARCHAR(255) NOT NULL,
+    refresh_token_hash VARCHAR(64) NOT NULL,
     access_token_jti VARCHAR(100),
     status TINYINT NOT NULL DEFAULT 0,
     expira_em DATETIME NOT NULL,
