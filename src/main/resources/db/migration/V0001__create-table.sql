@@ -175,7 +175,7 @@ INSERT INTO perfil_permissao (id_perfil, id_permissao, status) VALUES
 INSERT INTO usuario_perfil (id_usuario, id_perfil, status) VALUES
 (1, 1, 0);
 
-CREATE TABLE USUARIO_LOGIN_TENTATIVA (
+CREATE TABLE usuario_login_tentativa (
     ID BIGINT NOT NULL AUTO_INCREMENT,
     EMAIL VARCHAR(100) NOT NULL,
     QUANTIDADE_FALHAS INT NOT NULL DEFAULT 0,
