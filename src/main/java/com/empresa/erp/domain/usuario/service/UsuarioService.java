@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
+import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
 import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
@@ -26,48 +27,103 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UsuarioService implements UserDetailsService {
+public class UsuarioService
+        implements UserDetailsService {
 
-    private static final String MOTIVO_ALTERACAO_SENHA = "ALTERACAO_SENHA";
-    private static final String MOTIVO_USUARIO_REMOVIDO = "USUARIO_REMOVIDO";
+    private static final String
+            MOTIVO_ALTERACAO_SENHA =
+                    "ALTERACAO_SENHA";
+
+    private static final String
+            MOTIVO_USUARIO_REMOVIDO =
+                    "USUARIO_REMOVIDO";
 
     private final UsuarioRepository repository;
+
+    private final UsuarioEmpresaRepository
+            usuarioEmpresaRepository;
+
     private final PasswordEncoder passwordEncoder;
-    private final UsuarioLogadoService usuarioLogadoService;
-    private final UsuarioAutenticadoService usuarioAutenticadoService;
-    private final UsuarioSessaoService usuarioSessaoService;
+
+    private final UsuarioLogadoService
+            usuarioLogadoService;
+
+    private final UsuarioAutenticadoService
+            usuarioAutenticadoService;
+
+    private final UsuarioSessaoService
+            usuarioSessaoService;
 
     @Transactional
-    public UsuarioModel cadastrar(UsuarioRecord dados) {
-        if (repository.existsByEmailIgnoreCase(dados.email())) {
-            throw new ValidacaoException("Usuario ja cadastrado.");
+    public UsuarioModel cadastrar(
+            UsuarioRecord dados
+    ) {
+        if (repository.existsByEmailIgnoreCase(
+                dados.email()
+        )) {
+            throw new ValidacaoException(
+                    "Usuario ja cadastrado."
+            );
         }
 
-        var usuario = new UsuarioModel(dados, passwordEncoder.encode(dados.senha()));
+        var usuario = new UsuarioModel(
+                dados,
+                passwordEncoder.encode(dados.senha())
+        );
+
         repository.save(usuario);
 
         return usuario;
     }
 
     @Transactional(readOnly = true)
-    public Page<ListaUsuarioRecord> listar(Pageable paginacao, String filtro) {
+    public Page<ListaUsuarioRecord> listar(
+            Pageable paginacao,
+            String filtro
+    ) {
         if (filtro != null && !filtro.isBlank()) {
-            return repository.findByEmailContainingIgnoreCaseAndStatus(paginacao, filtro, StatusEnum.ATIVO)
+            return repository
+                    .findByEmailContainingIgnoreCaseAndStatus(
+                            paginacao,
+                            filtro,
+                            StatusEnum.ATIVO
+                    )
                     .map(ListaUsuarioRecord::new);
         }
 
-        return repository.findAllByStatus(paginacao, StatusEnum.ATIVO)
+        return repository
+                .findAllByStatus(
+                        paginacao,
+                        StatusEnum.ATIVO
+                )
                 .map(ListaUsuarioRecord::new);
     }
 
     @Transactional
-    public DetalheUsuarioRecord atualizar(AtualizaUsuarioRecord dados) {
-        if (repository.existsByEmailIgnoreCaseAndIdNot(dados.email(), dados.id())) {
-            throw new ValidacaoException("Usuario ja cadastrado.");
+    public DetalheUsuarioRecord atualizar(
+            AtualizaUsuarioRecord dados
+    ) {
+        if (repository
+                .existsByEmailIgnoreCaseAndIdNot(
+                        dados.email(),
+                        dados.id()
+                )
+        ) {
+            throw new ValidacaoException(
+                    "Usuario ja cadastrado."
+            );
         }
 
-        UsuarioModel usuario = repository.findByIdAndStatus(dados.id(), StatusEnum.ATIVO)
-                .orElseThrow(() -> new ValidacaoException("Usuario nao encontrado ou removido."));
+        UsuarioModel usuario = repository
+                .findByIdAndStatus(
+                        dados.id(),
+                        StatusEnum.ATIVO
+                )
+                .orElseThrow(() ->
+                        new ValidacaoException(
+                                "Usuario nao encontrado ou removido."
+                        )
+                );
 
         usuario.atualizar(dados);
 
@@ -76,9 +132,22 @@ public class UsuarioService implements UserDetailsService {
 
     @Transactional
     public void excluir(Long id) {
-        Long idUsuarioLogado = usuarioLogadoService.getId();
+        UsuarioModel usuario = repository
+                .findByIdAndStatus(
+                        id,
+                        StatusEnum.ATIVO
+                )
+                .orElseThrow(() ->
+                        new ValidacaoException(
+                                "Usuario nao encontrado ou removido."
+                        )
+                );
 
-        UsuarioModel usuario = repository.getReferenceById(id);
+        validarAusenciaDeEmpresas(usuario);
+
+        Long idUsuarioLogado =
+                usuarioLogadoService.getId();
+
         usuario.remover(idUsuarioLogado);
 
         usuarioSessaoService.revogarSessoesDoUsuario(
@@ -88,19 +157,52 @@ public class UsuarioService implements UserDetailsService {
         );
     }
 
+    private void validarAusenciaDeEmpresas(
+            UsuarioModel usuario
+    ) {
+        if (usuarioEmpresaRepository
+                .existsByUsuarioIdAndStatus(
+                        usuario.getId(),
+                        StatusEnum.ATIVO
+                )
+        ) {
+            throw new ValidacaoException(
+                    "Usuario possui empresas vinculadas "
+                            + "e nao pode ser removido."
+            );
+        }
+    }
+
     @Transactional(readOnly = true)
-    public DetalheUsuarioRecord detalhar(Long id) {
-        return new DetalheUsuarioRecord(repository.getReferenceById(id));
+    public DetalheUsuarioRecord detalhar(
+            Long id
+    ) {
+        return new DetalheUsuarioRecord(
+                repository.getReferenceById(id)
+        );
     }
 
     @Transactional
-    public DetalheUsuarioRecord atualizarSenha(AtualizaSenhaUsuarioRecord dados) {
-        Long idUsuarioLogado = usuarioLogadoService.getId();
+    public DetalheUsuarioRecord atualizarSenha(
+            AtualizaSenhaUsuarioRecord dados
+    ) {
+        Long idUsuarioLogado =
+                usuarioLogadoService.getId();
 
-        UsuarioModel usuario = repository.findByIdAndStatus(dados.id(), StatusEnum.ATIVO)
-                .orElseThrow(() -> new ValidacaoException("Usuario nao encontrado ou removido."));
+        UsuarioModel usuario = repository
+                .findByIdAndStatus(
+                        dados.id(),
+                        StatusEnum.ATIVO
+                )
+                .orElseThrow(() ->
+                        new ValidacaoException(
+                                "Usuario nao encontrado ou removido."
+                        )
+                );
 
-        usuario.atualizarSenha(passwordEncoder.encode(dados.senha()));
+        usuario.atualizarSenha(
+                passwordEncoder.encode(dados.senha())
+        );
 
         usuarioSessaoService.revogarSessoesDoUsuario(
                 usuario.getId(),
@@ -112,11 +214,17 @@ public class UsuarioService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var usuarioAutenticado = usuarioAutenticadoService.buscarPorEmail(username);
+    public UserDetails loadUserByUsername(
+            String username
+    ) throws UsernameNotFoundException {
+        var usuarioAutenticado =
+                usuarioAutenticadoService
+                        .buscarPorEmail(username);
 
         if (usuarioAutenticado == null) {
-            throw new UsernameNotFoundException("Usuario nao encontrado");
+            throw new UsernameNotFoundException(
+                    "Usuario nao encontrado"
+            );
         }
 
         return usuarioAutenticado;
