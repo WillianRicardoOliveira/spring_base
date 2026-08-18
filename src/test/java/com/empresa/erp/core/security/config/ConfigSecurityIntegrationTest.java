@@ -16,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.empresa.erp.controller.auth.AutenticacaoController;
+import com.empresa.erp.core.organizacao.service.ContextoOrganizacaoService;
 import com.empresa.erp.core.security.filter.FilterSecurity;
 import com.empresa.erp.core.security.handler.AcessoNegadoHandler;
 import com.empresa.erp.core.security.handler.AutenticacaoEntryPoint;
@@ -57,6 +58,9 @@ class ConfigSecurityIntegrationTest {
 
     @MockitoBean
     private UsuarioAutenticadoService usuarioAutenticadoService;
+    
+    @MockitoBean
+    private ContextoOrganizacaoService contextoOrganizacaoService;
 
     @Test
     @DisplayName("Deve permitir acesso publico ao login")

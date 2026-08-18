@@ -23,6 +23,7 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.record.DetalheUsuarioEmpresa
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.ListaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.service.UsuarioEmpresaService;
+import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -89,6 +90,34 @@ public class UsuarioEmpresaController {
                         paginacao,
                         idUsuario,
                         idEmpresa
+                )
+        );
+    }
+
+    @GetMapping("/empresas")
+    @PreAuthorize(
+            "hasAuthority('ACESSO_USUARIO_EMPRESA_CRIAR')"
+    )
+    public ResponseEntity<Page<ListaEmpresaRecord>>
+            listarEmpresas(
+                    @PageableDefault(
+                            page = 0,
+                            size = 10,
+                            sort = "nome",
+                            direction = Sort.Direction.ASC
+                    )
+                    Pageable paginacao,
+
+                    @RequestParam(
+                            name = "filtro",
+                            required = false
+                    )
+                    String filtro
+            ) {
+        return ResponseEntity.ok(
+                service.listarEmpresas(
+                        paginacao,
+                        filtro
                 )
         );
     }
