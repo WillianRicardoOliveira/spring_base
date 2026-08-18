@@ -26,7 +26,9 @@ import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 class AcessoControllersAuthorizationTest {
 
     @Test
-    @DisplayName("Deve validar permissoes do PerfilController")
+    @DisplayName(
+            "Deve validar permissoes do PerfilController"
+    )
     void deveValidarPermissoesDoPerfilController()
             throws Exception {
         assertThat(preAuthorize(
@@ -73,7 +75,9 @@ class AcessoControllersAuthorizationTest {
     }
 
     @Test
-    @DisplayName("Deve validar permissoes do PermissaoController")
+    @DisplayName(
+            "Deve validar permissoes do PermissaoController"
+    )
     void deveValidarPermissoesDoPermissaoController()
             throws Exception {
         assertThat(preAuthorize(
@@ -227,6 +231,15 @@ class AcessoControllersAuthorizationTest {
 
         assertThat(preAuthorize(
                 UsuarioEmpresaController.class,
+                "listarEmpresas",
+                Pageable.class,
+                String.class
+        )).isEqualTo(
+                "hasAuthority('ACESSO_USUARIO_EMPRESA_CRIAR')"
+        );
+
+        assertThat(preAuthorize(
+                UsuarioEmpresaController.class,
                 "detalhar",
                 Long.class
         )).isEqualTo(
@@ -292,7 +305,9 @@ class AcessoControllersAuthorizationTest {
     }
 
     @Test
-    @DisplayName("Deve validar permissoes do UsuarioController")
+    @DisplayName(
+            "Deve validar permissoes do UsuarioController"
+    )
     void deveValidarPermissoesDoUsuarioController()
             throws Exception {
         assertThat(preAuthorize(
@@ -352,8 +367,13 @@ class AcessoControllersAuthorizationTest {
             Class<?>... parametros
     ) throws Exception {
         return controller
-                .getDeclaredMethod(metodo, parametros)
-                .getAnnotation(PreAuthorize.class)
+                .getDeclaredMethod(
+                        metodo,
+                        parametros
+                )
+                .getAnnotation(
+                        PreAuthorize.class
+                )
                 .value();
     }
 }

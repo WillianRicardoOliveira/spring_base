@@ -15,7 +15,9 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
+import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
+import com.empresa.erp.domain.configuracao.empresa.service.EmpresaService;
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
@@ -34,6 +36,8 @@ public class UsuarioEmpresaService {
     private final UsuarioRepository usuarioRepository;
 
     private final EmpresaRepository empresaRepository;
+
+    private final EmpresaService empresaService;
 
     private final UsuarioLogadoService usuarioLogadoService;
 
@@ -129,6 +133,17 @@ public class UsuarioEmpresaService {
                         StatusEnum.ATIVO
                 )
                 .map(ListaUsuarioEmpresaRecord::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ListaEmpresaRecord> listarEmpresas(
+            Pageable paginacao,
+            String filtro
+    ) {
+        return empresaService.listar(
+                paginacao,
+                filtro
+        );
     }
 
     @Transactional(readOnly = true)
