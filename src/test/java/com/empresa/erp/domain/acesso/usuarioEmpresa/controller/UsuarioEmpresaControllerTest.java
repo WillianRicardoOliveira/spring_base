@@ -37,6 +37,7 @@ import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,9 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class UsuarioEmpresaControllerTest {
 
     private MockMvc mockMvc;
-
     private ObjectMapper objectMapper;
-
     private UsuarioEmpresaService service;
 
     @BeforeEach
@@ -87,23 +86,17 @@ class UsuarioEmpresaControllerTest {
         )).thenReturn(usuarioEmpresa);
 
         mockMvc.perform(
-                        post(
-                                "/acesso/usuario-empresa"
-                        )
+                        post("/acesso/usuario-empresa")
                                 .contentType(
-                                        MediaType
-                                                .APPLICATION_JSON
+                                        MediaType.APPLICATION_JSON
                                 )
                                 .content(
-                                        objectMapper
-                                                .writeValueAsString(
-                                                        dados
-                                                )
+                                        objectMapper.writeValueAsString(
+                                                dados
+                                        )
                                 )
                 )
-                .andExpect(
-                        status().isCreated()
-                )
+                .andExpect(status().isCreated())
                 .andExpect(
                         header().string(
                                 "Location",
@@ -157,23 +150,17 @@ class UsuarioEmpresaControllerTest {
         );
 
         mockMvc.perform(
-                        post(
-                                "/acesso/usuario-empresa"
-                        )
+                        post("/acesso/usuario-empresa")
                                 .contentType(
-                                        MediaType
-                                                .APPLICATION_JSON
+                                        MediaType.APPLICATION_JSON
                                 )
                                 .content(
-                                        objectMapper
-                                                .writeValueAsString(
-                                                        dados
-                                                )
+                                        objectMapper.writeValueAsString(
+                                                dados
+                                        )
                                 )
                 )
-                .andExpect(
-                        status().isBadRequest()
-                );
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -205,15 +192,12 @@ class UsuarioEmpresaControllerTest {
         )).thenReturn(pagina);
 
         mockMvc.perform(
-                        get(
-                                "/acesso/usuario-empresa"
-                        )
+                        get("/acesso/usuario-empresa")
                 )
                 .andExpect(status().isOk())
                 .andExpect(
-                        jsonPath(
-                                "$.content[0].id"
-                        ).value(3L)
+                        jsonPath("$.content[0].id")
+                                .value(3L)
                 )
                 .andExpect(
                         jsonPath(
@@ -259,9 +243,7 @@ class UsuarioEmpresaControllerTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar por usuario e empresa"
-    )
+    @DisplayName("Deve listar por usuario e empresa")
     void deveListarPorUsuarioEEmpresa()
             throws Exception {
         var pagina =
@@ -278,9 +260,7 @@ class UsuarioEmpresaControllerTest {
         )).thenReturn(pagina);
 
         mockMvc.perform(
-                        get(
-                                "/acesso/usuario-empresa"
-                        )
+                        get("/acesso/usuario-empresa")
                                 .param(
                                         "idUsuario",
                                         "1"
@@ -304,9 +284,7 @@ class UsuarioEmpresaControllerTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar empresas para selecao"
-    )
+    @DisplayName("Deve listar empresas para selecao")
     void deveListarEmpresasParaSelecao()
             throws Exception {
         var lista = List.of(
@@ -363,9 +341,8 @@ class UsuarioEmpresaControllerTest {
                         ).value("ATIVO")
                 )
                 .andExpect(
-                        jsonPath(
-                                "$.totalElements"
-                        ).value(1)
+                        jsonPath("$.totalElements")
+                                .value(1)
                 );
 
         verify(service).listarEmpresas(
@@ -375,9 +352,7 @@ class UsuarioEmpresaControllerTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar empresas sem filtro"
-    )
+    @DisplayName("Deve listar empresas sem filtro")
     void deveListarEmpresasSemFiltro()
             throws Exception {
         var pagina =
@@ -498,18 +473,14 @@ class UsuarioEmpresaControllerTest {
         )).thenReturn(detalhe);
 
         mockMvc.perform(
-                        put(
-                                "/acesso/usuario-empresa"
-                        )
+                        put("/acesso/usuario-empresa")
                                 .contentType(
-                                        MediaType
-                                                .APPLICATION_JSON
+                                        MediaType.APPLICATION_JSON
                                 )
                                 .content(
-                                        objectMapper
-                                                .writeValueAsString(
-                                                        dados
-                                                )
+                                        objectMapper.writeValueAsString(
+                                                dados
+                                        )
                                 )
                 )
                 .andExpect(status().isOk())
@@ -529,9 +500,7 @@ class UsuarioEmpresaControllerTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve rejeitar atualizacao invalida"
-    )
+    @DisplayName("Deve rejeitar atualizacao invalida")
     void deveRejeitarAtualizacaoInvalida()
             throws Exception {
         var dados =
@@ -541,23 +510,17 @@ class UsuarioEmpresaControllerTest {
                 );
 
         mockMvc.perform(
-                        put(
-                                "/acesso/usuario-empresa"
-                        )
+                        put("/acesso/usuario-empresa")
                                 .contentType(
-                                        MediaType
-                                                .APPLICATION_JSON
+                                        MediaType.APPLICATION_JSON
                                 )
                                 .content(
-                                        objectMapper
-                                                .writeValueAsString(
-                                                        dados
-                                                )
+                                        objectMapper.writeValueAsString(
+                                                dados
+                                        )
                                 )
                 )
-                .andExpect(
-                        status().isBadRequest()
-                );
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -569,9 +532,7 @@ class UsuarioEmpresaControllerTest {
                                 "/acesso/usuario-empresa/3"
                         )
                 )
-                .andExpect(
-                        status().isNoContent()
-                );
+                .andExpect(status().isNoContent());
 
         verify(service).excluir(3L);
     }
@@ -592,7 +553,19 @@ class UsuarioEmpresaControllerTest {
                 1L
         );
 
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                1L
+        );
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord(
                         "Empresa Exemplo"
                 )

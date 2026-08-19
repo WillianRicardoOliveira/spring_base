@@ -14,28 +14,35 @@ import com.empresa.erp.domain.usuario.model.UsuarioModel;
 public interface UsuarioEmpresaRepository
         extends JpaRepository<UsuarioEmpresaModel, Long> {
 
-    Page<UsuarioEmpresaModel> findAllByStatus(
-            Pageable paginacao,
-            StatusEnum status
-    );
-
-    Page<UsuarioEmpresaModel> findAllByUsuarioIdAndStatus(
-            Pageable paginacao,
-            Long idUsuario,
-            StatusEnum status
-    );
-
-    Page<UsuarioEmpresaModel> findAllByEmpresaIdAndStatus(
-            Pageable paginacao,
-            Long idEmpresa,
-            StatusEnum status
-    );
+    Page<UsuarioEmpresaModel>
+            findAllByEmpresaOrganizacaoIdAndStatus(
+                    Pageable paginacao,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
 
     Page<UsuarioEmpresaModel>
-            findAllByUsuarioIdAndEmpresaIdAndStatus(
+            findAllByUsuarioIdAndEmpresaOrganizacaoIdAndStatus(
+                    Pageable paginacao,
+                    Long idUsuario,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
+
+    Page<UsuarioEmpresaModel>
+            findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                    Pageable paginacao,
+                    Long idEmpresa,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
+
+    Page<UsuarioEmpresaModel>
+            findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
                     Pageable paginacao,
                     Long idUsuario,
                     Long idEmpresa,
+                    Long idOrganizacao,
                     StatusEnum status
             );
 
@@ -44,6 +51,21 @@ public interface UsuarioEmpresaRepository
             EmpresaModel empresa,
             StatusEnum status
     );
+
+    Optional<UsuarioEmpresaModel>
+            findByIdAndEmpresaOrganizacaoIdAndStatus(
+                    Long id,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
+
+    /*
+     * Métodos temporariamente mantidos para UsuarioService,
+     * EmpresaService e UsuarioSubsidiariaService.
+     *
+     * Devem ser removidos quando esses fluxos estiverem
+     * completamente isolados pela organização.
+     */
 
     boolean existsByUsuarioIdAndStatus(
             Long idUsuario,

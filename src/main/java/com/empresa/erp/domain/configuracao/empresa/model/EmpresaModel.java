@@ -4,14 +4,18 @@ import com.empresa.erp.domain.base.model.AuditoriaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.AtualizaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -30,6 +34,13 @@ public class EmpresaModel extends AuditoriaModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "id_organizacao",
+            nullable = false
+    )
+    private OrganizacaoModel organizacao;
+
     @Column(nullable = false, length = 100)
     private String nome;
 
@@ -37,7 +48,11 @@ public class EmpresaModel extends AuditoriaModel {
     @Column(nullable = false)
     private StatusEnum status;
 
-    public EmpresaModel(EmpresaRecord dados) {
+    public EmpresaModel(
+            OrganizacaoModel organizacao,
+            EmpresaRecord dados
+    ) {
+        this.organizacao = organizacao;
         this.nome = normalizarNome(dados.nome());
         this.status = StatusEnum.ATIVO;
     }

@@ -9,6 +9,7 @@ import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.record.AtualizaSubsidiariaRecord;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 class SubsidiariaModelTest {
 
@@ -16,6 +17,7 @@ class SubsidiariaModelTest {
     @DisplayName("Deve criar subsidiaria ativa")
     void deveCriarSubsidiariaAtiva() {
         var empresa = criarEmpresa();
+
         var subsidiaria = new SubsidiariaModel(
                 empresa,
                 "Filial Curitiba"
@@ -97,8 +99,16 @@ class SubsidiariaModelTest {
     }
 
     private EmpresaModel criarEmpresa() {
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
         return new EmpresaModel(
-                new EmpresaRecord("Empresa Exemplo")
+                organizacao,
+                new EmpresaRecord(
+                        "Empresa Exemplo"
+                )
         );
     }
 }

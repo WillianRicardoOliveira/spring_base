@@ -8,6 +8,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 class EmpresaResponseRecordsTest {
 
@@ -19,11 +20,17 @@ class EmpresaResponseRecordsTest {
                 "Empresa Exemplo"
         );
 
-        var detalhe = new DetalheEmpresaRecord(empresa);
+        var detalhe =
+                new DetalheEmpresaRecord(empresa);
 
-        assertThat(detalhe.id()).isEqualTo(1L);
-        assertThat(detalhe.nome()).isEqualTo("Empresa Exemplo");
-        assertThat(detalhe.status()).isEqualTo(StatusEnum.ATIVO);
+        assertThat(detalhe.id())
+                .isEqualTo(1L);
+
+        assertThat(detalhe.nome())
+                .isEqualTo("Empresa Exemplo");
+
+        assertThat(detalhe.status())
+                .isEqualTo(StatusEnum.ATIVO);
     }
 
     @Test
@@ -34,11 +41,17 @@ class EmpresaResponseRecordsTest {
                 "Segunda Empresa"
         );
 
-        var lista = new ListaEmpresaRecord(empresa);
+        var lista =
+                new ListaEmpresaRecord(empresa);
 
-        assertThat(lista.id()).isEqualTo(2L);
-        assertThat(lista.nome()).isEqualTo("Segunda Empresa");
-        assertThat(lista.status()).isEqualTo(StatusEnum.ATIVO);
+        assertThat(lista.id())
+                .isEqualTo(2L);
+
+        assertThat(lista.nome())
+                .isEqualTo("Segunda Empresa");
+
+        assertThat(lista.status())
+                .isEqualTo(StatusEnum.ATIVO);
     }
 
     @Test
@@ -51,7 +64,8 @@ class EmpresaResponseRecordsTest {
 
         empresa.inativar();
 
-        var detalhe = new DetalheEmpresaRecord(empresa);
+        var detalhe =
+                new DetalheEmpresaRecord(empresa);
 
         assertThat(detalhe.status())
                 .isEqualTo(StatusEnum.INATIVO);
@@ -67,7 +81,8 @@ class EmpresaResponseRecordsTest {
 
         empresa.remover(10L);
 
-        var lista = new ListaEmpresaRecord(empresa);
+        var lista =
+                new ListaEmpresaRecord(empresa);
 
         assertThat(lista.status())
                 .isEqualTo(StatusEnum.REMOVIDO);
@@ -77,7 +92,19 @@ class EmpresaResponseRecordsTest {
             Long id,
             String nome
     ) {
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                1L
+        );
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord(nome)
         );
 

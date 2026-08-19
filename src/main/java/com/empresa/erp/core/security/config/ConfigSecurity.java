@@ -21,7 +21,7 @@ import com.empresa.erp.core.organizacao.service.ContextoOrganizacaoService;
 import com.empresa.erp.core.security.filter.FilterSecurity;
 import com.empresa.erp.core.security.handler.AcessoNegadoHandler;
 import com.empresa.erp.core.security.handler.AutenticacaoEntryPoint;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 

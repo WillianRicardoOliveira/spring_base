@@ -13,28 +13,34 @@ import com.empresa.erp.domain.old.StatusEnum;
 public interface SubsidiariaRepository
         extends JpaRepository<SubsidiariaModel, Long> {
 
-    Page<SubsidiariaModel> findAllByStatus(
-            Pageable paginacao,
-            StatusEnum status
-    );
+    Page<SubsidiariaModel>
+            findAllByEmpresaOrganizacaoIdAndStatus(
+                    Pageable paginacao,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
 
     Page<SubsidiariaModel>
-            findByNomeContainingIgnoreCaseAndStatus(
+            findByEmpresaOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
                     Pageable paginacao,
+                    Long idOrganizacao,
                     String filtro,
                     StatusEnum status
             );
 
-    Page<SubsidiariaModel> findAllByEmpresaIdAndStatus(
-            Pageable paginacao,
-            Long idEmpresa,
-            StatusEnum status
-    );
-
     Page<SubsidiariaModel>
-            findByEmpresaIdAndNomeContainingIgnoreCaseAndStatus(
+            findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
                     Pageable paginacao,
                     Long idEmpresa,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
+
+    Page<SubsidiariaModel>
+            findByEmpresaIdAndEmpresaOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
+                    Pageable paginacao,
+                    Long idEmpresa,
+                    Long idOrganizacao,
                     String filtro,
                     StatusEnum status
             );
@@ -58,6 +64,18 @@ public interface SubsidiariaRepository
             StatusEnum status
     );
 
+    Optional<SubsidiariaModel>
+            findByIdAndEmpresaOrganizacaoIdAndStatus(
+                    Long id,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
+
+    /*
+     * Temporariamente mantido para UsuarioSubsidiariaService.
+     * Deve ser removido quando os acessos por subsidiária
+     * forem isolados pela organização.
+     */
     Optional<SubsidiariaModel> findByIdAndStatus(
             Long id,
             StatusEnum status

@@ -32,6 +32,7 @@ import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
@@ -46,7 +47,8 @@ class UsuarioSubsidiariaServiceTest {
             usuarioEmpresaRepository;
 
     @Mock
-    private SubsidiariaRepository subsidiariaRepository;
+    private SubsidiariaRepository
+            subsidiariaRepository;
 
     @Mock
     private UsuarioLogadoService usuarioLogadoService;
@@ -94,7 +96,8 @@ class UsuarioSubsidiariaServiceTest {
         when(repository.save(
                 any(UsuarioSubsidiariaModel.class)
         )).thenAnswer(
-                invocacao -> invocacao.getArgument(0)
+                invocacao ->
+                        invocacao.getArgument(0)
         );
 
         var resultado = service.cadastrar(
@@ -148,9 +151,12 @@ class UsuarioSubsidiariaServiceTest {
                         any(StatusEnum.class)
                 );
 
-        verify(repository, never()).save(
-                any(UsuarioSubsidiariaModel.class)
-        );
+        verify(repository, never())
+                .save(
+                        any(
+                                UsuarioSubsidiariaModel.class
+                        )
+                );
     }
 
     @Test
@@ -193,15 +199,16 @@ class UsuarioSubsidiariaServiceTest {
                         any(StatusEnum.class)
                 );
 
-        verify(repository, never()).save(
-                any(UsuarioSubsidiariaModel.class)
-        );
+        verify(repository, never())
+                .save(
+                        any(
+                                UsuarioSubsidiariaModel.class
+                        )
+                );
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear cadastro sem subsidiaria"
-    )
+    @DisplayName("Deve bloquear cadastro sem subsidiaria")
     void deveBloquearCadastroSemSubsidiaria() {
         var empresa = criarEmpresa(
                 2L,
@@ -236,15 +243,16 @@ class UsuarioSubsidiariaServiceTest {
                         "Subsidiaria nao encontrada ou removida."
                 );
 
-        verify(repository, never()).save(
-                any(UsuarioSubsidiariaModel.class)
-        );
+        verify(repository, never())
+                .save(
+                        any(
+                                UsuarioSubsidiariaModel.class
+                        )
+                );
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear subsidiaria de outra empresa"
-    )
+    @DisplayName("Deve bloquear subsidiaria de outra empresa")
     void deveBloquearSubsidiariaDeOutraEmpresa() {
         var empresa = criarEmpresa(
                 2L,
@@ -291,9 +299,12 @@ class UsuarioSubsidiariaServiceTest {
                                 + "vinculada ao usuario."
                 );
 
-        verify(repository, never()).save(
-                any(UsuarioSubsidiariaModel.class)
-        );
+        verify(repository, never())
+                .save(
+                        any(
+                                UsuarioSubsidiariaModel.class
+                        )
+                );
     }
 
     @Test
@@ -346,22 +357,30 @@ class UsuarioSubsidiariaServiceTest {
                         "Usuario ja vinculado a esta subsidiaria."
                 );
 
-        verify(repository, never()).save(
-                any(UsuarioSubsidiariaModel.class)
-        );
+        verify(repository, never())
+                .save(
+                        any(
+                                UsuarioSubsidiariaModel.class
+                        )
+                );
     }
 
     @Test
     @DisplayName("Deve listar sem filtro")
     void deveListarSemFiltro() {
-        var paginacao = PageRequest.of(0, 10);
-        var usuarioSubsidiaria = criarUsuarioSubsidiaria();
+        var paginacao =
+                PageRequest.of(0, 10);
+
+        var usuarioSubsidiaria =
+                criarUsuarioSubsidiaria();
 
         when(repository.findAllByStatus(
                 paginacao,
                 StatusEnum.ATIVO
         )).thenReturn(
-                new PageImpl<>(List.of(usuarioSubsidiaria))
+                new PageImpl<>(
+                        List.of(usuarioSubsidiaria)
+                )
         );
 
         var resultado = service.listar(
@@ -369,17 +388,18 @@ class UsuarioSubsidiariaServiceTest {
                 null
         );
 
-        assertThat(resultado.getContent()).hasSize(1);
+        assertThat(resultado.getContent())
+                .hasSize(1);
+
         assertThat(resultado.getContent().get(0).id())
                 .isEqualTo(6L);
     }
 
     @Test
-    @DisplayName(
-            "Deve listar por usuario empresa"
-    )
+    @DisplayName("Deve listar por usuario empresa")
     void deveListarPorUsuarioEmpresa() {
-        var paginacao = PageRequest.of(0, 10);
+        var paginacao =
+                PageRequest.of(0, 10);
 
         when(repository
                 .findAllByUsuarioEmpresaIdAndStatus(
@@ -387,7 +407,9 @@ class UsuarioSubsidiariaServiceTest {
                         3L,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(new PageImpl<>(List.of()));
+        ).thenReturn(
+                new PageImpl<>(List.of())
+        );
 
         service.listar(
                 paginacao,
@@ -405,20 +427,30 @@ class UsuarioSubsidiariaServiceTest {
     @Test
     @DisplayName("Deve detalhar vinculo ativo")
     void deveDetalharVinculoAtivo() {
-        var usuarioSubsidiaria = criarUsuarioSubsidiaria();
+        var usuarioSubsidiaria =
+                criarUsuarioSubsidiaria();
 
         when(repository.findByIdAndStatus(
                 6L,
                 StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuarioSubsidiaria));
+        )).thenReturn(
+                Optional.of(usuarioSubsidiaria)
+        );
 
         var resultado = service.detalhar(6L);
 
-        assertThat(resultado.id()).isEqualTo(6L);
+        assertThat(resultado.id())
+                .isEqualTo(6L);
+
         assertThat(resultado.idUsuarioEmpresa())
                 .isEqualTo(3L);
-        assertThat(resultado.idUsuario()).isEqualTo(1L);
-        assertThat(resultado.idEmpresa()).isEqualTo(2L);
+
+        assertThat(resultado.idUsuario())
+                .isEqualTo(1L);
+
+        assertThat(resultado.idEmpresa())
+                .isEqualTo(2L);
+
         assertThat(resultado.idSubsidiaria())
                 .isEqualTo(4L);
     }
@@ -431,7 +463,9 @@ class UsuarioSubsidiariaServiceTest {
                 StatusEnum.ATIVO
         )).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.detalhar(6L))
+        assertThatThrownBy(() ->
+                service.detalhar(6L)
+        )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Vinculo entre usuario e subsidiaria "
@@ -442,12 +476,15 @@ class UsuarioSubsidiariaServiceTest {
     @Test
     @DisplayName("Deve remover vinculo com auditoria")
     void deveRemoverVinculoComAuditoria() {
-        var usuarioSubsidiaria = criarUsuarioSubsidiaria();
+        var usuarioSubsidiaria =
+                criarUsuarioSubsidiaria();
 
         when(repository.findByIdAndStatus(
                 6L,
                 StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuarioSubsidiaria));
+        )).thenReturn(
+                Optional.of(usuarioSubsidiaria)
+        );
 
         when(usuarioLogadoService.getId())
                 .thenReturn(10L);
@@ -472,14 +509,17 @@ class UsuarioSubsidiariaServiceTest {
                 StatusEnum.ATIVO
         )).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.excluir(6L))
+        assertThatThrownBy(() ->
+                service.excluir(6L)
+        )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Vinculo entre usuario e subsidiaria "
                                 + "nao encontrado ou removido."
                 );
 
-        verify(usuarioLogadoService, never()).getId();
+        verify(usuarioLogadoService, never())
+                .getId();
     }
 
     private UsuarioModel criarUsuario() {
@@ -504,7 +544,19 @@ class UsuarioSubsidiariaServiceTest {
             Long id,
             String nome
     ) {
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                1L
+        );
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord(nome)
         );
 
@@ -521,11 +573,12 @@ class UsuarioSubsidiariaServiceTest {
             EmpresaModel empresa,
             Boolean todasSubsidiarias
     ) {
-        var usuarioEmpresa = new UsuarioEmpresaModel(
-                criarUsuario(),
-                empresa,
-                todasSubsidiarias
-        );
+        var usuarioEmpresa =
+                new UsuarioEmpresaModel(
+                        criarUsuario(),
+                        empresa,
+                        todasSubsidiarias
+                );
 
         ReflectionTestUtils.setField(
                 usuarioEmpresa,

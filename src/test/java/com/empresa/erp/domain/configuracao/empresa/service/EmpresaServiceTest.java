@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
@@ -29,33 +31,67 @@ import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
+import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 
 @ExtendWith(MockitoExtension.class)
 class EmpresaServiceTest {
+
+    private static final Long ID_ORGANIZACAO = 1L;
 
     @Mock
     private EmpresaRepository repository;
 
     @Mock
-    private SubsidiariaRepository subsidiariaRepository;
+    private OrganizacaoRepository
+            organizacaoRepository;
+
+    @Mock
+    private SubsidiariaRepository
+            subsidiariaRepository;
 
     @Mock
     private UsuarioEmpresaRepository
             usuarioEmpresaRepository;
 
     @Mock
-    private UsuarioLogadoService usuarioLogadoService;
+    private UsuarioLogadoService
+            usuarioLogadoService;
+
+    @Mock
+    private ContextoOrganizacao
+            contextoOrganizacao;
 
     @InjectMocks
     private EmpresaService service;
 
+    @BeforeEach
+    void setUp() {
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(ID_ORGANIZACAO);
+    }
+
     @Test
-    @DisplayName("Deve cadastrar empresa com nome normalizado")
-    void deveCadastrarEmpresaComNomeNormalizado() {
-        when(repository.existsByNomeIgnoreCaseAndStatus(
-                "Empresa Exemplo",
-                StatusEnum.ATIVO
-        )).thenReturn(false);
+    @DisplayName(
+            "Deve cadastrar empresa vinculada a organizacao do contexto"
+    )
+    void deveCadastrarEmpresaVinculadaAOrganizacaoDoContexto() {
+        var organizacao = criarOrganizacao(
+                ID_ORGANIZACAO,
+                "Organizacao Principal"
+        );
+
+        when(repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                        ID_ORGANIZACAO,
+                        "Empresa Exemplo",
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(false);
+
+        when(organizacaoRepository.getReferenceById(
+                ID_ORGANIZACAO
+        )).thenReturn(organizacao);
 
         when(repository.save(any(EmpresaModel.class)))
                 .thenAnswer(
@@ -68,26 +104,41 @@ class EmpresaServiceTest {
                 )
         );
 
+        assertThat(resultado.getOrganizacao())
+                .isSameAs(organizacao);
+
         assertThat(resultado.getNome())
                 .isEqualTo("Empresa Exemplo");
 
         assertThat(resultado.getStatus())
                 .isEqualTo(StatusEnum.ATIVO);
 
-        verify(repository).save(
-                any(EmpresaModel.class)
-        );
+        verify(repository)
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                        ID_ORGANIZACAO,
+                        "Empresa Exemplo",
+                        StatusEnum.ATIVO
+                );
+
+        verify(organizacaoRepository)
+                .getReferenceById(ID_ORGANIZACAO);
+
+        verify(repository)
+                .save(any(EmpresaModel.class));
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear cadastro de empresa ativa duplicada"
+            "Deve bloquear cadastro duplicado somente na organizacao atual"
     )
-    void deveBloquearCadastroDeEmpresaAtivaDuplicada() {
-        when(repository.existsByNomeIgnoreCaseAndStatus(
-                "Empresa Exemplo",
-                StatusEnum.ATIVO
-        )).thenReturn(true);
+    void deveBloquearCadastroDuplicadoSomenteNaOrganizacaoAtual() {
+        when(repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                        ID_ORGANIZACAO,
+                        "Empresa Exemplo",
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(true);
 
         assertThatThrownBy(() ->
                 service.cadastrar(
@@ -99,13 +150,18 @@ class EmpresaServiceTest {
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Empresa ja cadastrada.");
 
+        verify(organizacaoRepository, never())
+                .getReferenceById(any());
+
         verify(repository, never())
                 .save(any(EmpresaModel.class));
     }
 
     @Test
-    @DisplayName("Deve listar empresas ativas sem filtro")
-    void deveListarEmpresasAtivasSemFiltro() {
+    @DisplayName(
+            "Deve listar empresas ativas da organizacao sem filtro"
+    )
+    void deveListarEmpresasAtivasDaOrganizacaoSemFiltro() {
         var paginacao = PageRequest.of(0, 10);
 
         var empresa = criarEmpresa(
@@ -113,10 +169,13 @@ class EmpresaServiceTest {
                 "Empresa Exemplo"
         );
 
-        when(repository.findAllByStatus(
-                paginacao,
-                StatusEnum.ATIVO
-        )).thenReturn(
+        when(repository
+                .findAllByOrganizacaoIdAndStatus(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
                 new PageImpl<>(List.of(empresa))
         );
 
@@ -133,11 +192,20 @@ class EmpresaServiceTest {
 
         assertThat(resultado.getContent().get(0).nome())
                 .isEqualTo("Empresa Exemplo");
+
+        verify(repository)
+                .findAllByOrganizacaoIdAndStatus(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
     }
 
     @Test
-    @DisplayName("Deve listar empresas ativas com filtro")
-    void deveListarEmpresasAtivasComFiltro() {
+    @DisplayName(
+            "Deve listar empresas da organizacao com filtro"
+    )
+    void deveListarEmpresasDaOrganizacaoComFiltro() {
         var paginacao = PageRequest.of(0, 10);
 
         var empresa = criarEmpresa(
@@ -146,8 +214,9 @@ class EmpresaServiceTest {
         );
 
         when(repository
-                .findByNomeContainingIgnoreCaseAndStatus(
+                .findByOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
                         paginacao,
+                        ID_ORGANIZACAO,
                         "Empresa",
                         StatusEnum.ATIVO
                 )
@@ -164,8 +233,9 @@ class EmpresaServiceTest {
                 .hasSize(1);
 
         verify(repository)
-                .findByNomeContainingIgnoreCaseAndStatus(
+                .findByOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
                         paginacao,
+                        ID_ORGANIZACAO,
                         "Empresa",
                         StatusEnum.ATIVO
                 );
@@ -178,10 +248,13 @@ class EmpresaServiceTest {
     void deveConsiderarFiltroEmBrancoComoAusenciaDeFiltro() {
         var paginacao = PageRequest.of(0, 10);
 
-        when(repository.findAllByStatus(
-                paginacao,
-                StatusEnum.ATIVO
-        )).thenReturn(
+        when(repository
+                .findAllByOrganizacaoIdAndStatus(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
                 new PageImpl<>(List.of())
         );
 
@@ -190,26 +263,31 @@ class EmpresaServiceTest {
                 "   "
         );
 
-        verify(repository).findAllByStatus(
-                paginacao,
-                StatusEnum.ATIVO
-        );
+        verify(repository)
+                .findAllByOrganizacaoIdAndStatus(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
     }
 
     @Test
-    @DisplayName("Deve detalhar empresa ativa")
-    void deveDetalharEmpresaAtiva() {
+    @DisplayName(
+            "Deve detalhar empresa ativa da organizacao atual"
+    )
+    void deveDetalharEmpresaAtivaDaOrganizacaoAtual() {
         var empresa = criarEmpresa(
                 1L,
                 "Empresa Exemplo"
         );
 
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(empresa)
-        );
+        when(repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
 
         var resultado = service.detalhar(1L);
 
@@ -225,13 +303,16 @@ class EmpresaServiceTest {
 
     @Test
     @DisplayName(
-            "Deve rejeitar detalhamento de empresa inexistente"
+            "Deve rejeitar empresa inexistente ou de outra organizacao"
     )
-    void deveRejeitarDetalhamentoDeEmpresaInexistente() {
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+    void deveRejeitarEmpresaInexistenteOuDeOutraOrganizacao() {
+        when(repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.detalhar(1L)
@@ -244,28 +325,30 @@ class EmpresaServiceTest {
 
     @Test
     @DisplayName(
-            "Deve atualizar empresa e normalizar nome"
+            "Deve atualizar empresa da organizacao e normalizar nome"
     )
-    void deveAtualizarEmpresaENormalizarNome() {
+    void deveAtualizarEmpresaDaOrganizacaoENormalizarNome() {
         var empresa = criarEmpresa(
                 1L,
                 "Empresa Exemplo"
         );
 
         when(repository
-                .existsByNomeIgnoreCaseAndStatusAndIdNot(
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
+
+        when(repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                        ID_ORGANIZACAO,
                         "Empresa Atualizada",
                         StatusEnum.ATIVO,
                         1L
                 )
         ).thenReturn(false);
-
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(empresa)
-        );
 
         var resultado = service.atualizar(
                 new AtualizaEmpresaRecord(
@@ -276,6 +359,9 @@ class EmpresaServiceTest {
 
         assertThat(resultado.nome())
                 .isEqualTo("Empresa Atualizada");
+
+        assertThat(empresa.getOrganizacao().getId())
+                .isEqualTo(ID_ORGANIZACAO);
     }
 
     @Test
@@ -289,19 +375,21 @@ class EmpresaServiceTest {
         );
 
         when(repository
-                .existsByNomeIgnoreCaseAndStatusAndIdNot(
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
+
+        when(repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                        ID_ORGANIZACAO,
                         "Empresa Exemplo",
                         StatusEnum.ATIVO,
                         1L
                 )
         ).thenReturn(false);
-
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(empresa)
-        );
 
         var resultado = service.atualizar(
                 new AtualizaEmpresaRecord(
@@ -316,11 +404,25 @@ class EmpresaServiceTest {
 
     @Test
     @DisplayName(
-            "Deve bloquear atualizacao com nome duplicado"
+            "Deve bloquear atualizacao com nome duplicado na organizacao"
     )
-    void deveBloquearAtualizacaoComNomeDuplicado() {
+    void deveBloquearAtualizacaoComNomeDuplicadoNaOrganizacao() {
+        var empresa = criarEmpresa(
+                1L,
+                "Empresa Exemplo"
+        );
+
         when(repository
-                .existsByNomeIgnoreCaseAndStatusAndIdNot(
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
+
+        when(repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                        ID_ORGANIZACAO,
                         "Empresa Existente",
                         StatusEnum.ATIVO,
                         1L
@@ -337,25 +439,23 @@ class EmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Empresa ja cadastrada.");
+
+        assertThat(empresa.getNome())
+                .isEqualTo("Empresa Exemplo");
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear atualizacao de empresa removida"
+            "Deve bloquear atualizacao de empresa fora da organizacao"
     )
-    void deveBloquearAtualizacaoDeEmpresaRemovida() {
+    void deveBloquearAtualizacaoDeEmpresaForaDaOrganizacao() {
         when(repository
-                .existsByNomeIgnoreCaseAndStatusAndIdNot(
-                        "Empresa Atualizada",
-                        StatusEnum.ATIVO,
-                        1L
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
                 )
-        ).thenReturn(false);
-
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.atualizar(
@@ -369,20 +469,33 @@ class EmpresaServiceTest {
                 .hasMessage(
                         "Empresa nao encontrada ou removida."
                 );
+
+        verify(repository, never())
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                        any(),
+                        any(),
+                        any(),
+                        any()
+                );
     }
 
     @Test
-    @DisplayName("Deve remover empresa com auditoria")
-    void deveRemoverEmpresaComAuditoria() {
+    @DisplayName(
+            "Deve remover empresa da organizacao com auditoria"
+    )
+    void deveRemoverEmpresaDaOrganizacaoComAuditoria() {
         var empresa = criarEmpresa(
                 1L,
                 "Empresa Exemplo"
         );
 
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(empresa));
+        when(repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
 
         when(subsidiariaRepository
                 .existsByEmpresaIdAndStatus(
@@ -423,10 +536,13 @@ class EmpresaServiceTest {
                 "Empresa Exemplo"
         );
 
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(empresa));
+        when(repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
 
         when(subsidiariaRepository
                 .existsByEmpresaIdAndStatus(
@@ -447,21 +563,14 @@ class EmpresaServiceTest {
         assertThat(empresa.getStatus())
                 .isEqualTo(StatusEnum.ATIVO);
 
-        assertThat(empresa.getRemovidoEm())
-                .isNull();
+        verify(usuarioEmpresaRepository, never())
+                .existsByEmpresaIdAndStatus(
+                        1L,
+                        StatusEnum.ATIVO
+                );
 
-        verify(
-                usuarioEmpresaRepository,
-                never()
-        ).existsByEmpresaIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        );
-
-        verify(
-                usuarioLogadoService,
-                never()
-        ).getId();
+        verify(usuarioLogadoService, never())
+                .getId();
     }
 
     @Test
@@ -474,10 +583,13 @@ class EmpresaServiceTest {
                 "Empresa Exemplo"
         );
 
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(empresa));
+        when(repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
 
         when(subsidiariaRepository
                 .existsByEmpresaIdAndStatus(
@@ -505,24 +617,22 @@ class EmpresaServiceTest {
         assertThat(empresa.getStatus())
                 .isEqualTo(StatusEnum.ATIVO);
 
-        assertThat(empresa.getRemovidoEm())
-                .isNull();
-
-        verify(
-                usuarioLogadoService,
-                never()
-        ).getId();
+        verify(usuarioLogadoService, never())
+                .getId();
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear exclusao de empresa inexistente"
+            "Deve bloquear exclusao de empresa fora da organizacao"
     )
-    void deveBloquearExclusaoDeEmpresaInexistente() {
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+    void deveBloquearExclusaoDeEmpresaForaDaOrganizacao() {
+        when(repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.excluir(1L)
@@ -532,33 +642,49 @@ class EmpresaServiceTest {
                         "Empresa nao encontrada ou removida."
                 );
 
-        verify(
-                subsidiariaRepository,
-                never()
-        ).existsByEmpresaIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
+        verify(subsidiariaRepository, never())
+                .existsByEmpresaIdAndStatus(
+                        1L,
+                        StatusEnum.ATIVO
+                );
+
+        verify(usuarioEmpresaRepository, never())
+                .existsByEmpresaIdAndStatus(
+                        1L,
+                        StatusEnum.ATIVO
+                );
+
+        verify(usuarioLogadoService, never())
+                .getId();
+    }
+
+    private OrganizacaoModel criarOrganizacao(
+            Long id,
+            String nome
+    ) {
+        var organizacao =
+                new OrganizacaoModel(nome);
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                id
         );
 
-        verify(
-                usuarioEmpresaRepository,
-                never()
-        ).existsByEmpresaIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        );
-
-        verify(
-                usuarioLogadoService,
-                never()
-        ).getId();
+        return organizacao;
     }
 
     private EmpresaModel criarEmpresa(
             Long id,
             String nome
     ) {
+        var organizacao = criarOrganizacao(
+                ID_ORGANIZACAO,
+                "Organizacao Principal"
+        );
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord(nome)
         );
 

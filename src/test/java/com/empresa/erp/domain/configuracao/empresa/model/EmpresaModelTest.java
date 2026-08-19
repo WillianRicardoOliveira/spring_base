@@ -8,24 +8,46 @@ import org.junit.jupiter.api.Test;
 import com.empresa.erp.domain.configuracao.empresa.record.AtualizaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 class EmpresaModelTest {
 
     @Test
-    @DisplayName("Deve criar empresa ativa e normalizar nome")
-    void deveCriarEmpresaAtivaENormalizarNome() {
-        var dados = new EmpresaRecord("  Empresa   Exemplo  ");
+    @DisplayName(
+            "Deve criar empresa ativa vinculada a organizacao e normalizar nome"
+    )
+    void deveCriarEmpresaAtivaVinculadaAOrganizacaoENormalizarNome() {
+        var organizacao =
+                new OrganizacaoModel("Organizacao Exemplo");
 
-        var empresa = new EmpresaModel(dados);
+        var dados =
+                new EmpresaRecord("  Empresa   Exemplo  ");
 
-        assertThat(empresa.getNome()).isEqualTo("Empresa Exemplo");
-        assertThat(empresa.getStatus()).isEqualTo(StatusEnum.ATIVO);
+        var empresa = new EmpresaModel(
+                organizacao,
+                dados
+        );
+
+        assertThat(empresa.getOrganizacao())
+                .isSameAs(organizacao);
+
+        assertThat(empresa.getNome())
+                .isEqualTo("Empresa Exemplo");
+
+        assertThat(empresa.getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
     }
 
     @Test
-    @DisplayName("Deve atualizar e normalizar nome da empresa")
-    void deveAtualizarENormalizarNomeDaEmpresa() {
+    @DisplayName(
+            "Deve atualizar e normalizar nome sem alterar organizacao"
+    )
+    void deveAtualizarENormalizarNomeSemAlterarOrganizacao() {
+        var organizacao =
+                new OrganizacaoModel("Organizacao Exemplo");
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord("Empresa Exemplo")
         );
 
@@ -38,12 +60,21 @@ class EmpresaModelTest {
 
         assertThat(empresa.getNome())
                 .isEqualTo("Empresa Atualizada");
+
+        assertThat(empresa.getOrganizacao())
+                .isSameAs(organizacao);
     }
 
     @Test
-    @DisplayName("Deve inativar empresa")
-    void deveInativarEmpresa() {
+    @DisplayName(
+            "Deve inativar empresa sem alterar organizacao"
+    )
+    void deveInativarEmpresaSemAlterarOrganizacao() {
+        var organizacao =
+                new OrganizacaoModel("Organizacao Exemplo");
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord("Empresa Exemplo")
         );
 
@@ -51,12 +82,21 @@ class EmpresaModelTest {
 
         assertThat(empresa.getStatus())
                 .isEqualTo(StatusEnum.INATIVO);
+
+        assertThat(empresa.getOrganizacao())
+                .isSameAs(organizacao);
     }
 
     @Test
-    @DisplayName("Deve remover empresa registrando auditoria")
-    void deveRemoverEmpresaRegistrandoAuditoria() {
+    @DisplayName(
+            "Deve remover empresa registrando auditoria sem alterar organizacao"
+    )
+    void deveRemoverEmpresaRegistrandoAuditoriaSemAlterarOrganizacao() {
+        var organizacao =
+                new OrganizacaoModel("Organizacao Exemplo");
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord("Empresa Exemplo")
         );
 
@@ -70,5 +110,8 @@ class EmpresaModelTest {
 
         assertThat(empresa.getRemovidoEm())
                 .isNotNull();
+
+        assertThat(empresa.getOrganizacao())
+                .isSameAs(organizacao);
     }
 }

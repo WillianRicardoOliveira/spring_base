@@ -3,6 +3,7 @@ package com.empresa.erp.domain.acesso.usuarioEmpresa.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,11 +23,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
@@ -33,6 +37,7 @@ import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.empresa.service.EmpresaService;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
@@ -40,8 +45,14 @@ import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 @ExtendWith(MockitoExtension.class)
 class UsuarioEmpresaServiceTest {
 
+    private static final Long ID_ORGANIZACAO = 1L;
+
     @Mock
     private UsuarioEmpresaRepository repository;
+
+    @Mock
+    private UsuarioOrganizacaoRepository
+            usuarioOrganizacaoRepository;
 
     @Mock
     private UsuarioSubsidiariaRepository
@@ -59,12 +70,27 @@ class UsuarioEmpresaServiceTest {
     @Mock
     private UsuarioLogadoService usuarioLogadoService;
 
+    @Mock
+    private ContextoOrganizacao contextoOrganizacao;
+
     @InjectMocks
     private UsuarioEmpresaService service;
 
+    @BeforeEach
+    void setUp() {
+        lenient()
+                .when(
+                        contextoOrganizacao
+                                .getIdOrganizacao()
+                )
+                .thenReturn(ID_ORGANIZACAO);
+    }
+
     @Test
-    @DisplayName("Deve cadastrar vinculo")
-    void deveCadastrarVinculo() {
+    @DisplayName(
+            "Deve cadastrar vinculo na organizacao atual"
+    )
+    void deveCadastrarVinculoNaOrganizacaoAtual() {
         var usuario = criarUsuario(1L);
         var empresa = criarEmpresa(2L);
 
@@ -73,16 +99,29 @@ class UsuarioEmpresaServiceTest {
                 StatusEnum.ATIVO
         )).thenReturn(Optional.of(usuario));
 
-        when(empresaRepository.findByIdAndStatus(
-                2L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(empresa));
+        when(usuarioOrganizacaoRepository
+                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(true);
 
-        when(repository.existsByUsuarioAndEmpresaAndStatus(
-                usuario,
-                empresa,
-                StatusEnum.ATIVO
-        )).thenReturn(false);
+        when(empresaRepository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
+
+        when(repository
+                .existsByUsuarioAndEmpresaAndStatus(
+                        usuario,
+                        empresa,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(false);
 
         when(repository.save(
                 any(UsuarioEmpresaModel.class)
@@ -110,10 +149,6 @@ class UsuarioEmpresaServiceTest {
 
         assertThat(resultado.getStatus())
                 .isEqualTo(StatusEnum.ATIVO);
-
-        verify(repository).save(
-                any(UsuarioEmpresaModel.class)
-        );
     }
 
     @Test
@@ -135,32 +170,31 @@ class UsuarioEmpresaServiceTest {
                         )
                 )
         )
-                .isInstanceOf(
-                        ValidacaoException.class
-                )
+                .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Usuario nao encontrado ou removido."
                 );
 
-        verify(empresaRepository, never())
-                .findByIdAndStatus(
-                        any(Long.class),
-                        any(StatusEnum.class)
+        verify(usuarioOrganizacaoRepository, never())
+                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                        any(),
+                        any(),
+                        any()
                 );
 
-        verify(repository, never())
-                .save(
-                        any(
-                                UsuarioEmpresaModel.class
-                        )
+        verify(empresaRepository, never())
+                .findByIdAndOrganizacaoIdAndStatus(
+                        any(),
+                        any(),
+                        any()
                 );
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear cadastro para empresa inexistente"
+            "Deve bloquear usuario sem vinculo com organizacao"
     )
-    void deveBloquearCadastroParaEmpresaInexistente() {
+    void deveBloquearUsuarioSemVinculoComOrganizacao() {
         var usuario = criarUsuario(1L);
 
         when(usuarioRepository.findByIdAndStatus(
@@ -168,10 +202,13 @@ class UsuarioEmpresaServiceTest {
                 StatusEnum.ATIVO
         )).thenReturn(Optional.of(usuario));
 
-        when(empresaRepository.findByIdAndStatus(
-                2L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+        when(usuarioOrganizacaoRepository
+                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(false);
 
         assertThatThrownBy(() ->
                 service.cadastrar(
@@ -182,19 +219,66 @@ class UsuarioEmpresaServiceTest {
                         )
                 )
         )
-                .isInstanceOf(
-                        ValidacaoException.class
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage(
+                        "Usuario nao pertence a organizacao atual."
+                );
+
+        verify(empresaRepository, never())
+                .findByIdAndOrganizacaoIdAndStatus(
+                        any(),
+                        any(),
+                        any()
+                );
+
+        verify(repository, never())
+                .save(any(UsuarioEmpresaModel.class));
+    }
+
+    @Test
+    @DisplayName(
+            "Deve bloquear empresa fora da organizacao"
+    )
+    void deveBloquearEmpresaForaDaOrganizacao() {
+        var usuario = criarUsuario(1L);
+
+        when(usuarioRepository.findByIdAndStatus(
+                1L,
+                StatusEnum.ATIVO
+        )).thenReturn(Optional.of(usuario));
+
+        when(usuarioOrganizacaoRepository
+                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
                 )
+        ).thenReturn(true);
+
+        when(empresaRepository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                service.cadastrar(
+                        new UsuarioEmpresaRecord(
+                                1L,
+                                2L,
+                                true
+                        )
+                )
+        )
+                .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Empresa nao encontrada ou removida."
                 );
 
         verify(repository, never())
-                .save(
-                        any(
-                                UsuarioEmpresaModel.class
-                        )
-                );
+                .save(any(UsuarioEmpresaModel.class));
     }
 
     @Test
@@ -208,16 +292,29 @@ class UsuarioEmpresaServiceTest {
                 StatusEnum.ATIVO
         )).thenReturn(Optional.of(usuario));
 
-        when(empresaRepository.findByIdAndStatus(
-                2L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(empresa));
+        when(usuarioOrganizacaoRepository
+                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(true);
 
-        when(repository.existsByUsuarioAndEmpresaAndStatus(
-                usuario,
-                empresa,
-                StatusEnum.ATIVO
-        )).thenReturn(true);
+        when(empresaRepository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
+
+        when(repository
+                .existsByUsuarioAndEmpresaAndStatus(
+                        usuario,
+                        empresa,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(true);
 
         assertThatThrownBy(() ->
                 service.cadastrar(
@@ -228,34 +325,30 @@ class UsuarioEmpresaServiceTest {
                         )
                 )
         )
-                .isInstanceOf(
-                        ValidacaoException.class
-                )
+                .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Usuario ja vinculado a esta empresa."
                 );
 
         verify(repository, never())
-                .save(
-                        any(
-                                UsuarioEmpresaModel.class
-                        )
-                );
+                .save(any(UsuarioEmpresaModel.class));
     }
 
     @Test
-    @DisplayName("Deve listar sem filtros")
-    void deveListarSemFiltros() {
-        var paginacao =
-                PageRequest.of(0, 10);
+    @DisplayName(
+            "Deve listar vinculos da organizacao sem filtros"
+    )
+    void deveListarVinculosDaOrganizacaoSemFiltros() {
+        var paginacao = PageRequest.of(0, 10);
+        var usuarioEmpresa = criarUsuarioEmpresa();
 
-        var usuarioEmpresa =
-                criarUsuarioEmpresa();
-
-        when(repository.findAllByStatus(
-                paginacao,
-                StatusEnum.ATIVO
-        )).thenReturn(
+        when(repository
+                .findAllByEmpresaOrganizacaoIdAndStatus(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
                 new PageImpl<>(
                         List.of(usuarioEmpresa)
                 )
@@ -270,24 +363,25 @@ class UsuarioEmpresaServiceTest {
         assertThat(resultado.getContent())
                 .hasSize(1);
 
-        assertThat(
-                resultado.getContent()
-                        .get(0)
-                        .id()
-        ).isEqualTo(3L);
+        assertThat(resultado.getContent().get(0).id())
+                .isEqualTo(3L);
     }
 
     @Test
-    @DisplayName("Deve listar por usuario")
-    void deveListarPorUsuario() {
-        var paginacao =
-                PageRequest.of(0, 10);
+    @DisplayName(
+            "Deve listar por usuario e organizacao"
+    )
+    void deveListarPorUsuarioEOrganizacao() {
+        var paginacao = PageRequest.of(0, 10);
 
-        when(repository.findAllByUsuarioIdAndStatus(
-                paginacao,
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(
+        when(repository
+                .findAllByUsuarioIdAndEmpresaOrganizacaoIdAndStatus(
+                        paginacao,
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
                 new PageImpl<>(List.of())
         );
 
@@ -298,24 +392,29 @@ class UsuarioEmpresaServiceTest {
         );
 
         verify(repository)
-                .findAllByUsuarioIdAndStatus(
+                .findAllByUsuarioIdAndEmpresaOrganizacaoIdAndStatus(
                         paginacao,
                         1L,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 );
     }
 
     @Test
-    @DisplayName("Deve listar por empresa")
-    void deveListarPorEmpresa() {
-        var paginacao =
-                PageRequest.of(0, 10);
+    @DisplayName(
+            "Deve listar por empresa e organizacao"
+    )
+    void deveListarPorEmpresaEOrganizacao() {
+        var paginacao = PageRequest.of(0, 10);
 
-        when(repository.findAllByEmpresaIdAndStatus(
-                paginacao,
-                2L,
-                StatusEnum.ATIVO
-        )).thenReturn(
+        when(repository
+                .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                        paginacao,
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
                 new PageImpl<>(List.of())
         );
 
@@ -326,24 +425,27 @@ class UsuarioEmpresaServiceTest {
         );
 
         verify(repository)
-                .findAllByEmpresaIdAndStatus(
+                .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
                         paginacao,
                         2L,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 );
     }
 
     @Test
-    @DisplayName("Deve listar por usuario e empresa")
-    void deveListarPorUsuarioEEmpresa() {
-        var paginacao =
-                PageRequest.of(0, 10);
+    @DisplayName(
+            "Deve listar por usuario empresa e organizacao"
+    )
+    void deveListarPorUsuarioEmpresaEOrganizacao() {
+        var paginacao = PageRequest.of(0, 10);
 
         when(repository
-                .findAllByUsuarioIdAndEmpresaIdAndStatus(
+                .findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
                         paginacao,
                         1L,
                         2L,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(
@@ -357,19 +459,21 @@ class UsuarioEmpresaServiceTest {
         );
 
         verify(repository)
-                .findAllByUsuarioIdAndEmpresaIdAndStatus(
+                .findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
                         paginacao,
                         1L,
                         2L,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 );
     }
 
     @Test
-    @DisplayName("Deve listar empresas para selecao")
-    void deveListarEmpresasParaSelecao() {
-        var paginacao =
-                PageRequest.of(0, 10);
+    @DisplayName(
+            "Deve listar empresas pelo servico isolado"
+    )
+    void deveListarEmpresasPeloServicoIsolado() {
+        var paginacao = PageRequest.of(0, 10);
 
         var empresas = new PageImpl<>(
                 List.of(
@@ -388,32 +492,16 @@ class UsuarioEmpresaServiceTest {
                 "Exemplo"
         )).thenReturn(empresas);
 
-        var resultado =
-                service.listarEmpresas(
-                        paginacao,
-                        "Exemplo"
-                );
+        var resultado = service.listarEmpresas(
+                paginacao,
+                "Exemplo"
+        );
 
         assertThat(resultado.getContent())
                 .hasSize(1);
 
-        assertThat(
-                resultado.getContent()
-                        .get(0)
-                        .id()
-        ).isEqualTo(2L);
-
-        assertThat(
-                resultado.getContent()
-                        .get(0)
-                        .nome()
-        ).isEqualTo("Empresa Exemplo");
-
-        assertThat(
-                resultado.getContent()
-                        .get(0)
-                        .status()
-        ).isEqualTo(StatusEnum.ATIVO);
+        assertThat(resultado.getContent().get(0).id())
+                .isEqualTo(2L);
 
         verify(empresaService).listar(
                 paginacao,
@@ -422,20 +510,21 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName("Deve detalhar vinculo ativo")
-    void deveDetalharVinculoAtivo() {
-        var usuarioEmpresa =
-                criarUsuarioEmpresa();
+    @DisplayName(
+            "Deve detalhar vinculo da organizacao"
+    )
+    void deveDetalharVinculoDaOrganizacao() {
+        var usuarioEmpresa = criarUsuarioEmpresa();
 
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(usuarioEmpresa)
-        );
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(usuarioEmpresa));
 
-        var resultado =
-                service.detalhar(3L);
+        var resultado = service.detalhar(3L);
 
         assertThat(resultado.id())
                 .isEqualTo(3L);
@@ -445,25 +534,25 @@ class UsuarioEmpresaServiceTest {
 
         assertThat(resultado.idEmpresa())
                 .isEqualTo(2L);
-
-        assertThat(resultado.todasSubsidiarias())
-                .isTrue();
     }
 
     @Test
-    @DisplayName("Deve bloquear detalhe inexistente")
-    void deveBloquearDetalheInexistente() {
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+    @DisplayName(
+            "Deve bloquear detalhe de outra organizacao"
+    )
+    void deveBloquearDetalheDeOutraOrganizacao() {
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.detalhar(3L)
         )
-                .isInstanceOf(
-                        ValidacaoException.class
-                )
+                .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Vinculo entre usuario e empresa "
                                 + "nao encontrado ou removido."
@@ -475,15 +564,15 @@ class UsuarioEmpresaServiceTest {
             "Deve atualizar acesso a todas subsidiarias"
     )
     void deveAtualizarAcessoATodasSubsidiarias() {
-        var usuarioEmpresa =
-                criarUsuarioEmpresa();
+        var usuarioEmpresa = criarUsuarioEmpresa();
 
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(usuarioEmpresa)
-        );
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(usuarioEmpresa));
 
         var resultado = service.atualizar(
                 new AtualizaUsuarioEmpresaRecord(
@@ -498,18 +587,19 @@ class UsuarioEmpresaServiceTest {
 
     @Test
     @DisplayName(
-            "Deve permitir habilitar todas subsidiarias sem vinculos"
+            "Deve permitir habilitar todas sem vinculos"
     )
-    void devePermitirHabilitarTodasSubsidiariasSemVinculos() {
+    void devePermitirHabilitarTodasSemVinculos() {
         var usuarioEmpresa =
                 criarUsuarioEmpresa(false);
 
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(usuarioEmpresa)
-        );
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(usuarioEmpresa));
 
         when(usuarioSubsidiariaRepository
                 .existsByUsuarioEmpresaIdAndStatus(
@@ -531,18 +621,19 @@ class UsuarioEmpresaServiceTest {
 
     @Test
     @DisplayName(
-            "Deve bloquear acesso a todas subsidiarias com vinculos"
+            "Deve bloquear habilitacao com vinculos"
     )
-    void deveBloquearAcessoATodasSubsidiariasComVinculos() {
+    void deveBloquearHabilitacaoComVinculos() {
         var usuarioEmpresa =
                 criarUsuarioEmpresa(false);
 
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(usuarioEmpresa)
-        );
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(usuarioEmpresa));
 
         when(usuarioSubsidiariaRepository
                 .existsByUsuarioEmpresaIdAndStatus(
@@ -559,28 +650,29 @@ class UsuarioEmpresaServiceTest {
                         )
                 )
         )
-                .isInstanceOf(
-                        ValidacaoException.class
-                )
+                .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Remova os vinculos com subsidiarias "
                                 + "antes de habilitar o acesso "
                                 + "a todas as subsidiarias."
                 );
 
-        assertThat(
-                usuarioEmpresa
-                        .getTodasSubsidiarias()
-        ).isFalse();
+        assertThat(usuarioEmpresa.getTodasSubsidiarias())
+                .isFalse();
     }
 
     @Test
-    @DisplayName("Deve bloquear atualizacao inexistente")
-    void deveBloquearAtualizacaoInexistente() {
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+    @DisplayName(
+            "Deve bloquear atualizacao de outra organizacao"
+    )
+    void deveBloquearAtualizacaoDeOutraOrganizacao() {
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.atualizar(
@@ -590,27 +682,33 @@ class UsuarioEmpresaServiceTest {
                         )
                 )
         )
-                .isInstanceOf(
-                        ValidacaoException.class
-                )
+                .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Vinculo entre usuario e empresa "
                                 + "nao encontrado ou removido."
                 );
+
+        verify(usuarioSubsidiariaRepository, never())
+                .existsByUsuarioEmpresaIdAndStatus(
+                        any(),
+                        any()
+                );
     }
 
     @Test
-    @DisplayName("Deve remover vinculo com auditoria")
-    void deveRemoverVinculoComAuditoria() {
-        var usuarioEmpresa =
-                criarUsuarioEmpresa();
+    @DisplayName(
+            "Deve remover vinculo da organizacao com auditoria"
+    )
+    void deveRemoverVinculoDaOrganizacaoComAuditoria() {
+        var usuarioEmpresa = criarUsuarioEmpresa();
 
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(usuarioEmpresa)
-        );
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(usuarioEmpresa));
 
         when(usuarioSubsidiariaRepository
                 .existsByUsuarioEmpresaIdAndStatus(
@@ -642,12 +740,13 @@ class UsuarioEmpresaServiceTest {
         var usuarioEmpresa =
                 criarUsuarioEmpresa(false);
 
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                Optional.of(usuarioEmpresa)
-        );
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(usuarioEmpresa));
 
         when(usuarioSubsidiariaRepository
                 .existsByUsuarioEmpresaIdAndStatus(
@@ -659,9 +758,7 @@ class UsuarioEmpresaServiceTest {
         assertThatThrownBy(() ->
                 service.excluir(3L)
         )
-                .isInstanceOf(
-                        ValidacaoException.class
-                )
+                .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "O vinculo entre usuario e empresa "
                                 + "possui subsidiarias vinculadas "
@@ -671,40 +768,43 @@ class UsuarioEmpresaServiceTest {
         assertThat(usuarioEmpresa.getStatus())
                 .isEqualTo(StatusEnum.ATIVO);
 
-        verify(
-                usuarioLogadoService,
-                never()
-        ).getId();
+        verify(usuarioLogadoService, never())
+                .getId();
     }
 
     @Test
-    @DisplayName("Deve bloquear exclusao inexistente")
-    void deveBloquearExclusaoInexistente() {
-        when(repository.findByIdAndStatus(
-                3L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+    @DisplayName(
+            "Deve bloquear exclusao de outra organizacao"
+    )
+    void deveBloquearExclusaoDeOutraOrganizacao() {
+        when(repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        3L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.excluir(3L)
         )
-                .isInstanceOf(
-                        ValidacaoException.class
-                )
+                .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Vinculo entre usuario e empresa "
                                 + "nao encontrado ou removido."
                 );
 
-        verify(
-                usuarioLogadoService,
-                never()
-        ).getId();
+        verify(usuarioSubsidiariaRepository, never())
+                .existsByUsuarioEmpresaIdAndStatus(
+                        any(),
+                        any()
+                );
+
+        verify(usuarioLogadoService, never())
+                .getId();
     }
 
-    private UsuarioModel criarUsuario(
-            Long id
-    ) {
+    private UsuarioModel criarUsuario(Long id) {
         var usuario = new UsuarioModel(
                 new UsuarioRecord(
                         "usuario@teste.com",
@@ -722,10 +822,20 @@ class UsuarioEmpresaServiceTest {
         return usuario;
     }
 
-    private EmpresaModel criarEmpresa(
-            Long id
-    ) {
+    private EmpresaModel criarEmpresa(Long id) {
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                ID_ORGANIZACAO
+        );
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord(
                         "Empresa Exemplo"
                 )

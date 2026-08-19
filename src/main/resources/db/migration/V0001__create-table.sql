@@ -1,3 +1,6 @@
+-- #################### --
+-- USUÁRIO E SEGURANÇA  --
+-- #################### --
 
 CREATE TABLE usuario (
     id BIGINT NOT NULL AUTO_INCREMENT,
@@ -11,7 +14,8 @@ CREATE TABLE usuario (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
-    CONSTRAINT uk_usuario_email UNIQUE (email)
+    CONSTRAINT uk_usuario_email
+        UNIQUE (email)
 );
 
 CREATE TABLE usuario_sessao (
@@ -33,18 +37,105 @@ CREATE TABLE usuario_sessao (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
-    CONSTRAINT fk_usuario_sessao_usuario_id FOREIGN KEY (id_usuario) REFERENCES usuario (id),
-    CONSTRAINT uk_usuario_sessao_refresh_token_hash UNIQUE (refresh_token_hash)
+    CONSTRAINT fk_usuario_sessao_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario (id),
+    CONSTRAINT uk_usuario_sessao_refresh_token_hash
+        UNIQUE (refresh_token_hash)
 );
 
 CREATE INDEX idx_usuario_sessao_usuario_status
-ON usuario_sessao (id_usuario, status);
+ON usuario_sessao (
+    id_usuario,
+    status
+);
 
 CREATE INDEX idx_usuario_sessao_expira_em
-ON usuario_sessao (expira_em);
+ON usuario_sessao (
+    expira_em
+);
 
 CREATE INDEX idx_usuario_sessao_access_token_jti
-ON usuario_sessao (access_token_jti);
+ON usuario_sessao (
+    access_token_jti
+);
+
+CREATE TABLE usuario_login_tentativa (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    email VARCHAR(100) NOT NULL,
+    quantidade_falhas INT NOT NULL DEFAULT 0,
+    ultima_falha_em DATETIME,
+    bloqueado_ate DATETIME,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_usuario_login_tentativa_email
+        UNIQUE (email)
+);
+
+-- #################### --
+-- ORGANIZAÇÃO          --
+-- #################### --
+
+CREATE TABLE organizacao (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_organizacao_nome_status
+ON organizacao (
+    nome,
+    status
+);
+
+CREATE TABLE usuario_organizacao (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_usuario BIGINT NOT NULL,
+    id_organizacao BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_usuario_organizacao_usuario_organizacao
+        UNIQUE (
+            id_usuario,
+            id_organizacao
+        ),
+    CONSTRAINT fk_usuario_organizacao_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario (id),
+    CONSTRAINT fk_usuario_organizacao_organizacao
+        FOREIGN KEY (id_organizacao)
+        REFERENCES organizacao (id)
+);
+
+CREATE INDEX idx_usuario_organizacao_usuario_status
+ON usuario_organizacao (
+    id_usuario,
+    status,
+    id_organizacao
+);
+
+-- #################### --
+-- PERFIS E PERMISSÕES  --
+-- #################### --
 
 CREATE TABLE perfil (
     id BIGINT NOT NULL AUTO_INCREMENT,
@@ -61,22 +152,6 @@ CREATE TABLE perfil (
     PRIMARY KEY (id)
 );
 
-CREATE TABLE usuario_perfil (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    id_usuario BIGINT NOT NULL,
-    id_perfil BIGINT NOT NULL,
-    status TINYINT NOT NULL DEFAULT 0,
-    criado_em DATETIME,
-    criado_por BIGINT,
-    atualizado_em DATETIME,
-    atualizado_por BIGINT,
-    removido_em DATETIME,
-    removido_por BIGINT,
-    PRIMARY KEY (id),
-    CONSTRAINT fk_usuario_perfil_usuario_id FOREIGN KEY (id_usuario) REFERENCES usuario (id),
-    CONSTRAINT fk_usuario_perfil_perfil_id FOREIGN KEY (id_perfil) REFERENCES perfil (id)
-);
-
 CREATE TABLE permissao (
     id BIGINT NOT NULL AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
@@ -91,7 +166,8 @@ CREATE TABLE permissao (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
-    CONSTRAINT uk_permissao_chave UNIQUE (chave)
+    CONSTRAINT uk_permissao_chave
+        UNIQUE (chave)
 );
 
 CREATE TABLE perfil_permissao (
@@ -106,155 +182,630 @@ CREATE TABLE perfil_permissao (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
-    CONSTRAINT fk_perfil_permissao_perfil_id FOREIGN KEY (id_perfil) REFERENCES perfil (id),
-    CONSTRAINT fk_perfil_permissao_permissao_id FOREIGN KEY (id_permissao) REFERENCES permissao (id)
+    CONSTRAINT fk_perfil_permissao_perfil
+        FOREIGN KEY (id_perfil)
+        REFERENCES perfil (id),
+    CONSTRAINT fk_perfil_permissao_permissao
+        FOREIGN KEY (id_permissao)
+        REFERENCES permissao (id)
 );
 
-INSERT INTO usuario (id, email, senha, status) VALUES 
-(1, 'admin@futuro.com', '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW', 0);
-
-INSERT INTO perfil (id, nome, descricao, status, sistema) VALUES
-(1, 'Administrador', 'Perfil com acesso total ao sistema', 0, TRUE);
-
-INSERT INTO permissao (id, nome, chave, descricao, status, sistema) VALUES
-(1, 'Criar perfis', 'ACESSO_PERFIL_CRIAR', 'Permite criar perfis de acesso', 0, TRUE),
-(2, 'Listar perfis', 'ACESSO_PERFIL_LISTAR', 'Permite listar perfis de acesso', 0, TRUE),
-(3, 'Detalhar perfil', 'ACESSO_PERFIL_DETALHAR', 'Permite detalhar perfil de acesso', 0, TRUE),
-(4, 'Editar perfil', 'ACESSO_PERFIL_EDITAR', 'Permite editar perfil de acesso', 0, TRUE),
-(5, 'Excluir perfil', 'ACESSO_PERFIL_EXCLUIR', 'Permite remover perfil de acesso', 0, TRUE),
-
-(6, 'Criar permissões', 'ACESSO_PERMISSAO_CRIAR', 'Permite criar permissões', 0, TRUE),
-(7, 'Listar permissões', 'ACESSO_PERMISSAO_LISTAR', 'Permite listar permissões', 0, TRUE),
-(8, 'Detalhar permissão', 'ACESSO_PERMISSAO_DETALHAR', 'Permite detalhar permissão', 0, TRUE),
-(9, 'Editar permissão', 'ACESSO_PERMISSAO_EDITAR', 'Permite editar permissão', 0, TRUE),
-(10, 'Excluir permissão', 'ACESSO_PERMISSAO_EXCLUIR', 'Permite remover permissão', 0, TRUE),
-
-(11, 'Vincular permissão ao perfil', 'ACESSO_PERFIL_PERMISSAO_CRIAR', 'Permite vincular permissão ao perfil', 0, TRUE),
-(12, 'Listar permissões do perfil', 'ACESSO_PERFIL_PERMISSAO_LISTAR', 'Permite listar permissões vinculadas ao perfil', 0, TRUE),
-(13, 'Detalhar vínculo perfil permissão', 'ACESSO_PERFIL_PERMISSAO_DETALHAR', 'Permite detalhar vínculo entre perfil e permissão', 0, TRUE),
-(14, 'Remover permissão do perfil', 'ACESSO_PERFIL_PERMISSAO_EXCLUIR', 'Permite remover permissão vinculada ao perfil', 0, TRUE),
-
-(15, 'Vincular perfil ao usuário', 'ACESSO_USUARIO_PERFIL_CRIAR', 'Permite vincular perfil ao usuário', 0, TRUE),
-(16, 'Listar perfis do usuário', 'ACESSO_USUARIO_PERFIL_LISTAR', 'Permite listar perfis vinculados ao usuário', 0, TRUE),
-(17, 'Detalhar vínculo usuário perfil', 'ACESSO_USUARIO_PERFIL_DETALHAR', 'Permite detalhar vínculo entre usuário e perfil', 0, TRUE),
-(18, 'Remover perfil do usuário', 'ACESSO_USUARIO_PERFIL_EXCLUIR', 'Permite remover perfil vinculado ao usuário', 0, TRUE),
-
-(19, 'Criar usuários', 'ACESSO_USUARIO_CRIAR', 'Permite criar usuários', 0, TRUE),
-(20, 'Listar usuários', 'ACESSO_USUARIO_LISTAR', 'Permite listar usuários', 0, TRUE),
-(21, 'Detalhar usuário', 'ACESSO_USUARIO_DETALHAR', 'Permite detalhar usuário', 0, TRUE),
-(22, 'Editar usuário', 'ACESSO_USUARIO_EDITAR', 'Permite editar usuário', 0, TRUE),
-(23, 'Excluir usuário', 'ACESSO_USUARIO_EXCLUIR', 'Permite remover usuário', 0, TRUE),
-(24, 'Alterar senha de usuário', 'ACESSO_USUARIO_SENHA_EDITAR', 'Permite alterar senha de usuário', 0, TRUE);
-
-INSERT INTO perfil_permissao (id_perfil, id_permissao, status) VALUES
-(1, 1, 0),
-(1, 2, 0),
-(1, 3, 0),
-(1, 4, 0),
-(1, 5, 0),
-(1, 6, 0),
-(1, 7, 0),
-(1, 8, 0),
-(1, 9, 0),
-(1, 10, 0),
-(1, 11, 0),
-(1, 12, 0),
-(1, 13, 0),
-(1, 14, 0),
-(1, 15, 0),
-(1, 16, 0),
-(1, 17, 0),
-(1, 18, 0),
-(1, 19, 0),
-(1, 20, 0),
-(1, 21, 0),
-(1, 22, 0),
-(1, 23, 0),
-(1, 24, 0);
-
-INSERT INTO usuario_perfil (id_usuario, id_perfil, status) VALUES
-(1, 1, 0);
-
-CREATE TABLE usuario_login_tentativa (
-    ID BIGINT NOT NULL AUTO_INCREMENT,
-    EMAIL VARCHAR(100) NOT NULL,
-    QUANTIDADE_FALHAS INT NOT NULL DEFAULT 0,
-    ULTIMA_FALHA_EM DATETIME NULL,
-    BLOQUEADO_ATE DATETIME NULL,
-    STATUS TINYINT NOT NULL DEFAULT 0,
-    CRIADO_EM DATETIME NULL,
-    CRIADO_POR BIGINT NULL,
-    ATUALIZADO_EM DATETIME NULL,
-    ATUALIZADO_POR BIGINT NULL,
-    REMOVIDO_EM DATETIME NULL,
-    REMOVIDO_POR BIGINT NULL,
-    PRIMARY KEY(ID),
-    UNIQUE KEY UK_USUARIO_LOGIN_TENTATIVA_EMAIL (EMAIL)
+CREATE TABLE usuario_perfil (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_usuario BIGINT NOT NULL,
+    id_perfil BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_usuario_perfil_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario (id),
+    CONSTRAINT fk_usuario_perfil_perfil
+        FOREIGN KEY (id_perfil)
+        REFERENCES perfil (id)
 );
 
+-- #################### --
+-- EMPRESA              --
+-- #################### --
 
+CREATE TABLE empresa (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_organizacao BIGINT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_empresa_organizacao
+        FOREIGN KEY (id_organizacao)
+        REFERENCES organizacao (id)
+);
 
+CREATE INDEX idx_empresa_organizacao_nome_status
+ON empresa (
+    id_organizacao,
+    nome,
+    status
+);
 
+CREATE TABLE subsidiaria (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_empresa BIGINT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_subsidiaria_empresa
+        FOREIGN KEY (id_empresa)
+        REFERENCES empresa (id)
+);
 
+CREATE INDEX idx_subsidiaria_empresa_nome_status
+ON subsidiaria (
+    id_empresa,
+    nome,
+    status
+);
 
+-- #################### --
+-- ACESSOS              --
+-- #################### --
 
+CREATE TABLE usuario_empresa (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_usuario BIGINT NOT NULL,
+    id_empresa BIGINT NOT NULL,
+    todas_subsidiarias BOOLEAN NOT NULL DEFAULT FALSE,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_usuario_empresa_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario (id),
+    CONSTRAINT fk_usuario_empresa_empresa
+        FOREIGN KEY (id_empresa)
+        REFERENCES empresa (id)
+);
 
+CREATE INDEX idx_usuario_empresa_usuario_status
+ON usuario_empresa (
+    id_usuario,
+    status
+);
 
+CREATE INDEX idx_usuario_empresa_empresa_status
+ON usuario_empresa (
+    id_empresa,
+    status
+);
 
+CREATE INDEX idx_usuario_empresa_usuario_empresa_status
+ON usuario_empresa (
+    id_usuario,
+    id_empresa,
+    status
+);
 
+CREATE TABLE usuario_subsidiaria (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_usuario_empresa BIGINT NOT NULL,
+    id_subsidiaria BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_usuario_subsidiaria_usuario_empresa
+        FOREIGN KEY (id_usuario_empresa)
+        REFERENCES usuario_empresa (id),
+    CONSTRAINT fk_usuario_subsidiaria_subsidiaria
+        FOREIGN KEY (id_subsidiaria)
+        REFERENCES subsidiaria (id)
+);
 
+CREATE INDEX idx_usuario_subsidiaria_usuario_empresa_status
+ON usuario_subsidiaria (
+    id_usuario_empresa,
+    status
+);
 
+CREATE INDEX idx_usuario_subsidiaria_subsidiaria_status
+ON usuario_subsidiaria (
+    id_subsidiaria,
+    status
+);
 
+CREATE INDEX idx_usuario_subsidiaria_vinculo_status
+ON usuario_subsidiaria (
+    id_usuario_empresa,
+    id_subsidiaria,
+    status
+);
 
+-- #################### --
+-- DADOS INICIAIS       --
+-- #################### --
 
+INSERT INTO usuario (
+    id,
+    email,
+    senha,
+    status
+) VALUES (
+    1,
+    'admin@futuro.com',
+    '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW',
+    0
+);
 
+INSERT INTO organizacao (
+    id,
+    nome,
+    status
+) VALUES (
+    1,
+    'Organização Principal',
+    0
+);
 
+INSERT INTO usuario_organizacao (
+    id_usuario,
+    id_organizacao,
+    status
+) VALUES (
+    1,
+    1,
+    0
+);
 
+INSERT INTO perfil (
+    id,
+    nome,
+    descricao,
+    status,
+    sistema
+) VALUES (
+    1,
+    'Administrador',
+    'Perfil com acesso total ao sistema',
+    0,
+    TRUE
+);
 
+INSERT INTO permissao (
+    id,
+    nome,
+    chave,
+    descricao,
+    status,
+    sistema
+) VALUES
+(
+    1,
+    'Criar perfis',
+    'ACESSO_PERFIL_CRIAR',
+    'Permite criar perfis de acesso',
+    0,
+    TRUE
+),
+(
+    2,
+    'Listar perfis',
+    'ACESSO_PERFIL_LISTAR',
+    'Permite listar perfis de acesso',
+    0,
+    TRUE
+),
+(
+    3,
+    'Detalhar perfil',
+    'ACESSO_PERFIL_DETALHAR',
+    'Permite detalhar perfil de acesso',
+    0,
+    TRUE
+),
+(
+    4,
+    'Editar perfil',
+    'ACESSO_PERFIL_EDITAR',
+    'Permite editar perfil de acesso',
+    0,
+    TRUE
+),
+(
+    5,
+    'Excluir perfil',
+    'ACESSO_PERFIL_EXCLUIR',
+    'Permite remover perfil de acesso',
+    0,
+    TRUE
+),
+(
+    6,
+    'Criar permissões',
+    'ACESSO_PERMISSAO_CRIAR',
+    'Permite criar permissões',
+    0,
+    TRUE
+),
+(
+    7,
+    'Listar permissões',
+    'ACESSO_PERMISSAO_LISTAR',
+    'Permite listar permissões',
+    0,
+    TRUE
+),
+(
+    8,
+    'Detalhar permissão',
+    'ACESSO_PERMISSAO_DETALHAR',
+    'Permite detalhar permissão',
+    0,
+    TRUE
+),
+(
+    9,
+    'Editar permissão',
+    'ACESSO_PERMISSAO_EDITAR',
+    'Permite editar permissão',
+    0,
+    TRUE
+),
+(
+    10,
+    'Excluir permissão',
+    'ACESSO_PERMISSAO_EXCLUIR',
+    'Permite remover permissão',
+    0,
+    TRUE
+),
+(
+    11,
+    'Vincular permissão ao perfil',
+    'ACESSO_PERFIL_PERMISSAO_CRIAR',
+    'Permite vincular permissão ao perfil',
+    0,
+    TRUE
+),
+(
+    12,
+    'Listar permissões do perfil',
+    'ACESSO_PERFIL_PERMISSAO_LISTAR',
+    'Permite listar permissões vinculadas ao perfil',
+    0,
+    TRUE
+),
+(
+    13,
+    'Detalhar vínculo perfil permissão',
+    'ACESSO_PERFIL_PERMISSAO_DETALHAR',
+    'Permite detalhar vínculo entre perfil e permissão',
+    0,
+    TRUE
+),
+(
+    14,
+    'Remover permissão do perfil',
+    'ACESSO_PERFIL_PERMISSAO_EXCLUIR',
+    'Permite remover permissão vinculada ao perfil',
+    0,
+    TRUE
+),
+(
+    15,
+    'Vincular perfil ao usuário',
+    'ACESSO_USUARIO_PERFIL_CRIAR',
+    'Permite vincular perfil ao usuário',
+    0,
+    TRUE
+),
+(
+    16,
+    'Listar perfis do usuário',
+    'ACESSO_USUARIO_PERFIL_LISTAR',
+    'Permite listar perfis vinculados ao usuário',
+    0,
+    TRUE
+),
+(
+    17,
+    'Detalhar vínculo usuário perfil',
+    'ACESSO_USUARIO_PERFIL_DETALHAR',
+    'Permite detalhar vínculo entre usuário e perfil',
+    0,
+    TRUE
+),
+(
+    18,
+    'Remover perfil do usuário',
+    'ACESSO_USUARIO_PERFIL_EXCLUIR',
+    'Permite remover perfil vinculado ao usuário',
+    0,
+    TRUE
+),
+(
+    19,
+    'Criar usuários',
+    'ACESSO_USUARIO_CRIAR',
+    'Permite criar usuários',
+    0,
+    TRUE
+),
+(
+    20,
+    'Listar usuários',
+    'ACESSO_USUARIO_LISTAR',
+    'Permite listar usuários',
+    0,
+    TRUE
+),
+(
+    21,
+    'Detalhar usuário',
+    'ACESSO_USUARIO_DETALHAR',
+    'Permite detalhar usuário',
+    0,
+    TRUE
+),
+(
+    22,
+    'Editar usuário',
+    'ACESSO_USUARIO_EDITAR',
+    'Permite editar usuário',
+    0,
+    TRUE
+),
+(
+    23,
+    'Excluir usuário',
+    'ACESSO_USUARIO_EXCLUIR',
+    'Permite remover usuário',
+    0,
+    TRUE
+),
+(
+    24,
+    'Alterar senha de usuário',
+    'ACESSO_USUARIO_SENHA_EDITAR',
+    'Permite alterar senha de usuário',
+    0,
+    TRUE
+);
 
+INSERT INTO permissao (
+    nome,
+    chave,
+    descricao,
+    status,
+    sistema
+) VALUES
+(
+    'Criar empresas',
+    'CONFIGURACAO_EMPRESA_CRIAR',
+    'Permite criar empresas',
+    0,
+    TRUE
+),
+(
+    'Listar empresas',
+    'CONFIGURACAO_EMPRESA_LISTAR',
+    'Permite listar empresas',
+    0,
+    TRUE
+),
+(
+    'Detalhar empresa',
+    'CONFIGURACAO_EMPRESA_DETALHAR',
+    'Permite detalhar empresas',
+    0,
+    TRUE
+),
+(
+    'Editar empresas',
+    'CONFIGURACAO_EMPRESA_EDITAR',
+    'Permite editar empresas',
+    0,
+    TRUE
+),
+(
+    'Excluir empresas',
+    'CONFIGURACAO_EMPRESA_EXCLUIR',
+    'Permite remover empresas',
+    0,
+    TRUE
+),
+(
+    'Criar subsidiárias',
+    'CONFIGURACAO_SUBSIDIARIA_CRIAR',
+    'Permite criar subsidiárias',
+    0,
+    TRUE
+),
+(
+    'Listar subsidiárias',
+    'CONFIGURACAO_SUBSIDIARIA_LISTAR',
+    'Permite listar subsidiárias',
+    0,
+    TRUE
+),
+(
+    'Detalhar subsidiária',
+    'CONFIGURACAO_SUBSIDIARIA_DETALHAR',
+    'Permite detalhar subsidiárias',
+    0,
+    TRUE
+),
+(
+    'Editar subsidiárias',
+    'CONFIGURACAO_SUBSIDIARIA_EDITAR',
+    'Permite editar subsidiárias',
+    0,
+    TRUE
+),
+(
+    'Excluir subsidiárias',
+    'CONFIGURACAO_SUBSIDIARIA_EXCLUIR',
+    'Permite remover subsidiárias',
+    0,
+    TRUE
+),
+(
+    'Vincular usuário a empresa',
+    'ACESSO_USUARIO_EMPRESA_CRIAR',
+    'Permite vincular usuários a empresas',
+    0,
+    TRUE
+),
+(
+    'Listar empresas do usuário',
+    'ACESSO_USUARIO_EMPRESA_LISTAR',
+    'Permite listar os vínculos entre usuários e empresas',
+    0,
+    TRUE
+),
+(
+    'Detalhar empresa do usuário',
+    'ACESSO_USUARIO_EMPRESA_DETALHAR',
+    'Permite detalhar o vínculo entre usuário e empresa',
+    0,
+    TRUE
+),
+(
+    'Editar empresa do usuário',
+    'ACESSO_USUARIO_EMPRESA_EDITAR',
+    'Permite editar o acesso do usuário à empresa',
+    0,
+    TRUE
+),
+(
+    'Remover empresa do usuário',
+    'ACESSO_USUARIO_EMPRESA_EXCLUIR',
+    'Permite remover o vínculo entre usuário e empresa',
+    0,
+    TRUE
+),
+(
+    'Vincular usuário a subsidiária',
+    'ACESSO_USUARIO_SUBSIDIARIA_CRIAR',
+    'Permite vincular usuários a subsidiárias',
+    0,
+    TRUE
+),
+(
+    'Listar subsidiárias do usuário',
+    'ACESSO_USUARIO_SUBSIDIARIA_LISTAR',
+    'Permite listar os vínculos entre usuários e subsidiárias',
+    0,
+    TRUE
+),
+(
+    'Detalhar subsidiária do usuário',
+    'ACESSO_USUARIO_SUBSIDIARIA_DETALHAR',
+    'Permite detalhar o vínculo entre usuário e subsidiária',
+    0,
+    TRUE
+),
+(
+    'Remover subsidiária do usuário',
+    'ACESSO_USUARIO_SUBSIDIARIA_EXCLUIR',
+    'Permite remover o vínculo entre usuário e subsidiária',
+    0,
+    TRUE
+);
 
+INSERT INTO perfil_permissao (
+    id_perfil,
+    id_permissao,
+    status
+)
+SELECT
+    1,
+    permissao.id,
+    0
+FROM permissao
+WHERE permissao.chave IN (
+    'ACESSO_PERFIL_CRIAR',
+    'ACESSO_PERFIL_LISTAR',
+    'ACESSO_PERFIL_DETALHAR',
+    'ACESSO_PERFIL_EDITAR',
+    'ACESSO_PERFIL_EXCLUIR',
+    'ACESSO_PERMISSAO_CRIAR',
+    'ACESSO_PERMISSAO_LISTAR',
+    'ACESSO_PERMISSAO_DETALHAR',
+    'ACESSO_PERMISSAO_EDITAR',
+    'ACESSO_PERMISSAO_EXCLUIR',
+    'ACESSO_PERFIL_PERMISSAO_CRIAR',
+    'ACESSO_PERFIL_PERMISSAO_LISTAR',
+    'ACESSO_PERFIL_PERMISSAO_DETALHAR',
+    'ACESSO_PERFIL_PERMISSAO_EXCLUIR',
+    'ACESSO_USUARIO_PERFIL_CRIAR',
+    'ACESSO_USUARIO_PERFIL_LISTAR',
+    'ACESSO_USUARIO_PERFIL_DETALHAR',
+    'ACESSO_USUARIO_PERFIL_EXCLUIR',
+    'ACESSO_USUARIO_CRIAR',
+    'ACESSO_USUARIO_LISTAR',
+    'ACESSO_USUARIO_DETALHAR',
+    'ACESSO_USUARIO_EDITAR',
+    'ACESSO_USUARIO_EXCLUIR',
+    'ACESSO_USUARIO_SENHA_EDITAR',
+    'CONFIGURACAO_EMPRESA_CRIAR',
+    'CONFIGURACAO_EMPRESA_LISTAR',
+    'CONFIGURACAO_EMPRESA_DETALHAR',
+    'CONFIGURACAO_EMPRESA_EDITAR',
+    'CONFIGURACAO_EMPRESA_EXCLUIR',
+    'CONFIGURACAO_SUBSIDIARIA_CRIAR',
+    'CONFIGURACAO_SUBSIDIARIA_LISTAR',
+    'CONFIGURACAO_SUBSIDIARIA_DETALHAR',
+    'CONFIGURACAO_SUBSIDIARIA_EDITAR',
+    'CONFIGURACAO_SUBSIDIARIA_EXCLUIR',
+    'ACESSO_USUARIO_EMPRESA_CRIAR',
+    'ACESSO_USUARIO_EMPRESA_LISTAR',
+    'ACESSO_USUARIO_EMPRESA_DETALHAR',
+    'ACESSO_USUARIO_EMPRESA_EDITAR',
+    'ACESSO_USUARIO_EMPRESA_EXCLUIR',
+    'ACESSO_USUARIO_SUBSIDIARIA_CRIAR',
+    'ACESSO_USUARIO_SUBSIDIARIA_LISTAR',
+    'ACESSO_USUARIO_SUBSIDIARIA_DETALHAR',
+    'ACESSO_USUARIO_SUBSIDIARIA_EXCLUIR'
+);
 
+INSERT INTO usuario_perfil (
+    id_usuario,
+    id_perfil,
+    status
+) VALUES (
+    1,
+    1,
+    0
+);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- ##################################################### --
+-- ESTRUTURAS COMENTADAS PARA DESENVOLVIMENTO FUTURO     --
+-- ##################################################### --
 
 /*
 -- Criação da tabela RegimeTributacaoFederal

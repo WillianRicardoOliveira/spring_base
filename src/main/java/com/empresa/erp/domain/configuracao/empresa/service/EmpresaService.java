@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
@@ -16,6 +17,8 @@ import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
+import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +27,9 @@ import lombok.RequiredArgsConstructor;
 public class EmpresaService {
 
     private final EmpresaRepository repository;
+
+    private final OrganizacaoRepository
+            organizacaoRepository;
 
     private final SubsidiariaRepository
             subsidiariaRepository;
@@ -34,22 +40,37 @@ public class EmpresaService {
     private final UsuarioLogadoService
             usuarioLogadoService;
 
+    private final ContextoOrganizacao
+            contextoOrganizacao;
+
     @Transactional
     public EmpresaModel cadastrar(
             EmpresaRecord dados
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         String nome = normalizarNome(dados.nome());
 
-        if (repository.existsByNomeIgnoreCaseAndStatus(
-                nome,
-                StatusEnum.ATIVO
-        )) {
+        if (repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                        idOrganizacao,
+                        nome,
+                        StatusEnum.ATIVO
+                )
+        ) {
             throw new ValidacaoException(
                     "Empresa ja cadastrada."
             );
         }
 
+        OrganizacaoModel organizacao =
+                organizacaoRepository.getReferenceById(
+                        idOrganizacao
+                );
+
         EmpresaModel empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord(nome)
         );
 
@@ -61,10 +82,14 @@ public class EmpresaService {
             Pageable paginacao,
             String filtro
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         if (filtro != null && !filtro.isBlank()) {
             return repository
-                    .findByNomeContainingIgnoreCaseAndStatus(
+                    .findByOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
                             paginacao,
+                            idOrganizacao,
                             filtro.trim(),
                             StatusEnum.ATIVO
                     )
@@ -72,8 +97,9 @@ public class EmpresaService {
         }
 
         return repository
-                .findAllByStatus(
+                .findAllByOrganizacaoIdAndStatus(
                         paginacao,
+                        idOrganizacao,
                         StatusEnum.ATIVO
                 )
                 .map(ListaEmpresaRecord::new);
@@ -93,13 +119,20 @@ public class EmpresaService {
     public DetalheEmpresaRecord atualizar(
             AtualizaEmpresaRecord dados
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         String nome = normalizarNome(dados.nome());
 
+        EmpresaModel empresa =
+                buscarEmpresaAtiva(dados.id());
+
         if (repository
-                .existsByNomeIgnoreCaseAndStatusAndIdNot(
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                        idOrganizacao,
                         nome,
                         StatusEnum.ATIVO,
-                        dados.id()
+                        empresa.getId()
                 )
         ) {
             throw new ValidacaoException(
@@ -107,12 +140,9 @@ public class EmpresaService {
             );
         }
 
-        EmpresaModel empresa =
-                buscarEmpresaAtiva(dados.id());
-
         empresa.atualizar(
                 new AtualizaEmpresaRecord(
-                        dados.id(),
+                        empresa.getId(),
                         nome
                 )
         );
@@ -125,13 +155,8 @@ public class EmpresaService {
         EmpresaModel empresa =
                 buscarEmpresaAtiva(id);
 
-        validarAusenciaDeSubsidiarias(
-                empresa
-        );
-
-        validarAusenciaDeUsuarios(
-                empresa
-        );
+        validarAusenciaDeSubsidiarias(empresa);
+        validarAusenciaDeUsuarios(empresa);
 
         Long idUsuario =
                 usuarioLogadoService.getId();
@@ -174,9 +199,13 @@ public class EmpresaService {
     private EmpresaModel buscarEmpresaAtiva(
             Long id
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         return repository
-                .findByIdAndStatus(
+                .findByIdAndOrganizacaoIdAndStatus(
                         id,
+                        idOrganizacao,
                         StatusEnum.ATIVO
                 )
                 .orElseThrow(() ->

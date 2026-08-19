@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
+import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 
 @DataJpaTest(properties = {
         "spring.flyway.enabled=false",
@@ -21,95 +23,181 @@ class EmpresaRepositoryTest {
     @Autowired
     private EmpresaRepository repository;
 
+    @Autowired
+    private OrganizacaoRepository
+            organizacaoRepository;
+
     @Test
-    @DisplayName("Deve listar somente empresas ativas")
-    void deveListarSomenteEmpresasAtivas() {
-        var empresaAtiva = repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Empresa Ativa")
-                )
+    @DisplayName(
+            "Deve listar somente empresas ativas da organizacao informada"
+    )
+    void deveListarSomenteEmpresasAtivasDaOrganizacaoInformada() {
+        var organizacao =
+                criarOrganizacao("Organizacao Principal");
+
+        var outraOrganizacao =
+                criarOrganizacao("Outra Organizacao");
+
+        var empresaAtiva = criarEmpresa(
+                organizacao,
+                "Empresa Ativa"
         );
 
-        var empresaInativa = repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Empresa Inativa")
-                )
+        var empresaInativa = criarEmpresa(
+                organizacao,
+                "Empresa Inativa"
         );
 
         empresaInativa.inativar();
         repository.save(empresaInativa);
 
-        var resultado = repository.findAllByStatus(
-                PageRequest.of(0, 10),
-                StatusEnum.ATIVO
-        );
-
-        assertThat(resultado.getContent())
-                .extracting(EmpresaModel::getId)
-                .contains(empresaAtiva.getId())
-                .doesNotContain(empresaInativa.getId());
-    }
-
-    @Test
-    @DisplayName("Deve filtrar empresas ativas pelo nome ignorando caixa")
-    void deveFiltrarEmpresasAtivasPeloNomeIgnorandoCaixa() {
-        repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Empresa Agrícola")
-                )
-        );
-
-        repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Indústria Exemplo")
-                )
+        var empresaDeOutraOrganizacao = criarEmpresa(
+                outraOrganizacao,
+                "Empresa de Outro Cliente"
         );
 
         var resultado =
-                repository.findByNomeContainingIgnoreCaseAndStatus(
+                repository.findAllByOrganizacaoIdAndStatus(
                         PageRequest.of(0, 10),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
+
+        assertThat(resultado.getContent())
+                .extracting(EmpresaModel::getId)
+                .containsExactly(empresaAtiva.getId())
+                .doesNotContain(
+                        empresaInativa.getId(),
+                        empresaDeOutraOrganizacao.getId()
+                );
+    }
+
+    @Test
+    @DisplayName(
+            "Deve filtrar empresas pelo nome somente na organizacao informada"
+    )
+    void deveFiltrarEmpresasPeloNomeSomenteNaOrganizacaoInformada() {
+        var organizacao =
+                criarOrganizacao("Organizacao Principal");
+
+        var outraOrganizacao =
+                criarOrganizacao("Outra Organizacao");
+
+        criarEmpresa(
+                organizacao,
+                "Empresa Agrícola"
+        );
+
+        criarEmpresa(
+                organizacao,
+                "Indústria Exemplo"
+        );
+
+        criarEmpresa(
+                outraOrganizacao,
+                "Empresa Agrícola Externa"
+        );
+
+        var resultado = repository
+                .findByOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
+                        PageRequest.of(0, 10),
+                        organizacao.getId(),
                         "AGRÍCOLA",
                         StatusEnum.ATIVO
                 );
 
-        assertThat(resultado.getContent()).hasSize(1);
-
-        assertThat(resultado.getContent().get(0).getNome())
-                .isEqualTo("Empresa Agrícola");
+        assertThat(resultado.getContent())
+                .extracting(EmpresaModel::getNome)
+                .containsExactly("Empresa Agrícola");
     }
 
     @Test
-    @DisplayName("Deve verificar nome existente ignorando caixa")
-    void deveVerificarNomeExistenteIgnorandoCaixa() {
-        repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Empresa Exemplo")
-                )
+    @DisplayName(
+            "Deve verificar nome existente somente na organizacao informada"
+    )
+    void deveVerificarNomeExistenteSomenteNaOrganizacaoInformada() {
+        var organizacao =
+                criarOrganizacao("Organizacao Principal");
+
+        var outraOrganizacao =
+                criarOrganizacao("Outra Organizacao");
+
+        criarEmpresa(
+                organizacao,
+                "Empresa Exemplo"
         );
 
-        boolean existe =
-                repository.existsByNomeIgnoreCaseAndStatus(
+        boolean existeNaOrganizacao = repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                        organizacao.getId(),
                         "empresa exemplo",
                         StatusEnum.ATIVO
                 );
 
-        assertThat(existe).isTrue();
+        boolean existeNaOutraOrganizacao = repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                        outraOrganizacao.getId(),
+                        "empresa exemplo",
+                        StatusEnum.ATIVO
+                );
+
+        assertThat(existeNaOrganizacao).isTrue();
+        assertThat(existeNaOutraOrganizacao).isFalse();
     }
 
     @Test
-    @DisplayName("Deve ignorar empresa removida na verificação de nome")
+    @DisplayName(
+            "Deve permitir mesmo nome em organizacoes diferentes"
+    )
+    void devePermitirMesmoNomeEmOrganizacoesDiferentes() {
+        var primeiraOrganizacao =
+                criarOrganizacao("Primeira Organizacao");
+
+        var segundaOrganizacao =
+                criarOrganizacao("Segunda Organizacao");
+
+        criarEmpresa(
+                primeiraOrganizacao,
+                "Empresa Exemplo"
+        );
+
+        boolean existeAntesDoCadastro = repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                        segundaOrganizacao.getId(),
+                        "Empresa Exemplo",
+                        StatusEnum.ATIVO
+                );
+
+        var empresaDaSegundaOrganizacao = criarEmpresa(
+                segundaOrganizacao,
+                "Empresa Exemplo"
+        );
+
+        assertThat(existeAntesDoCadastro).isFalse();
+
+        assertThat(empresaDaSegundaOrganizacao.getId())
+                .isNotNull();
+    }
+
+    @Test
+    @DisplayName(
+            "Deve ignorar empresa removida na verificacao de nome"
+    )
     void deveIgnorarEmpresaRemovidaNaVerificacaoDeNome() {
-        var empresa = repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Empresa Exemplo")
-                )
+        var organizacao =
+                criarOrganizacao("Organizacao Principal");
+
+        var empresa = criarEmpresa(
+                organizacao,
+                "Empresa Exemplo"
         );
 
         empresa.remover(10L);
         repository.save(empresa);
 
-        boolean existe =
-                repository.existsByNomeIgnoreCaseAndStatus(
+        boolean existe = repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                        organizacao.getId(),
                         "Empresa Exemplo",
                         StatusEnum.ATIVO
                 );
@@ -118,29 +206,34 @@ class EmpresaRepositoryTest {
     }
 
     @Test
-    @DisplayName("Deve verificar nome duplicado desconsiderando o próprio id")
+    @DisplayName(
+            "Deve verificar nome duplicado desconsiderando o proprio id"
+    )
     void deveVerificarNomeDuplicadoDesconsiderandoProprioId() {
-        var primeira = repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Primeira Empresa")
-                )
+        var organizacao =
+                criarOrganizacao("Organizacao Principal");
+
+        var primeira = criarEmpresa(
+                organizacao,
+                "Primeira Empresa"
         );
 
-        repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Segunda Empresa")
-                )
+        criarEmpresa(
+                organizacao,
+                "Segunda Empresa"
         );
 
-        boolean nomeDeOutraEmpresa =
-                repository.existsByNomeIgnoreCaseAndStatusAndIdNot(
+        boolean nomeDeOutraEmpresa = repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                        organizacao.getId(),
                         "segunda empresa",
                         StatusEnum.ATIVO,
                         primeira.getId()
                 );
 
-        boolean proprioNome =
-                repository.existsByNomeIgnoreCaseAndStatusAndIdNot(
+        boolean proprioNome = repository
+                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                        organizacao.getId(),
                         "primeira empresa",
                         StatusEnum.ATIVO,
                         primeira.getId()
@@ -151,42 +244,86 @@ class EmpresaRepositoryTest {
     }
 
     @Test
-    @DisplayName("Deve buscar empresa ativa por id e status")
-    void deveBuscarEmpresaAtivaPorIdEStatus() {
-        var empresa = repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Empresa Exemplo")
-                )
+    @DisplayName(
+            "Deve buscar empresa ativa somente na organizacao informada"
+    )
+    void deveBuscarEmpresaAtivaSomenteNaOrganizacaoInformada() {
+        var organizacao =
+                criarOrganizacao("Organizacao Principal");
+
+        var outraOrganizacao =
+                criarOrganizacao("Outra Organizacao");
+
+        var empresa = criarEmpresa(
+                organizacao,
+                "Empresa Exemplo"
         );
 
-        var resultado = repository.findByIdAndStatus(
-                empresa.getId(),
-                StatusEnum.ATIVO
-        );
+        var resultadoCorreto = repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        empresa.getId(),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
-        assertThat(resultado).isPresent();
+        var resultadoOutraOrganizacao = repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        empresa.getId(),
+                        outraOrganizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
-        assertThat(resultado.get().getNome())
+        assertThat(resultadoCorreto).isPresent();
+
+        assertThat(resultadoCorreto.get().getNome())
                 .isEqualTo("Empresa Exemplo");
+
+        assertThat(resultadoOutraOrganizacao).isEmpty();
     }
 
     @Test
-    @DisplayName("Não deve buscar empresa inativa como ativa")
+    @DisplayName(
+            "Nao deve buscar empresa inativa como ativa"
+    )
     void naoDeveBuscarEmpresaInativaComoAtiva() {
-        var empresa = repository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Empresa Exemplo")
-                )
+        var organizacao =
+                criarOrganizacao("Organizacao Principal");
+
+        var empresa = criarEmpresa(
+                organizacao,
+                "Empresa Exemplo"
         );
 
         empresa.inativar();
         repository.save(empresa);
 
-        var resultado = repository.findByIdAndStatus(
-                empresa.getId(),
-                StatusEnum.ATIVO
-        );
+        var resultado = repository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        empresa.getId(),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
         assertThat(resultado).isEmpty();
+    }
+
+    private OrganizacaoModel criarOrganizacao(
+            String nome
+    ) {
+        return organizacaoRepository.save(
+                new OrganizacaoModel(nome)
+        );
+    }
+
+    private EmpresaModel criarEmpresa(
+            OrganizacaoModel organizacao,
+            String nome
+    ) {
+        return repository.save(
+                new EmpresaModel(
+                        organizacao,
+                        new EmpresaRecord(nome)
+                )
+        );
     }
 }

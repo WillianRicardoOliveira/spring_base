@@ -36,6 +36,7 @@ import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,7 +69,8 @@ class UsuarioSubsidiariaControllerTest {
 
     @Test
     @DisplayName("Deve cadastrar vinculo")
-    void deveCadastrarVinculo() throws Exception {
+    void deveCadastrarVinculo()
+            throws Exception {
         var dados = new UsuarioSubsidiariaRecord(
                 3L,
                 4L
@@ -82,7 +84,9 @@ class UsuarioSubsidiariaControllerTest {
         )).thenReturn(usuarioSubsidiaria);
 
         mockMvc.perform(
-                        post("/acesso/usuario-subsidiaria")
+                        post(
+                                "/acesso/usuario-subsidiaria"
+                        )
                                 .contentType(
                                         MediaType.APPLICATION_JSON
                                 )
@@ -100,24 +104,33 @@ class UsuarioSubsidiariaControllerTest {
                                         + "usuario-subsidiaria/6"
                         )
                 )
-                .andExpect(jsonPath("$.id").value(6L))
+                .andExpect(
+                        jsonPath("$.id")
+                                .value(6L)
+                )
                 .andExpect(
                         jsonPath("$.idUsuarioEmpresa")
                                 .value(3L)
                 )
                 .andExpect(
-                        jsonPath("$.idUsuario").value(1L)
+                        jsonPath("$.idUsuario")
+                                .value(1L)
                 )
                 .andExpect(
                         jsonPath("$.usuario")
-                                .value("usuario@teste.com")
+                                .value(
+                                        "usuario@teste.com"
+                                )
                 )
                 .andExpect(
-                        jsonPath("$.idEmpresa").value(2L)
+                        jsonPath("$.idEmpresa")
+                                .value(2L)
                 )
                 .andExpect(
                         jsonPath("$.empresa")
-                                .value("Empresa Exemplo")
+                                .value(
+                                        "Empresa Exemplo"
+                                )
                 )
                 .andExpect(
                         jsonPath("$.idSubsidiaria")
@@ -125,10 +138,13 @@ class UsuarioSubsidiariaControllerTest {
                 )
                 .andExpect(
                         jsonPath("$.subsidiaria")
-                                .value("Filial Curitiba")
+                                .value(
+                                        "Filial Curitiba"
+                                )
                 )
                 .andExpect(
-                        jsonPath("$.status").value("ATIVO")
+                        jsonPath("$.status")
+                                .value("ATIVO")
                 );
     }
 
@@ -142,7 +158,9 @@ class UsuarioSubsidiariaControllerTest {
         );
 
         mockMvc.perform(
-                        post("/acesso/usuario-subsidiaria")
+                        post(
+                                "/acesso/usuario-subsidiaria"
+                        )
                                 .contentType(
                                         MediaType.APPLICATION_JSON
                                 )
@@ -157,7 +175,8 @@ class UsuarioSubsidiariaControllerTest {
 
     @Test
     @DisplayName("Deve listar vinculos")
-    void deveListarVinculos() throws Exception {
+    void deveListarVinculos()
+            throws Exception {
         var lista = List.of(
                 new ListaUsuarioSubsidiariaRecord(
                         6L,
@@ -184,7 +203,9 @@ class UsuarioSubsidiariaControllerTest {
         )).thenReturn(pagina);
 
         mockMvc.perform(
-                        get("/acesso/usuario-subsidiaria")
+                        get(
+                                "/acesso/usuario-subsidiaria"
+                        )
                 )
                 .andExpect(status().isOk())
                 .andExpect(
@@ -193,22 +214,28 @@ class UsuarioSubsidiariaControllerTest {
                 )
                 .andExpect(
                         jsonPath(
-                                "$.content[0].idUsuarioEmpresa"
+                                "$.content[0]"
+                                        + ".idUsuarioEmpresa"
                         ).value(3L)
                 )
                 .andExpect(
                         jsonPath(
-                                "$.content[0].idSubsidiaria"
+                                "$.content[0]"
+                                        + ".idSubsidiaria"
                         ).value(4L)
                 )
                 .andExpect(
                         jsonPath(
-                                "$.content[0].subsidiaria"
-                        ).value("Filial Curitiba")
+                                "$.content[0]"
+                                        + ".subsidiaria"
+                        ).value(
+                                "Filial Curitiba"
+                        )
                 )
                 .andExpect(
-                        jsonPath("$.content[0].status")
-                                .value("ATIVO")
+                        jsonPath(
+                                "$.content[0].status"
+                        ).value("ATIVO")
                 );
 
         verify(service).listar(
@@ -218,9 +245,7 @@ class UsuarioSubsidiariaControllerTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar por usuario empresa"
-    )
+    @DisplayName("Deve listar por usuario empresa")
     void deveListarPorUsuarioEmpresa()
             throws Exception {
         var pagina =
@@ -236,7 +261,9 @@ class UsuarioSubsidiariaControllerTest {
         )).thenReturn(pagina);
 
         mockMvc.perform(
-                        get("/acesso/usuario-subsidiaria")
+                        get(
+                                "/acesso/usuario-subsidiaria"
+                        )
                                 .param(
                                         "idUsuarioEmpresa",
                                         "3"
@@ -244,7 +271,8 @@ class UsuarioSubsidiariaControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(
-                        jsonPath("$.content").isEmpty()
+                        jsonPath("$.content")
+                                .isEmpty()
                 );
 
         verify(service).listar(
@@ -255,7 +283,8 @@ class UsuarioSubsidiariaControllerTest {
 
     @Test
     @DisplayName("Deve detalhar vinculo")
-    void deveDetalharVinculo() throws Exception {
+    void deveDetalharVinculo()
+            throws Exception {
         var detalhe =
                 new DetalheUsuarioSubsidiariaRecord(
                         6L,
@@ -279,16 +308,21 @@ class UsuarioSubsidiariaControllerTest {
                         )
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(6L))
+                .andExpect(
+                        jsonPath("$.id")
+                                .value(6L)
+                )
                 .andExpect(
                         jsonPath("$.idUsuarioEmpresa")
                                 .value(3L)
                 )
                 .andExpect(
-                        jsonPath("$.idUsuario").value(1L)
+                        jsonPath("$.idUsuario")
+                                .value(1L)
                 )
                 .andExpect(
-                        jsonPath("$.idEmpresa").value(2L)
+                        jsonPath("$.idEmpresa")
+                                .value(2L)
                 )
                 .andExpect(
                         jsonPath("$.idSubsidiaria")
@@ -296,16 +330,20 @@ class UsuarioSubsidiariaControllerTest {
                 )
                 .andExpect(
                         jsonPath("$.subsidiaria")
-                                .value("Filial Curitiba")
+                                .value(
+                                        "Filial Curitiba"
+                                )
                 )
                 .andExpect(
-                        jsonPath("$.status").value("ATIVO")
+                        jsonPath("$.status")
+                                .value("ATIVO")
                 );
     }
 
     @Test
     @DisplayName("Deve excluir vinculo")
-    void deveExcluirVinculo() throws Exception {
+    void deveExcluirVinculo()
+            throws Exception {
         mockMvc.perform(
                         delete(
                                 "/acesso/"
@@ -333,8 +371,22 @@ class UsuarioSubsidiariaControllerTest {
                 1L
         );
 
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                1L
+        );
+
         var empresa = new EmpresaModel(
-                new EmpresaRecord("Empresa Exemplo")
+                organizacao,
+                new EmpresaRecord(
+                        "Empresa Exemplo"
+                )
         );
 
         ReflectionTestUtils.setField(
@@ -343,11 +395,12 @@ class UsuarioSubsidiariaControllerTest {
                 2L
         );
 
-        var usuarioEmpresa = new UsuarioEmpresaModel(
-                usuario,
-                empresa,
-                false
-        );
+        var usuarioEmpresa =
+                new UsuarioEmpresaModel(
+                        usuario,
+                        empresa,
+                        false
+                );
 
         ReflectionTestUtils.setField(
                 usuarioEmpresa,

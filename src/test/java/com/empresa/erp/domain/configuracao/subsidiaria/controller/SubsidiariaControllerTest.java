@@ -36,6 +36,7 @@ import com.empresa.erp.domain.configuracao.subsidiaria.record.ListaSubsidiariaRe
 import com.empresa.erp.domain.configuracao.subsidiaria.record.SubsidiariaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.service.SubsidiariaService;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 class SubsidiariaControllerTest {
@@ -64,7 +65,8 @@ class SubsidiariaControllerTest {
 
     @Test
     @DisplayName("Deve cadastrar subsidiaria")
-    void deveCadastrarSubsidiaria() throws Exception {
+    void deveCadastrarSubsidiaria()
+            throws Exception {
         var dados = new SubsidiariaRecord(
                 1L,
                 "Filial Curitiba"
@@ -78,7 +80,9 @@ class SubsidiariaControllerTest {
 
         mockMvc.perform(
                         post("/configuracao/subsidiaria")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -122,7 +126,9 @@ class SubsidiariaControllerTest {
 
         mockMvc.perform(
                         post("/configuracao/subsidiaria")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -134,7 +140,8 @@ class SubsidiariaControllerTest {
 
     @Test
     @DisplayName("Deve listar subsidiarias")
-    void deveListarSubsidiarias() throws Exception {
+    void deveListarSubsidiarias()
+            throws Exception {
         var lista = List.of(
                 new ListaSubsidiariaRecord(
                         2L,
@@ -193,11 +200,12 @@ class SubsidiariaControllerTest {
     @DisplayName("Deve listar com empresa e filtro")
     void deveListarComEmpresaEFiltro()
             throws Exception {
-        var pagina = new PageImpl<ListaSubsidiariaRecord>(
-                List.of(),
-                PageRequest.of(0, 10),
-                0
-        );
+        var pagina =
+                new PageImpl<ListaSubsidiariaRecord>(
+                        List.of(),
+                        PageRequest.of(0, 10),
+                        0
+                );
 
         when(service.listar(
                 any(Pageable.class),
@@ -207,8 +215,14 @@ class SubsidiariaControllerTest {
 
         mockMvc.perform(
                         get("/configuracao/subsidiaria")
-                                .param("idEmpresa", "1")
-                                .param("filtro", "Curitiba")
+                                .param(
+                                        "idEmpresa",
+                                        "1"
+                                )
+                                .param(
+                                        "filtro",
+                                        "Curitiba"
+                                )
                 )
                 .andExpect(status().isOk())
                 .andExpect(
@@ -225,14 +239,16 @@ class SubsidiariaControllerTest {
 
     @Test
     @DisplayName("Deve detalhar subsidiaria")
-    void deveDetalharSubsidiaria() throws Exception {
-        var detalhe = new DetalheSubsidiariaRecord(
-                2L,
-                1L,
-                "Empresa Exemplo",
-                "Filial Curitiba",
-                StatusEnum.ATIVO
-        );
+    void deveDetalharSubsidiaria()
+            throws Exception {
+        var detalhe =
+                new DetalheSubsidiariaRecord(
+                        2L,
+                        1L,
+                        "Empresa Exemplo",
+                        "Filial Curitiba",
+                        StatusEnum.ATIVO
+                );
 
         when(service.detalhar(2L))
                 .thenReturn(detalhe);
@@ -262,19 +278,22 @@ class SubsidiariaControllerTest {
 
     @Test
     @DisplayName("Deve atualizar subsidiaria")
-    void deveAtualizarSubsidiaria() throws Exception {
-        var dados = new AtualizaSubsidiariaRecord(
-                2L,
-                "Filial Atualizada"
-        );
+    void deveAtualizarSubsidiaria()
+            throws Exception {
+        var dados =
+                new AtualizaSubsidiariaRecord(
+                        2L,
+                        "Filial Atualizada"
+                );
 
-        var detalhe = new DetalheSubsidiariaRecord(
-                2L,
-                1L,
-                "Empresa Exemplo",
-                "Filial Atualizada",
-                StatusEnum.ATIVO
-        );
+        var detalhe =
+                new DetalheSubsidiariaRecord(
+                        2L,
+                        1L,
+                        "Empresa Exemplo",
+                        "Filial Atualizada",
+                        StatusEnum.ATIVO
+                );
 
         when(service.atualizar(
                 any(AtualizaSubsidiariaRecord.class)
@@ -282,7 +301,9 @@ class SubsidiariaControllerTest {
 
         mockMvc.perform(
                         put("/configuracao/subsidiaria")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -309,14 +330,17 @@ class SubsidiariaControllerTest {
     @DisplayName("Deve rejeitar atualizacao invalida")
     void deveRejeitarAtualizacaoInvalida()
             throws Exception {
-        var dados = new AtualizaSubsidiariaRecord(
-                null,
-                ""
-        );
+        var dados =
+                new AtualizaSubsidiariaRecord(
+                        null,
+                        ""
+                );
 
         mockMvc.perform(
                         put("/configuracao/subsidiaria")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -328,7 +352,8 @@ class SubsidiariaControllerTest {
 
     @Test
     @DisplayName("Deve excluir subsidiaria")
-    void deveExcluirSubsidiaria() throws Exception {
+    void deveExcluirSubsidiaria()
+            throws Exception {
         mockMvc.perform(
                         delete("/configuracao/subsidiaria/2")
                 )
@@ -338,8 +363,22 @@ class SubsidiariaControllerTest {
     }
 
     private SubsidiariaModel criarSubsidiaria() {
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                1L
+        );
+
         var empresa = new EmpresaModel(
-                new EmpresaRecord("Empresa Exemplo")
+                organizacao,
+                new EmpresaRecord(
+                        "Empresa Exemplo"
+                )
         );
 
         ReflectionTestUtils.setField(

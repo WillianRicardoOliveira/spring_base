@@ -9,6 +9,7 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpres
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
@@ -106,8 +107,16 @@ class UsuarioEmpresaModelTest {
     }
 
     private EmpresaModel criarEmpresa() {
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
         return new EmpresaModel(
-                new EmpresaRecord("Empresa Exemplo")
+                organizacao,
+                new EmpresaRecord(
+                        "Empresa Exemplo"
+                )
         );
     }
 }
