@@ -18,6 +18,8 @@ import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
+import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
@@ -45,6 +47,11 @@ class UsuarioSubsidiariaRepositoryTest {
     private SubsidiariaRepository
             subsidiariaRepository;
 
+    @Autowired
+    private OrganizacaoRepository
+            organizacaoRepository;
+
+    private OrganizacaoModel organizacao;
     private UsuarioModel usuario;
     private EmpresaModel empresa;
     private UsuarioEmpresaModel usuarioEmpresa;
@@ -52,6 +59,12 @@ class UsuarioSubsidiariaRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        organizacao = organizacaoRepository.save(
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                )
+        );
+
         usuario = usuarioRepository.save(
                 new UsuarioModel(
                         new UsuarioRecord(
@@ -64,7 +77,10 @@ class UsuarioSubsidiariaRepositoryTest {
 
         empresa = empresaRepository.save(
                 new EmpresaModel(
-                        new EmpresaRecord("Empresa Exemplo")
+                        organizacao,
+                        new EmpresaRecord(
+                                "Empresa Exemplo"
+                        )
                 )
         );
 
@@ -119,7 +135,9 @@ class UsuarioSubsidiariaRepositoryTest {
         );
 
         assertThat(resultado.getContent())
-                .extracting(UsuarioSubsidiariaModel::getId)
+                .extracting(
+                        UsuarioSubsidiariaModel::getId
+                )
                 .contains(ativo.getId())
                 .doesNotContain(inativo.getId());
     }

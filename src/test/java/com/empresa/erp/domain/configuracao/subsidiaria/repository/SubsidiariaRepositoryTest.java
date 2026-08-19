@@ -14,6 +14,8 @@ import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
+import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 
 @DataJpaTest(properties = {
         "spring.flyway.enabled=false",
@@ -27,194 +29,252 @@ class SubsidiariaRepositoryTest {
     @Autowired
     private EmpresaRepository empresaRepository;
 
+    @Autowired
+    private OrganizacaoRepository
+            organizacaoRepository;
+
+    private OrganizacaoModel organizacao;
+    private OrganizacaoModel outraOrganizacao;
     private EmpresaModel empresa;
+    private EmpresaModel empresaDeOutraOrganizacao;
 
     @BeforeEach
     void setUp() {
-        empresa = empresaRepository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Empresa Exemplo")
+        organizacao = organizacaoRepository.save(
+                new OrganizacaoModel(
+                        "Organizacao Principal"
                 )
         );
+
+        outraOrganizacao = organizacaoRepository.save(
+                new OrganizacaoModel(
+                        "Outra Organizacao"
+                )
+        );
+
+        empresa = empresaRepository.save(
+                new EmpresaModel(
+                        organizacao,
+                        new EmpresaRecord(
+                                "Empresa Exemplo"
+                        )
+                )
+        );
+
+        empresaDeOutraOrganizacao =
+                empresaRepository.save(
+                        new EmpresaModel(
+                                outraOrganizacao,
+                                new EmpresaRecord(
+                                        "Empresa Externa"
+                                )
+                        )
+                );
     }
 
     @Test
-    @DisplayName("Deve listar somente subsidiarias ativas")
-    void deveListarSomenteSubsidiariasAtivas() {
-        var ativa = repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Ativa"
-                )
+    @DisplayName(
+            "Deve listar somente subsidiarias ativas da organizacao"
+    )
+    void deveListarSomenteSubsidiariasAtivasDaOrganizacao() {
+        var ativa = criarSubsidiaria(
+                empresa,
+                "Filial Ativa"
         );
 
-        var inativa = repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Inativa"
-                )
+        var inativa = criarSubsidiaria(
+                empresa,
+                "Filial Inativa"
         );
 
         inativa.inativar();
         repository.save(inativa);
 
-        var resultado = repository.findAllByStatus(
-                PageRequest.of(0, 10),
-                StatusEnum.ATIVO
+        var externa = criarSubsidiaria(
+                empresaDeOutraOrganizacao,
+                "Filial Externa"
         );
+
+        var resultado = repository
+                .findAllByEmpresaOrganizacaoIdAndStatus(
+                        PageRequest.of(0, 10),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
         assertThat(resultado.getContent())
                 .extracting(SubsidiariaModel::getId)
-                .contains(ativa.getId())
-                .doesNotContain(inativa.getId());
+                .containsExactly(ativa.getId())
+                .doesNotContain(
+                        inativa.getId(),
+                        externa.getId()
+                );
     }
 
     @Test
-    @DisplayName("Deve filtrar subsidiaria pelo nome")
-    void deveFiltrarSubsidiariaPeloNome() {
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+    @DisplayName(
+            "Deve filtrar nome somente dentro da organizacao"
+    )
+    void deveFiltrarNomeSomenteDentroDaOrganizacao() {
+        criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Londrina"
-                )
+        criarSubsidiaria(
+                empresa,
+                "Filial Londrina"
         );
 
-        var resultado =
-                repository.findByNomeContainingIgnoreCaseAndStatus(
+        criarSubsidiaria(
+                empresaDeOutraOrganizacao,
+                "Filial Curitiba Externa"
+        );
+
+        var resultado = repository
+                .findByEmpresaOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
                         PageRequest.of(0, 10),
+                        organizacao.getId(),
                         "CURITIBA",
                         StatusEnum.ATIVO
                 );
 
-        assertThat(resultado.getContent()).hasSize(1);
-
-        assertThat(resultado.getContent().get(0).getNome())
-                .isEqualTo("Filial Curitiba");
+        assertThat(resultado.getContent())
+                .extracting(SubsidiariaModel::getNome)
+                .containsExactly("Filial Curitiba");
     }
 
     @Test
-    @DisplayName("Deve listar subsidiarias por empresa")
-    void deveListarSubsidiariasPorEmpresa() {
-        var outraEmpresa = empresaRepository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Outra Empresa")
-                )
+    @DisplayName(
+            "Deve listar por empresa somente na organizacao informada"
+    )
+    void deveListarPorEmpresaSomenteNaOrganizacaoInformada() {
+        criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
-        );
-
-        repository.save(
-                new SubsidiariaModel(
-                        outraEmpresa,
-                        "Filial Sao Paulo"
-                )
-        );
-
-        var resultado =
-                repository.findAllByEmpresaIdAndStatus(
+        var resultadoCorreto = repository
+                .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
                         PageRequest.of(0, 10),
                         empresa.getId(),
+                        organizacao.getId(),
                         StatusEnum.ATIVO
                 );
 
-        assertThat(resultado.getContent()).hasSize(1);
+        var resultadoOutraOrganizacao = repository
+                .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                        PageRequest.of(0, 10),
+                        empresa.getId(),
+                        outraOrganizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
-        assertThat(
-                resultado.getContent()
-                        .get(0)
-                        .getEmpresa()
-                        .getId()
-        ).isEqualTo(empresa.getId());
+        assertThat(resultadoCorreto.getContent())
+                .hasSize(1);
+
+        assertThat(resultadoOutraOrganizacao.getContent())
+                .isEmpty();
     }
 
     @Test
-    @DisplayName("Deve filtrar nome dentro da empresa")
-    void deveFiltrarNomeDentroDaEmpresa() {
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+    @DisplayName(
+            "Deve filtrar nome por empresa e organizacao"
+    )
+    void deveFiltrarNomePorEmpresaEOrganizacao() {
+        criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Londrina"
-                )
+        criarSubsidiaria(
+                empresa,
+                "Filial Londrina"
         );
 
-        var resultado =
-                repository
-                        .findByEmpresaIdAndNomeContainingIgnoreCaseAndStatus(
-                                PageRequest.of(0, 10),
-                                empresa.getId(),
-                                "curitiba",
-                                StatusEnum.ATIVO
-                        );
+        var resultado = repository
+                .findByEmpresaIdAndEmpresaOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
+                        PageRequest.of(0, 10),
+                        empresa.getId(),
+                        organizacao.getId(),
+                        "curitiba",
+                        StatusEnum.ATIVO
+                );
 
-        assertThat(resultado.getContent()).hasSize(1);
-
-        assertThat(resultado.getContent().get(0).getNome())
-                .isEqualTo("Filial Curitiba");
+        assertThat(resultado.getContent())
+                .extracting(SubsidiariaModel::getNome)
+                .containsExactly("Filial Curitiba");
     }
 
     @Test
-    @DisplayName("Deve verificar nome duplicado na mesma empresa")
+    @DisplayName(
+            "Nao deve filtrar empresa usando outra organizacao"
+    )
+    void naoDeveFiltrarEmpresaUsandoOutraOrganizacao() {
+        criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
+        );
+
+        var resultado = repository
+                .findByEmpresaIdAndEmpresaOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
+                        PageRequest.of(0, 10),
+                        empresa.getId(),
+                        outraOrganizacao.getId(),
+                        "Curitiba",
+                        StatusEnum.ATIVO
+                );
+
+        assertThat(resultado.getContent())
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName(
+            "Deve verificar nome duplicado na mesma empresa"
+    )
     void deveVerificarNomeDuplicadoNaMesmaEmpresa() {
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+        criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
-        boolean existe =
-                repository
-                        .existsByEmpresaAndNomeIgnoreCaseAndStatus(
-                                empresa,
-                                "filial curitiba",
-                                StatusEnum.ATIVO
-                        );
+        boolean existe = repository
+                .existsByEmpresaAndNomeIgnoreCaseAndStatus(
+                        empresa,
+                        "filial curitiba",
+                        StatusEnum.ATIVO
+                );
 
         assertThat(existe).isTrue();
     }
 
     @Test
-    @DisplayName("Deve permitir mesmo nome em empresas diferentes")
+    @DisplayName(
+            "Deve permitir mesmo nome em empresas diferentes"
+    )
     void devePermitirMesmoNomeEmEmpresasDiferentes() {
-        var outraEmpresa = empresaRepository.save(
-                new EmpresaModel(
-                        new EmpresaRecord("Outra Empresa")
-                )
+        criarSubsidiaria(
+                empresa,
+                "Matriz"
         );
 
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Matriz"
-                )
-        );
+        var outraEmpresaDaMesmaOrganizacao =
+                empresaRepository.save(
+                        new EmpresaModel(
+                                organizacao,
+                                new EmpresaRecord(
+                                        "Outra Empresa"
+                                )
+                        )
+                );
 
-        boolean existeNaOutraEmpresa =
-                repository
-                        .existsByEmpresaAndNomeIgnoreCaseAndStatus(
-                                outraEmpresa,
-                                "Matriz",
-                                StatusEnum.ATIVO
-                        );
+        boolean existeNaOutraEmpresa = repository
+                .existsByEmpresaAndNomeIgnoreCaseAndStatus(
+                        outraEmpresaDaMesmaOrganizacao,
+                        "Matriz",
+                        StatusEnum.ATIVO
+                );
 
         assertThat(existeNaOutraEmpresa).isFalse();
     }
@@ -224,21 +284,18 @@ class SubsidiariaRepositoryTest {
             "Deve desconsiderar o proprio id na duplicidade"
     )
     void deveDesconsiderarProprioIdNaDuplicidade() {
-        var subsidiaria = repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+        var subsidiaria = criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
-        boolean existe =
-                repository
-                        .existsByEmpresaAndNomeIgnoreCaseAndStatusAndIdNot(
-                                empresa,
-                                "Filial Curitiba",
-                                StatusEnum.ATIVO,
-                                subsidiaria.getId()
-                        );
+        boolean existe = repository
+                .existsByEmpresaAndNomeIgnoreCaseAndStatusAndIdNot(
+                        empresa,
+                        "Filial Curitiba",
+                        StatusEnum.ATIVO,
+                        subsidiaria.getId()
+                );
 
         assertThat(existe).isFalse();
     }
@@ -248,40 +305,35 @@ class SubsidiariaRepositoryTest {
             "Deve identificar nome duplicado em outra subsidiaria"
     )
     void deveIdentificarNomeDuplicadoEmOutraSubsidiaria() {
-        var primeira = repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+        var primeira = criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Londrina"
-                )
+        criarSubsidiaria(
+                empresa,
+                "Filial Londrina"
         );
 
-        boolean existeEmOutraSubsidiaria =
-                repository
-                        .existsByEmpresaAndNomeIgnoreCaseAndStatusAndIdNot(
-                                empresa,
-                                "filial londrina",
-                                StatusEnum.ATIVO,
-                                primeira.getId()
-                        );
+        boolean existe = repository
+                .existsByEmpresaAndNomeIgnoreCaseAndStatusAndIdNot(
+                        empresa,
+                        "filial londrina",
+                        StatusEnum.ATIVO,
+                        primeira.getId()
+                );
 
-        assertThat(existeEmOutraSubsidiaria).isTrue();
+        assertThat(existe).isTrue();
     }
 
     @Test
-    @DisplayName("Deve verificar subsidiaria ativa da empresa")
+    @DisplayName(
+            "Deve verificar subsidiaria ativa da empresa"
+    )
     void deveVerificarSubsidiariaAtivaDaEmpresa() {
-        repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+        criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
         boolean existe =
@@ -298,11 +350,9 @@ class SubsidiariaRepositoryTest {
             "Nao deve considerar subsidiaria inativa como ativa"
     )
     void naoDeveConsiderarSubsidiariaInativaComoAtiva() {
-        var subsidiaria = repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+        var subsidiaria = criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
         subsidiaria.inativar();
@@ -318,44 +368,70 @@ class SubsidiariaRepositoryTest {
     }
 
     @Test
-    @DisplayName("Deve buscar subsidiaria ativa por id")
-    void deveBuscarSubsidiariaAtivaPorId() {
-        var subsidiaria = repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+    @DisplayName(
+            "Deve buscar subsidiaria somente na organizacao"
+    )
+    void deveBuscarSubsidiariaSomenteNaOrganizacao() {
+        var subsidiaria = criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
-        var resultado = repository.findByIdAndStatus(
-                subsidiaria.getId(),
-                StatusEnum.ATIVO
-        );
+        var resultadoCorreto = repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        subsidiaria.getId(),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
-        assertThat(resultado).isPresent();
+        var resultadoOutraOrganizacao = repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        subsidiaria.getId(),
+                        outraOrganizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
-        assertThat(resultado.get().getNome())
+        assertThat(resultadoCorreto).isPresent();
+
+        assertThat(resultadoCorreto.get().getNome())
                 .isEqualTo("Filial Curitiba");
+
+        assertThat(resultadoOutraOrganizacao)
+                .isEmpty();
     }
 
     @Test
-    @DisplayName("Nao deve buscar subsidiaria inativa como ativa")
+    @DisplayName(
+            "Nao deve buscar subsidiaria inativa como ativa"
+    )
     void naoDeveBuscarSubsidiariaInativaComoAtiva() {
-        var subsidiaria = repository.save(
-                new SubsidiariaModel(
-                        empresa,
-                        "Filial Curitiba"
-                )
+        var subsidiaria = criarSubsidiaria(
+                empresa,
+                "Filial Curitiba"
         );
 
         subsidiaria.inativar();
         repository.save(subsidiaria);
 
-        var resultado = repository.findByIdAndStatus(
-                subsidiaria.getId(),
-                StatusEnum.ATIVO
-        );
+        var resultado = repository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        subsidiaria.getId(),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
         assertThat(resultado).isEmpty();
+    }
+
+    private SubsidiariaModel criarSubsidiaria(
+            EmpresaModel empresa,
+            String nome
+    ) {
+        return repository.save(
+                new SubsidiariaModel(
+                        empresa,
+                        nome
+                )
+        );
     }
 }

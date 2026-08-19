@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
@@ -31,15 +32,23 @@ public class SubsidiariaService {
     private final UsuarioSubsidiariaRepository
             usuarioSubsidiariaRepository;
 
-    private final UsuarioLogadoService usuarioLogadoService;
+    private final UsuarioLogadoService
+            usuarioLogadoService;
+
+    private final ContextoOrganizacao
+            contextoOrganizacao;
 
     @Transactional
     public SubsidiariaModel cadastrar(
             SubsidiariaRecord dados
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         EmpresaModel empresa = empresaRepository
-                .findByIdAndStatus(
+                .findByIdAndOrganizacaoIdAndStatus(
                         dados.idEmpresa(),
+                        idOrganizacao,
                         StatusEnum.ATIVO
                 )
                 .orElseThrow(() ->
@@ -77,16 +86,21 @@ public class SubsidiariaService {
             Long idEmpresa,
             String filtro
     ) {
-        boolean possuiEmpresa = idEmpresa != null;
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
+        boolean possuiEmpresa =
+                idEmpresa != null;
 
         boolean possuiFiltro =
                 filtro != null && !filtro.isBlank();
 
         if (possuiEmpresa && possuiFiltro) {
             return repository
-                    .findByEmpresaIdAndNomeContainingIgnoreCaseAndStatus(
+                    .findByEmpresaIdAndEmpresaOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
                             paginacao,
                             idEmpresa,
+                            idOrganizacao,
                             filtro.trim(),
                             StatusEnum.ATIVO
                     )
@@ -95,9 +109,10 @@ public class SubsidiariaService {
 
         if (possuiEmpresa) {
             return repository
-                    .findAllByEmpresaIdAndStatus(
+                    .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
                             paginacao,
                             idEmpresa,
+                            idOrganizacao,
                             StatusEnum.ATIVO
                     )
                     .map(ListaSubsidiariaRecord::new);
@@ -105,8 +120,9 @@ public class SubsidiariaService {
 
         if (possuiFiltro) {
             return repository
-                    .findByNomeContainingIgnoreCaseAndStatus(
+                    .findByEmpresaOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
                             paginacao,
+                            idOrganizacao,
                             filtro.trim(),
                             StatusEnum.ATIVO
                     )
@@ -114,8 +130,9 @@ public class SubsidiariaService {
         }
 
         return repository
-                .findAllByStatus(
+                .findAllByEmpresaOrganizacaoIdAndStatus(
                         paginacao,
+                        idOrganizacao,
                         StatusEnum.ATIVO
                 )
                 .map(ListaSubsidiariaRecord::new);
@@ -135,16 +152,20 @@ public class SubsidiariaService {
             AtualizaSubsidiariaRecord dados
     ) {
         SubsidiariaModel subsidiaria =
-                buscarSubsidiariaAtiva(dados.id());
+                buscarSubsidiariaAtiva(
+                        dados.id()
+                );
 
-        String nome = normalizarNome(dados.nome());
+        String nome = normalizarNome(
+                dados.nome()
+        );
 
         if (repository
                 .existsByEmpresaAndNomeIgnoreCaseAndStatusAndIdNot(
                         subsidiaria.getEmpresa(),
                         nome,
                         StatusEnum.ATIVO,
-                        dados.id()
+                        subsidiaria.getId()
                 )
         ) {
             throw new ValidacaoException(
@@ -154,7 +175,7 @@ public class SubsidiariaService {
 
         subsidiaria.atualizar(
                 new AtualizaSubsidiariaRecord(
-                        dados.id(),
+                        subsidiaria.getId(),
                         nome
                 )
         );
@@ -181,7 +202,8 @@ public class SubsidiariaService {
             );
         }
 
-        Long idUsuario = usuarioLogadoService.getId();
+        Long idUsuario =
+                usuarioLogadoService.getId();
 
         subsidiaria.remover(idUsuario);
     }
@@ -189,9 +211,13 @@ public class SubsidiariaService {
     private SubsidiariaModel buscarSubsidiariaAtiva(
             Long id
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         return repository
-                .findByIdAndStatus(
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
                         id,
+                        idOrganizacao,
                         StatusEnum.ATIVO
                 )
                 .orElseThrow(() ->

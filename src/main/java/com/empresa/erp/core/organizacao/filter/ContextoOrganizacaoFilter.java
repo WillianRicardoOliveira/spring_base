@@ -11,7 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.organizacao.service.ContextoOrganizacaoService;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

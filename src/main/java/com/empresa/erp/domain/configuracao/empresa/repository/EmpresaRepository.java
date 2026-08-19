@@ -12,26 +12,52 @@ import com.empresa.erp.domain.old.StatusEnum;
 public interface EmpresaRepository
         extends JpaRepository<EmpresaModel, Long> {
 
-    Page<EmpresaModel> findByNomeContainingIgnoreCaseAndStatus(
+    Page<EmpresaModel>
+            findByOrganizacaoIdAndNomeContainingIgnoreCaseAndStatus(
+                    Pageable paginacao,
+                    Long idOrganizacao,
+                    String filtro,
+                    StatusEnum status
+            );
+
+    Page<EmpresaModel> findAllByOrganizacaoIdAndStatus(
             Pageable paginacao,
-            String filtro,
+            Long idOrganizacao,
             StatusEnum status
     );
+
+    boolean existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+            Long idOrganizacao,
+            String nome,
+            StatusEnum status
+    );
+
+    boolean
+            existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                    Long idOrganizacao,
+                    String nome,
+                    StatusEnum status,
+                    Long id
+            );
+
+    Optional<EmpresaModel>
+            findByIdAndOrganizacaoIdAndStatus(
+                    Long id,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
+
+    /*
+     * Métodos temporariamente mantidos para os fluxos de
+     * Subsidiária e UsuarioEmpresa.
+     *
+     * Devem ser removidos após esses módulos passarem a
+     * respeitar o contexto da organização.
+     */
 
     Page<EmpresaModel> findAllByStatus(
             Pageable paginacao,
             StatusEnum status
-    );
-
-    boolean existsByNomeIgnoreCaseAndStatus(
-            String nome,
-            StatusEnum status
-    );
-
-    boolean existsByNomeIgnoreCaseAndStatusAndIdNot(
-            String nome,
-            StatusEnum status,
-            Long id
     );
 
     Optional<EmpresaModel> findByIdAndStatus(

@@ -10,6 +10,7 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
@@ -24,15 +25,24 @@ class UsuarioEmpresaResponseRecordsTest {
                 usuarioEmpresa
         );
 
-        assertThat(detalhe.id()).isEqualTo(3L);
-        assertThat(detalhe.idUsuario()).isEqualTo(1L);
+        assertThat(detalhe.id())
+                .isEqualTo(3L);
+
+        assertThat(detalhe.idUsuario())
+                .isEqualTo(1L);
+
         assertThat(detalhe.usuario())
                 .isEqualTo("usuario@teste.com");
-        assertThat(detalhe.idEmpresa()).isEqualTo(2L);
+
+        assertThat(detalhe.idEmpresa())
+                .isEqualTo(2L);
+
         assertThat(detalhe.empresa())
                 .isEqualTo("Empresa Exemplo");
+
         assertThat(detalhe.todasSubsidiarias())
                 .isTrue();
+
         assertThat(detalhe.status())
                 .isEqualTo(StatusEnum.ATIVO);
     }
@@ -46,15 +56,24 @@ class UsuarioEmpresaResponseRecordsTest {
                 usuarioEmpresa
         );
 
-        assertThat(lista.id()).isEqualTo(3L);
-        assertThat(lista.idUsuario()).isEqualTo(1L);
+        assertThat(lista.id())
+                .isEqualTo(3L);
+
+        assertThat(lista.idUsuario())
+                .isEqualTo(1L);
+
         assertThat(lista.usuario())
                 .isEqualTo("usuario@teste.com");
-        assertThat(lista.idEmpresa()).isEqualTo(2L);
+
+        assertThat(lista.idEmpresa())
+                .isEqualTo(2L);
+
         assertThat(lista.empresa())
                 .isEqualTo("Empresa Exemplo");
+
         assertThat(lista.todasSubsidiarias())
                 .isTrue();
+
         assertThat(lista.status())
                 .isEqualTo(StatusEnum.ATIVO);
     }
@@ -89,8 +108,22 @@ class UsuarioEmpresaResponseRecordsTest {
                 1L
         );
 
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                1L
+        );
+
         var empresa = new EmpresaModel(
-                new EmpresaRecord("Empresa Exemplo")
+                organizacao,
+                new EmpresaRecord(
+                        "Empresa Exemplo"
+                )
         );
 
         ReflectionTestUtils.setField(

@@ -27,7 +27,7 @@ import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.organizacao.service.ContextoOrganizacaoService;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
 

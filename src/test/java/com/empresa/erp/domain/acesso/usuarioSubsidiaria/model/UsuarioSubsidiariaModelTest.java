@@ -10,6 +10,7 @@ import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
@@ -19,6 +20,7 @@ class UsuarioSubsidiariaModelTest {
     @DisplayName("Deve criar vinculo ativo")
     void deveCriarVinculoAtivo() {
         var usuarioEmpresa = criarUsuarioEmpresa();
+
         var subsidiaria = criarSubsidiaria(
                 usuarioEmpresa.getEmpresa()
         );
@@ -94,8 +96,16 @@ class UsuarioSubsidiariaModelTest {
                 "senha-criptografada"
         );
 
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
         var empresa = new EmpresaModel(
-                new EmpresaRecord("Empresa Exemplo")
+                organizacao,
+                new EmpresaRecord(
+                        "Empresa Exemplo"
+                )
         );
 
         return new UsuarioEmpresaModel(

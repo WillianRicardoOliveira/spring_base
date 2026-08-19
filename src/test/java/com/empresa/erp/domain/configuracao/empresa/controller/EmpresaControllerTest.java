@@ -34,6 +34,7 @@ import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.service.EmpresaService;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 class EmpresaControllerTest {
@@ -64,15 +65,23 @@ class EmpresaControllerTest {
     @DisplayName("Deve cadastrar empresa e retornar status 201")
     void deveCadastrarEmpresaERetornarStatus201()
             throws Exception {
-        var dados = new EmpresaRecord("Empresa Exemplo");
-        var empresa = criarEmpresa(1L, "Empresa Exemplo");
+        var dados =
+                new EmpresaRecord("Empresa Exemplo");
 
-        when(service.cadastrar(any(EmpresaRecord.class)))
-                .thenReturn(empresa);
+        var empresa = criarEmpresa(
+                1L,
+                "Empresa Exemplo"
+        );
+
+        when(service.cadastrar(
+                any(EmpresaRecord.class)
+        )).thenReturn(empresa);
 
         mockMvc.perform(
                         post("/configuracao/empresa")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -105,7 +114,9 @@ class EmpresaControllerTest {
 
         mockMvc.perform(
                         post("/configuracao/empresa")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -119,11 +130,14 @@ class EmpresaControllerTest {
     @DisplayName("Deve rejeitar cadastro com nome acima do limite")
     void deveRejeitarCadastroComNomeAcimaDoLimite()
             throws Exception {
-        var dados = new EmpresaRecord("A".repeat(101));
+        var dados =
+                new EmpresaRecord("A".repeat(101));
 
         mockMvc.perform(
                         post("/configuracao/empresa")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -176,7 +190,8 @@ class EmpresaControllerTest {
 
     @Test
     @DisplayName("Deve listar empresas com filtro")
-    void deveListarEmpresasComFiltro() throws Exception {
+    void deveListarEmpresasComFiltro()
+            throws Exception {
         var lista = List.of(
                 new ListaEmpresaRecord(
                         1L,
@@ -198,7 +213,10 @@ class EmpresaControllerTest {
 
         mockMvc.perform(
                         get("/configuracao/empresa")
-                                .param("filtro", "Empresa")
+                                .param(
+                                        "filtro",
+                                        "Empresa"
+                                )
                 )
                 .andExpect(status().isOk());
 
@@ -255,7 +273,9 @@ class EmpresaControllerTest {
 
         mockMvc.perform(
                         put("/configuracao/empresa")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -272,7 +292,8 @@ class EmpresaControllerTest {
 
     @Test
     @DisplayName("Deve rejeitar atualização sem id")
-    void deveRejeitarAtualizacaoSemId() throws Exception {
+    void deveRejeitarAtualizacaoSemId()
+            throws Exception {
         var dados = new AtualizaEmpresaRecord(
                 null,
                 "Empresa Atualizada"
@@ -280,7 +301,9 @@ class EmpresaControllerTest {
 
         mockMvc.perform(
                         put("/configuracao/empresa")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -294,11 +317,14 @@ class EmpresaControllerTest {
     @DisplayName("Deve rejeitar atualização com nome em branco")
     void deveRejeitarAtualizacaoComNomeEmBranco()
             throws Exception {
-        var dados = new AtualizaEmpresaRecord(1L, "");
+        var dados =
+                new AtualizaEmpresaRecord(1L, "");
 
         mockMvc.perform(
                         put("/configuracao/empresa")
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON
+                                )
                                 .content(
                                         objectMapper.writeValueAsString(
                                                 dados
@@ -324,7 +350,19 @@ class EmpresaControllerTest {
             Long id,
             String nome
     ) {
+        var organizacao =
+                new OrganizacaoModel(
+                        "Organizacao Principal"
+                );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                1L
+        );
+
         var empresa = new EmpresaModel(
+                organizacao,
                 new EmpresaRecord(nome)
         );
 
