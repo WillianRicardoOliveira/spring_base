@@ -70,14 +70,4 @@ public interface SubsidiariaRepository
                     Long idOrganizacao,
                     StatusEnum status
             );
-
-    /*
-     * Temporariamente mantido para UsuarioSubsidiariaService.
-     * Deve ser removido quando os acessos por subsidiária
-     * forem isolados pela organização.
-     */
-    Optional<SubsidiariaModel> findByIdAndStatus(
-            Long id,
-            StatusEnum status
-    );
 }

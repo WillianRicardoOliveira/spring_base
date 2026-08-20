@@ -37,15 +37,19 @@ class PerfilPermissaoResponseRecordsTest {
     @DisplayName("Deve criar ListaPerfilPermissaoRecord a partir do model")
     void deveCriarListaPerfilPermissaoRecordAPartirDoModel() {
         var perfil = criarPerfil(1L, "Administrador");
-        var permissao = criarPermissao(2L, "Editar usuarios", "ACESSO_USUARIO_EDITAR");
+        var permissao = criarPermissao(
+                2L,
+                "Excluir usuarios",
+                "ACESSO_USUARIO_EXCLUIR"
+        );
         var perfilPermissao = criarPerfilPermissao(3L, perfil, permissao);
 
         var lista = new ListaPerfilPermissaoRecord(perfilPermissao);
 
         assertThat(lista.id()).isEqualTo(3L);
         assertThat(lista.idPermissao()).isEqualTo(2L);
-        assertThat(lista.permissao()).isEqualTo("Editar usuarios");
-        assertThat(lista.chave()).isEqualTo("ACESSO_USUARIO_EDITAR");
+        assertThat(lista.permissao()).isEqualTo("Excluir usuarios");
+        assertThat(lista.chave()).isEqualTo("ACESSO_USUARIO_EXCLUIR");
         assertThat(lista.status()).isEqualTo(StatusEnum.ATIVO);
     }
 

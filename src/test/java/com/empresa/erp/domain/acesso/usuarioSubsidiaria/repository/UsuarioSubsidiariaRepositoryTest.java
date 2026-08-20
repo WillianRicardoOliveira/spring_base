@@ -52,10 +52,14 @@ class UsuarioSubsidiariaRepositoryTest {
             organizacaoRepository;
 
     private OrganizacaoModel organizacao;
+    private OrganizacaoModel outraOrganizacao;
     private UsuarioModel usuario;
-    private EmpresaModel empresa;
     private UsuarioEmpresaModel usuarioEmpresa;
+    private UsuarioEmpresaModel
+            usuarioEmpresaDeOutraOrganizacao;
     private SubsidiariaModel subsidiaria;
+    private SubsidiariaModel
+            subsidiariaDeOutraOrganizacao;
 
     @BeforeEach
     void setUp() {
@@ -64,6 +68,13 @@ class UsuarioSubsidiariaRepositoryTest {
                         "Organizacao Principal"
                 )
         );
+
+        outraOrganizacao =
+                organizacaoRepository.save(
+                        new OrganizacaoModel(
+                                "Outra Organizacao"
+                        )
+                );
 
         usuario = usuarioRepository.save(
                 new UsuarioModel(
@@ -75,7 +86,7 @@ class UsuarioSubsidiariaRepositoryTest {
                 )
         );
 
-        empresa = empresaRepository.save(
+        var empresa = empresaRepository.save(
                 new EmpresaModel(
                         organizacao,
                         new EmpresaRecord(
@@ -83,6 +94,16 @@ class UsuarioSubsidiariaRepositoryTest {
                         )
                 )
         );
+
+        var empresaDeOutraOrganizacao =
+                empresaRepository.save(
+                        new EmpresaModel(
+                                outraOrganizacao,
+                                new EmpresaRecord(
+                                        "Empresa Externa"
+                                )
+                        )
+                );
 
         usuarioEmpresa =
                 usuarioEmpresaRepository.save(
@@ -93,93 +114,141 @@ class UsuarioSubsidiariaRepositoryTest {
                         )
                 );
 
+        usuarioEmpresaDeOutraOrganizacao =
+                usuarioEmpresaRepository.save(
+                        new UsuarioEmpresaModel(
+                                usuario,
+                                empresaDeOutraOrganizacao,
+                                false
+                        )
+                );
+
         subsidiaria = subsidiariaRepository.save(
                 new SubsidiariaModel(
                         empresa,
                         "Filial Curitiba"
                 )
         );
+
+        subsidiariaDeOutraOrganizacao =
+                subsidiariaRepository.save(
+                        new SubsidiariaModel(
+                                empresaDeOutraOrganizacao,
+                                "Filial Externa"
+                        )
+                );
     }
 
     @Test
-    @DisplayName("Deve listar somente vinculos ativos")
-    void deveListarSomenteVinculosAtivos() {
-        var ativo = repository.save(
-                new UsuarioSubsidiariaModel(
-                        usuarioEmpresa,
-                        subsidiaria
-                )
+    @DisplayName(
+            "Deve listar somente vinculos ativos da organizacao"
+    )
+    void deveListarSomenteVinculosAtivosDaOrganizacao() {
+        var ativo = criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
         );
 
         var outraSubsidiaria =
                 subsidiariaRepository.save(
                         new SubsidiariaModel(
-                                empresa,
+                                usuarioEmpresa.getEmpresa(),
                                 "Filial Londrina"
                         )
                 );
 
-        var inativo = repository.save(
-                new UsuarioSubsidiariaModel(
-                        usuarioEmpresa,
-                        outraSubsidiaria
-                )
+        var inativo = criarVinculo(
+                usuarioEmpresa,
+                outraSubsidiaria
         );
 
         inativo.inativar();
         repository.save(inativo);
 
-        var resultado = repository.findAllByStatus(
-                PageRequest.of(0, 10),
-                StatusEnum.ATIVO
+        var externo = criarVinculo(
+                usuarioEmpresaDeOutraOrganizacao,
+                subsidiariaDeOutraOrganizacao
         );
+
+        var resultado = repository
+                .findAllByUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                        PageRequest.of(0, 10),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
         assertThat(resultado.getContent())
                 .extracting(
                         UsuarioSubsidiariaModel::getId
                 )
-                .contains(ativo.getId())
-                .doesNotContain(inativo.getId());
+                .containsExactly(ativo.getId())
+                .doesNotContain(
+                        inativo.getId(),
+                        externo.getId()
+                );
     }
 
     @Test
     @DisplayName(
-            "Deve listar vinculos por usuario empresa"
+            "Deve listar por usuario empresa somente na organizacao"
     )
-    void deveListarVinculosPorUsuarioEmpresa() {
-        repository.save(
-                new UsuarioSubsidiariaModel(
-                        usuarioEmpresa,
-                        subsidiaria
-                )
+    void deveListarPorUsuarioEmpresaSomenteNaOrganizacao() {
+        criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
+        );
+
+        var resultadoCorreto = repository
+                .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                        PageRequest.of(0, 10),
+                        usuarioEmpresa.getId(),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
+
+        var resultadoOutraOrganizacao = repository
+                .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                        PageRequest.of(0, 10),
+                        usuarioEmpresa.getId(),
+                        outraOrganizacao.getId(),
+                        StatusEnum.ATIVO
+                );
+
+        assertThat(resultadoCorreto.getContent())
+                .hasSize(1);
+
+        assertThat(resultadoOutraOrganizacao.getContent())
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName(
+            "Nao deve listar vinculo externo na organizacao atual"
+    )
+    void naoDeveListarVinculoExternoNaOrganizacaoAtual() {
+        criarVinculo(
+                usuarioEmpresaDeOutraOrganizacao,
+                subsidiariaDeOutraOrganizacao
         );
 
         var resultado = repository
-                .findAllByUsuarioEmpresaIdAndStatus(
+                .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         PageRequest.of(0, 10),
-                        usuarioEmpresa.getId(),
+                        usuarioEmpresaDeOutraOrganizacao.getId(),
+                        organizacao.getId(),
                         StatusEnum.ATIVO
                 );
 
         assertThat(resultado.getContent())
-                .hasSize(1);
-
-        assertThat(
-                resultado.getContent()
-                        .get(0)
-                        .getUsuarioEmpresa()
-                        .getId()
-        ).isEqualTo(usuarioEmpresa.getId());
+                .isEmpty();
     }
 
     @Test
     @DisplayName("Deve verificar vinculo duplicado")
     void deveVerificarVinculoDuplicado() {
-        repository.save(
-                new UsuarioSubsidiariaModel(
-                        usuarioEmpresa,
-                        subsidiaria
-                )
+        criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
         );
 
         boolean existe = repository
@@ -197,15 +266,13 @@ class UsuarioSubsidiariaRepositoryTest {
             "Nao deve considerar vinculo inativo como duplicado"
     )
     void naoDeveConsiderarVinculoInativoComoDuplicado() {
-        var usuarioSubsidiaria = repository.save(
-                new UsuarioSubsidiariaModel(
-                        usuarioEmpresa,
-                        subsidiaria
-                )
+        var vinculo = criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
         );
 
-        usuarioSubsidiaria.inativar();
-        repository.save(usuarioSubsidiaria);
+        vinculo.inativar();
+        repository.save(vinculo);
 
         boolean existe = repository
                 .existsByUsuarioEmpresaAndSubsidiariaAndStatus(
@@ -222,11 +289,9 @@ class UsuarioSubsidiariaRepositoryTest {
             "Deve verificar vinculo ativo por usuario empresa"
     )
     void deveVerificarVinculoAtivoPorUsuarioEmpresa() {
-        repository.save(
-                new UsuarioSubsidiariaModel(
-                        usuarioEmpresa,
-                        subsidiaria
-                )
+        criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
         );
 
         boolean existe = repository
@@ -243,11 +308,9 @@ class UsuarioSubsidiariaRepositoryTest {
             "Deve verificar vinculo ativo por subsidiaria"
     )
     void deveVerificarVinculoAtivoPorSubsidiaria() {
-        repository.save(
-                new UsuarioSubsidiariaModel(
-                        usuarioEmpresa,
-                        subsidiaria
-                )
+        criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
         );
 
         boolean existe = repository
@@ -260,24 +323,64 @@ class UsuarioSubsidiariaRepositoryTest {
     }
 
     @Test
-    @DisplayName("Deve buscar vinculo ativo por id")
-    void deveBuscarVinculoAtivoPorId() {
-        var usuarioSubsidiaria = repository.save(
-                new UsuarioSubsidiariaModel(
-                        usuarioEmpresa,
-                        subsidiaria
+    @DisplayName(
+            "Metodos exists devem ignorar vinculo inativo"
+    )
+    void metodosExistsDevemIgnorarVinculoInativo() {
+        var vinculo = criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
+        );
+
+        vinculo.inativar();
+        repository.save(vinculo);
+
+        assertThat(
+                repository.existsByUsuarioEmpresaIdAndStatus(
+                        usuarioEmpresa.getId(),
+                        StatusEnum.ATIVO
                 )
+        ).isFalse();
+
+        assertThat(
+                repository.existsBySubsidiariaIdAndStatus(
+                        subsidiaria.getId(),
+                        StatusEnum.ATIVO
+                )
+        ).isFalse();
+    }
+
+    @Test
+    @DisplayName(
+            "Deve buscar vinculo por id somente na organizacao"
+    )
+    void deveBuscarVinculoPorIdSomenteNaOrganizacao() {
+        var vinculo = criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
         );
 
-        var resultado = repository.findByIdAndStatus(
-                usuarioSubsidiaria.getId(),
-                StatusEnum.ATIVO
-        );
+        var resultadoCorreto = repository
+                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                        vinculo.getId(),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
-        assertThat(resultado).isPresent();
+        var resultadoOutraOrganizacao = repository
+                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                        vinculo.getId(),
+                        outraOrganizacao.getId(),
+                        StatusEnum.ATIVO
+                );
 
-        assertThat(resultado.get().getId())
-                .isEqualTo(usuarioSubsidiaria.getId());
+        assertThat(resultadoCorreto).isPresent();
+
+        assertThat(resultadoCorreto.get().getId())
+                .isEqualTo(vinculo.getId());
+
+        assertThat(resultadoOutraOrganizacao)
+                .isEmpty();
     }
 
     @Test
@@ -285,21 +388,33 @@ class UsuarioSubsidiariaRepositoryTest {
             "Nao deve buscar vinculo inativo como ativo"
     )
     void naoDeveBuscarVinculoInativoComoAtivo() {
-        var usuarioSubsidiaria = repository.save(
+        var vinculo = criarVinculo(
+                usuarioEmpresa,
+                subsidiaria
+        );
+
+        vinculo.inativar();
+        repository.save(vinculo);
+
+        var resultado = repository
+                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                        vinculo.getId(),
+                        organizacao.getId(),
+                        StatusEnum.ATIVO
+                );
+
+        assertThat(resultado).isEmpty();
+    }
+
+    private UsuarioSubsidiariaModel criarVinculo(
+            UsuarioEmpresaModel usuarioEmpresa,
+            SubsidiariaModel subsidiaria
+    ) {
+        return repository.save(
                 new UsuarioSubsidiariaModel(
                         usuarioEmpresa,
                         subsidiaria
                 )
         );
-
-        usuarioSubsidiaria.inativar();
-        repository.save(usuarioSubsidiaria);
-
-        var resultado = repository.findByIdAndStatus(
-                usuarioSubsidiaria.getId(),
-                StatusEnum.ATIVO
-        );
-
-        assertThat(resultado).isEmpty();
     }
 }

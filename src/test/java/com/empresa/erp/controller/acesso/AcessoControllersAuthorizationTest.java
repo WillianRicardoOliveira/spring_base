@@ -19,8 +19,6 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioPerfil.record.UsuarioPerfilRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.controller.UsuarioSubsidiariaController;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.UsuarioSubsidiariaRecord;
-import com.empresa.erp.domain.usuario.record.AtualizaSenhaUsuarioRecord;
-import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
 class AcessoControllersAuthorizationTest {
@@ -330,14 +328,6 @@ class AcessoControllersAuthorizationTest {
 
         assertThat(preAuthorize(
                 UsuarioController.class,
-                "atualizar",
-                AtualizaUsuarioRecord.class
-        )).isEqualTo(
-                "hasAuthority('ACESSO_USUARIO_EDITAR')"
-        );
-
-        assertThat(preAuthorize(
-                UsuarioController.class,
                 "excluir",
                 Long.class
         )).isEqualTo(
@@ -350,14 +340,6 @@ class AcessoControllersAuthorizationTest {
                 Long.class
         )).isEqualTo(
                 "hasAuthority('ACESSO_USUARIO_DETALHAR')"
-        );
-
-        assertThat(preAuthorize(
-                UsuarioController.class,
-                "alterarSenha",
-                AtualizaSenhaUsuarioRecord.class
-        )).isEqualTo(
-                "hasAuthority('ACESSO_USUARIO_SENHA_EDITAR')"
         );
     }
 

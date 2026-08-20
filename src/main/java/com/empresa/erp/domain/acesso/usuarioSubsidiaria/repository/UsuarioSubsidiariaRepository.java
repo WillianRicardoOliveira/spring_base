@@ -14,15 +14,18 @@ import com.empresa.erp.domain.old.StatusEnum;
 public interface UsuarioSubsidiariaRepository
         extends JpaRepository<UsuarioSubsidiariaModel, Long> {
 
-    Page<UsuarioSubsidiariaModel> findAllByStatus(
-            Pageable paginacao,
-            StatusEnum status
-    );
+    Page<UsuarioSubsidiariaModel>
+            findAllByUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                    Pageable paginacao,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
 
     Page<UsuarioSubsidiariaModel>
-            findAllByUsuarioEmpresaIdAndStatus(
+            findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                     Pageable paginacao,
                     Long idUsuarioEmpresa,
+                    Long idOrganizacao,
                     StatusEnum status
             );
 
@@ -42,8 +45,10 @@ public interface UsuarioSubsidiariaRepository
             StatusEnum status
     );
 
-    Optional<UsuarioSubsidiariaModel> findByIdAndStatus(
-            Long id,
-            StatusEnum status
-    );
+    Optional<UsuarioSubsidiariaModel>
+            findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                    Long id,
+                    Long idOrganizacao,
+                    StatusEnum status
+            );
 }

@@ -35,17 +35,17 @@ class PermissaoResponseRecordsTest {
     void deveCriarListaPermissaoRecordAPartirDoModel() {
         var permissao = criarPermissao(
                 2L,
-                "Editar usuarios",
-                "ACESSO_USUARIO_EDITAR",
-                "Permite editar usuarios"
+                "Excluir usuarios",
+                "ACESSO_USUARIO_EXCLUIR",
+                "Permite excluir usuarios"
         );
 
         var lista = new ListaPermissaoRecord(permissao);
 
         assertThat(lista.id()).isEqualTo(2L);
-        assertThat(lista.nome()).isEqualTo("Editar usuarios");
-        assertThat(lista.chave()).isEqualTo("ACESSO_USUARIO_EDITAR");
-        assertThat(lista.descricao()).isEqualTo("Permite editar usuarios");
+        assertThat(lista.nome()).isEqualTo("Excluir usuarios");
+        assertThat(lista.chave()).isEqualTo("ACESSO_USUARIO_EXCLUIR");
+        assertThat(lista.descricao()).isEqualTo("Permite excluir usuarios");
         assertThat(lista.status()).isEqualTo(StatusEnum.ATIVO);
     }
 

@@ -31,9 +31,9 @@ class PermissaoRepositoryTest {
         )));
 
         var permissaoInativa = repository.save(new PermissaoModel(new PermissaoRecord(
-                "Editar usuarios",
-                "ACESSO_USUARIO_EDITAR",
-                "Permite editar usuarios"
+        		"Excluir usuarios",
+        		"ACESSO_USUARIO_EXCLUIR",
+        		"Permite excluir usuarios"
         )));
         permissaoInativa.inativar();
         repository.save(permissaoInativa);
@@ -104,13 +104,13 @@ class PermissaoRepositoryTest {
         )));
 
         repository.save(new PermissaoModel(new PermissaoRecord(
-                "Editar usuarios",
-                "ACESSO_USUARIO_EDITAR",
-                "Permite editar usuarios"
+        		"Excluir usuarios",
+        		"ACESSO_USUARIO_EXCLUIR",
+        		"Permite excluir usuarios"
         )));
 
         var existeEmOutroRegistro = repository.existsByChaveIgnoreCaseAndStatusAndIdNot(
-                "acesso_usuario_editar",
+        		"acesso_usuario_excluir",
                 StatusEnum.ATIVO,
                 permissao.getId()
         );

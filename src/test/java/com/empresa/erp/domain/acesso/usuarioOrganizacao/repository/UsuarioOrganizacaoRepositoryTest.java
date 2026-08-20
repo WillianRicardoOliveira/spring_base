@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
@@ -286,4 +287,264 @@ class UsuarioOrganizacaoRepositoryTest {
                         "Organização B"
                 );
     }
+    
+    @Test
+    @DisplayName(
+            "Deve listar somente usuários ativos vinculados à organização"
+    )
+    void deveListarSomenteUsuariosAtivosVinculadosAOrganizacao() {
+        var vinculoAtivo = repository.save(
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                )
+        );
+
+        var usuarioComVinculoInativo = usuarioRepository.save(
+                new UsuarioModel(
+                        new UsuarioRecord(
+                                "vinculo.inativo@teste.com",
+                                "123456"
+                        ),
+                        "senha-criptografada"
+                )
+        );
+
+        var vinculoInativo = repository.save(
+                new UsuarioOrganizacaoModel(
+                        usuarioComVinculoInativo,
+                        organizacao
+                )
+        );
+
+        vinculoInativo.inativar();
+        repository.save(vinculoInativo);
+
+        var usuarioInativo = usuarioRepository.save(
+                new UsuarioModel(
+                        new UsuarioRecord(
+                                "usuario.inativo@teste.com",
+                                "123456"
+                        ),
+                        "senha-criptografada"
+                )
+        );
+
+        repository.save(
+                new UsuarioOrganizacaoModel(
+                        usuarioInativo,
+                        organizacao
+                )
+        );
+
+        usuarioInativo.inativar();
+        usuarioRepository.save(usuarioInativo);
+
+        var outraOrganizacao = organizacaoRepository.save(
+                new OrganizacaoModel(
+                        "Outra Organização"
+                )
+        );
+
+        var usuarioOutraOrganizacao = usuarioRepository.save(
+                new UsuarioModel(
+                        new UsuarioRecord(
+                                "outra.organizacao@teste.com",
+                                "123456"
+                        ),
+                        "senha-criptografada"
+                )
+        );
+
+        repository.save(
+                new UsuarioOrganizacaoModel(
+                        usuarioOutraOrganizacao,
+                        outraOrganizacao
+                )
+        );
+
+        var resultado =
+                repository
+                        .findAllByOrganizacaoIdAndStatusAndUsuarioStatus(
+                                PageRequest.of(0, 10),
+                                organizacao.getId(),
+                                StatusEnum.ATIVO,
+                                StatusEnum.ATIVO
+                        );
+
+        assertThat(resultado.getContent())
+                .extracting(UsuarioOrganizacaoModel::getId)
+                .containsExactly(vinculoAtivo.getId());
+    }
+
+    @Test
+    @DisplayName(
+            "Deve filtrar usuários ativos por e-mail dentro da organização"
+    )
+    void deveFiltrarUsuariosAtivosPorEmailDentroDaOrganizacao() {
+        repository.save(
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                )
+        );
+
+        var outroUsuario = usuarioRepository.save(
+                new UsuarioModel(
+                        new UsuarioRecord(
+                                "outro@teste.com",
+                                "123456"
+                        ),
+                        "senha-criptografada"
+                )
+        );
+
+        repository.save(
+                new UsuarioOrganizacaoModel(
+                        outroUsuario,
+                        organizacao
+                )
+        );
+
+        var outraOrganizacao = organizacaoRepository.save(
+                new OrganizacaoModel(
+                        "Outra Organização"
+                )
+        );
+
+        var usuarioOutraOrganizacao = usuarioRepository.save(
+                new UsuarioModel(
+                        new UsuarioRecord(
+                                "usuario@outra-organizacao.com",
+                                "123456"
+                        ),
+                        "senha-criptografada"
+                )
+        );
+
+        repository.save(
+                new UsuarioOrganizacaoModel(
+                        usuarioOutraOrganizacao,
+                        outraOrganizacao
+                )
+        );
+
+        var resultado =
+                repository
+                        .findByOrganizacaoIdAndUsuarioEmailContainingIgnoreCaseAndStatusAndUsuarioStatus(
+                                PageRequest.of(0, 10),
+                                organizacao.getId(),
+                                "USUARIO@TESTE",
+                                StatusEnum.ATIVO,
+                                StatusEnum.ATIVO
+                        );
+
+        assertThat(resultado.getContent())
+                .extracting(
+                        vinculo -> vinculo.getUsuario().getEmail()
+                )
+                .containsExactly("usuario@teste.com");
+    }
+
+    @Test
+    @DisplayName(
+            "Deve buscar usuário ativo somente dentro da organização informada"
+    )
+    void deveBuscarUsuarioAtivoSomenteDentroDaOrganizacaoInformada() {
+        var vinculo = repository.save(
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                )
+        );
+
+        var resultado =
+                repository
+                        .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                                usuario.getId(),
+                                organizacao.getId(),
+                                StatusEnum.ATIVO,
+                                StatusEnum.ATIVO
+                        );
+
+        assertThat(resultado).isPresent();
+        assertThat(resultado.get().getId())
+                .isEqualTo(vinculo.getId());
+
+        var outraOrganizacao = organizacaoRepository.save(
+                new OrganizacaoModel(
+                        "Outra Organização"
+                )
+        );
+
+        var resultadoOutraOrganizacao =
+                repository
+                        .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                                usuario.getId(),
+                                outraOrganizacao.getId(),
+                                StatusEnum.ATIVO,
+                                StatusEnum.ATIVO
+                        );
+
+        assertThat(resultadoOutraOrganizacao).isEmpty();
+    }
+
+    @Test
+    @DisplayName(
+            "Não deve detalhar vínculo inativo ou usuário inativo"
+    )
+    void naoDeveDetalharVinculoInativoOuUsuarioInativo() {
+        var vinculoInativo = repository.save(
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                )
+        );
+
+        vinculoInativo.inativar();
+        repository.save(vinculoInativo);
+
+        var resultadoVinculoInativo =
+                repository
+                        .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                                usuario.getId(),
+                                organizacao.getId(),
+                                StatusEnum.ATIVO,
+                                StatusEnum.ATIVO
+                        );
+
+        assertThat(resultadoVinculoInativo).isEmpty();
+
+        var outroUsuario = usuarioRepository.save(
+                new UsuarioModel(
+                        new UsuarioRecord(
+                                "usuario.inativo@teste.com",
+                                "123456"
+                        ),
+                        "senha-criptografada"
+                )
+        );
+
+        repository.save(
+                new UsuarioOrganizacaoModel(
+                        outroUsuario,
+                        organizacao
+                )
+        );
+
+        outroUsuario.inativar();
+        usuarioRepository.save(outroUsuario);
+
+        var resultadoUsuarioInativo =
+                repository
+                        .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                                outroUsuario.getId(),
+                                organizacao.getId(),
+                                StatusEnum.ATIVO,
+                                StatusEnum.ATIVO
+                        );
+
+        assertThat(resultadoUsuarioInativo).isEmpty();
+    }
+    
 }

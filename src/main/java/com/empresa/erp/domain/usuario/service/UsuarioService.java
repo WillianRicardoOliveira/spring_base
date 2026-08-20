@@ -10,14 +10,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
-import com.empresa.erp.core.security.service.UsuarioLogadoService;
-import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
-import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
-import com.empresa.erp.domain.usuario.record.AtualizaSenhaUsuarioRecord;
-import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.DetalheUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.ListaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -30,34 +29,29 @@ import lombok.RequiredArgsConstructor;
 public class UsuarioService
         implements UserDetailsService {
 
-    private static final String
-            MOTIVO_ALTERACAO_SENHA =
-                    "ALTERACAO_SENHA";
-
-    private static final String
-            MOTIVO_USUARIO_REMOVIDO =
-                    "USUARIO_REMOVIDO";
-
     private final UsuarioRepository repository;
 
-    private final UsuarioEmpresaRepository
-            usuarioEmpresaRepository;
+    private final UsuarioOrganizacaoRepository
+            usuarioOrganizacaoRepository;
+
+    private final OrganizacaoRepository
+            organizacaoRepository;
 
     private final PasswordEncoder passwordEncoder;
-
-    private final UsuarioLogadoService
-            usuarioLogadoService;
 
     private final UsuarioAutenticadoService
             usuarioAutenticadoService;
 
-    private final UsuarioSessaoService
-            usuarioSessaoService;
+    private final ContextoOrganizacao
+            contextoOrganizacao;
 
     @Transactional
     public UsuarioModel cadastrar(
             UsuarioRecord dados
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         if (repository.existsByEmailIgnoreCase(
                 dados.email()
         )) {
@@ -73,6 +67,18 @@ public class UsuarioService
 
         repository.save(usuario);
 
+        var organizacao =
+                organizacaoRepository.getReferenceById(
+                        idOrganizacao
+                );
+
+        usuarioOrganizacaoRepository.save(
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                )
+        );
+
         return usuario;
     }
 
@@ -81,60 +87,49 @@ public class UsuarioService
             Pageable paginacao,
             String filtro
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         if (filtro != null && !filtro.isBlank()) {
-            return repository
-                    .findByEmailContainingIgnoreCaseAndStatus(
+            return usuarioOrganizacaoRepository
+                    .findByOrganizacaoIdAndUsuarioEmailContainingIgnoreCaseAndStatusAndUsuarioStatus(
                             paginacao,
-                            filtro,
+                            idOrganizacao,
+                            filtro.trim(),
+                            StatusEnum.ATIVO,
                             StatusEnum.ATIVO
                     )
-                    .map(ListaUsuarioRecord::new);
+                    .map(vinculo ->
+                            new ListaUsuarioRecord(
+                                    vinculo.getUsuario()
+                            )
+                    );
         }
 
-        return repository
-                .findAllByStatus(
+        return usuarioOrganizacaoRepository
+                .findAllByOrganizacaoIdAndStatusAndUsuarioStatus(
                         paginacao,
+                        idOrganizacao,
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-                .map(ListaUsuarioRecord::new);
-    }
-
-    @Transactional
-    public DetalheUsuarioRecord atualizar(
-            AtualizaUsuarioRecord dados
-    ) {
-        if (repository
-                .existsByEmailIgnoreCaseAndIdNot(
-                        dados.email(),
-                        dados.id()
-                )
-        ) {
-            throw new ValidacaoException(
-                    "Usuario ja cadastrado."
-            );
-        }
-
-        UsuarioModel usuario = repository
-                .findByIdAndStatus(
-                        dados.id(),
-                        StatusEnum.ATIVO
-                )
-                .orElseThrow(() ->
-                        new ValidacaoException(
-                                "Usuario nao encontrado ou removido."
+                .map(vinculo ->
+                        new ListaUsuarioRecord(
+                                vinculo.getUsuario()
                         )
                 );
-
-        usuario.atualizar(dados);
-
-        return new DetalheUsuarioRecord(usuario);
     }
 
     @Transactional
     public void excluir(Long id) {
-        UsuarioModel usuario = repository
-                .findByIdAndStatus(
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
+        var vinculo = usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         id,
+                        idOrganizacao,
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
                 .orElseThrow(() ->
@@ -143,55 +138,21 @@ public class UsuarioService
                         )
                 );
 
-        validarAusenciaDeEmpresas(usuario);
-
-        Long idUsuarioLogado =
-                usuarioLogadoService.getId();
-
-        usuario.remover(idUsuarioLogado);
-
-        usuarioSessaoService.revogarSessoesDoUsuario(
-                usuario.getId(),
-                idUsuarioLogado,
-                MOTIVO_USUARIO_REMOVIDO
-        );
-    }
-
-    private void validarAusenciaDeEmpresas(
-            UsuarioModel usuario
-    ) {
-        if (usuarioEmpresaRepository
-                .existsByUsuarioIdAndStatus(
-                        usuario.getId(),
-                        StatusEnum.ATIVO
-                )
-        ) {
-            throw new ValidacaoException(
-                    "Usuario possui empresas vinculadas "
-                            + "e nao pode ser removido."
-            );
-        }
+        vinculo.inativar();
     }
 
     @Transactional(readOnly = true)
     public DetalheUsuarioRecord detalhar(
             Long id
     ) {
-        return new DetalheUsuarioRecord(
-                repository.getReferenceById(id)
-        );
-    }
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
 
-    @Transactional
-    public DetalheUsuarioRecord atualizarSenha(
-            AtualizaSenhaUsuarioRecord dados
-    ) {
-        Long idUsuarioLogado =
-                usuarioLogadoService.getId();
-
-        UsuarioModel usuario = repository
-                .findByIdAndStatus(
-                        dados.id(),
+        var vinculo = usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        id,
+                        idOrganizacao,
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
                 .orElseThrow(() ->
@@ -200,17 +161,9 @@ public class UsuarioService
                         )
                 );
 
-        usuario.atualizarSenha(
-                passwordEncoder.encode(dados.senha())
+        return new DetalheUsuarioRecord(
+                vinculo.getUsuario()
         );
-
-        usuarioSessaoService.revogarSessoesDoUsuario(
-                usuario.getId(),
-                idUsuarioLogado,
-                MOTIVO_ALTERACAO_SENHA
-        );
-
-        return new DetalheUsuarioRecord(usuario);
     }
 
     @Override

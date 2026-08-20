@@ -46,9 +46,9 @@ class PerfilPermissaoRepositoryTest {
         )));
 
         var permissaoRemovida = permissaoRepository.save(new PermissaoModel(new PermissaoRecord(
-                "Editar usuarios",
-                "ACESSO_USUARIO_EDITAR",
-                "Permite editar usuarios"
+        		"Excluir usuarios",
+        		"ACESSO_USUARIO_EXCLUIR",
+        		"Permite excluir usuarios"
         )));
 
         var vinculoAtivo = repository.save(new PerfilPermissaoModel(perfil, permissaoAtiva));

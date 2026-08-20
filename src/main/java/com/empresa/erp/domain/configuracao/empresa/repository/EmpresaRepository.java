@@ -46,22 +46,4 @@ public interface EmpresaRepository
                     Long idOrganizacao,
                     StatusEnum status
             );
-
-    /*
-     * Métodos temporariamente mantidos para os fluxos de
-     * Subsidiária e UsuarioEmpresa.
-     *
-     * Devem ser removidos após esses módulos passarem a
-     * respeitar o contexto da organização.
-     */
-
-    Page<EmpresaModel> findAllByStatus(
-            Pageable paginacao,
-            StatusEnum status
-    );
-
-    Optional<EmpresaModel> findByIdAndStatus(
-            Long id,
-            StatusEnum status
-    );
 }

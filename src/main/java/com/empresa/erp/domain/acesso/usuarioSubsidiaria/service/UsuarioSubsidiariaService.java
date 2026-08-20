@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
@@ -37,14 +38,21 @@ public class UsuarioSubsidiariaService {
     private final UsuarioLogadoService
             usuarioLogadoService;
 
+    private final ContextoOrganizacao
+            contextoOrganizacao;
+
     @Transactional
     public UsuarioSubsidiariaModel cadastrar(
             UsuarioSubsidiariaRecord dados
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         UsuarioEmpresaModel usuarioEmpresa =
                 usuarioEmpresaRepository
-                        .findByIdAndStatus(
+                        .findByIdAndEmpresaOrganizacaoIdAndStatus(
                                 dados.idUsuarioEmpresa(),
+                                idOrganizacao,
                                 StatusEnum.ATIVO
                         )
                         .orElseThrow(() ->
@@ -66,8 +74,9 @@ public class UsuarioSubsidiariaService {
 
         SubsidiariaModel subsidiaria =
                 subsidiariaRepository
-                        .findByIdAndStatus(
+                        .findByIdAndEmpresaOrganizacaoIdAndStatus(
                                 dados.idSubsidiaria(),
+                                idOrganizacao,
                                 StatusEnum.ATIVO
                         )
                         .orElseThrow(() ->
@@ -108,11 +117,15 @@ public class UsuarioSubsidiariaService {
             Pageable paginacao,
             Long idUsuarioEmpresa
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         if (idUsuarioEmpresa != null) {
             return repository
-                    .findAllByUsuarioEmpresaIdAndStatus(
+                    .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                             paginacao,
                             idUsuarioEmpresa,
+                            idOrganizacao,
                             StatusEnum.ATIVO
                     )
                     .map(
@@ -121,8 +134,9 @@ public class UsuarioSubsidiariaService {
         }
 
         return repository
-                .findAllByStatus(
+                .findAllByUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         paginacao,
+                        idOrganizacao,
                         StatusEnum.ATIVO
                 )
                 .map(
@@ -144,7 +158,8 @@ public class UsuarioSubsidiariaService {
         UsuarioSubsidiariaModel usuarioSubsidiaria =
                 buscarVinculoAtivo(id);
 
-        Long idUsuario = usuarioLogadoService.getId();
+        Long idUsuario =
+                usuarioLogadoService.getId();
 
         usuarioSubsidiaria.remover(idUsuario);
     }
@@ -177,9 +192,13 @@ public class UsuarioSubsidiariaService {
     private UsuarioSubsidiariaModel buscarVinculoAtivo(
             Long id
     ) {
+        Long idOrganizacao =
+                contextoOrganizacao.getIdOrganizacao();
+
         return repository
-                .findByIdAndStatus(
+                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         id,
+                        idOrganizacao,
                         StatusEnum.ATIVO
                 )
                 .orElseThrow(() ->

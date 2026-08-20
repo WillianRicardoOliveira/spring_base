@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,15 +23,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.core.exception.ValidacaoException;
+import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
-import com.empresa.erp.core.security.service.UsuarioLogadoService;
-import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
-import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
+import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
-import com.empresa.erp.domain.usuario.record.AtualizaSenhaUsuarioRecord;
-import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
@@ -41,34 +42,49 @@ class UsuarioServiceTest {
     private UsuarioRepository repository;
 
     @Mock
-    private UsuarioEmpresaRepository
-            usuarioEmpresaRepository;
+    private UsuarioOrganizacaoRepository
+            usuarioOrganizacaoRepository;
+
+    @Mock
+    private OrganizacaoRepository
+            organizacaoRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private UsuarioLogadoService usuarioLogadoService;
 
     @Mock
     private UsuarioAutenticadoService
             usuarioAutenticadoService;
 
     @Mock
-    private UsuarioSessaoService usuarioSessaoService;
+    private ContextoOrganizacao
+            contextoOrganizacao;
 
     @InjectMocks
     private UsuarioService service;
 
     @Test
     @DisplayName(
-            "Deve cadastrar usuario quando email ainda nao existe"
+            "Deve cadastrar usuario e vincular à organizacao atual"
     )
-    void deveCadastrarUsuarioQuandoEmailNaoExiste() {
+    void deveCadastrarUsuarioEVincularAOrganizacaoAtual() {
         var dados = new UsuarioRecord(
                 "Usuario@Teste.com",
                 "Senha@123"
         );
+
+        var organizacao = new OrganizacaoModel(
+                "Organização Exemplo"
+        );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                10L
+        );
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(10L);
 
         when(repository.existsByEmailIgnoreCase(
                 "Usuario@Teste.com"
@@ -76,6 +92,9 @@ class UsuarioServiceTest {
 
         when(passwordEncoder.encode("Senha@123"))
                 .thenReturn("senha-criptografada");
+
+        when(organizacaoRepository.getReferenceById(10L))
+                .thenReturn(organizacao);
 
         UsuarioModel usuario =
                 service.cadastrar(dados);
@@ -89,20 +108,47 @@ class UsuarioServiceTest {
         assertThat(usuario.getStatus())
                 .isEqualTo(StatusEnum.ATIVO);
 
-        verify(repository).save(usuario);
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
 
-        verifyNoInteractions(usuarioSessaoService);
+        verify(repository)
+                .save(usuario);
+
+        verify(organizacaoRepository)
+                .getReferenceById(10L);
+
+        var captor = ArgumentCaptor.forClass(
+                UsuarioOrganizacaoModel.class
+        );
+
+        verify(usuarioOrganizacaoRepository)
+                .save(captor.capture());
+
+        var vinculo = captor.getValue();
+
+        assertThat(vinculo.getUsuario())
+                .isSameAs(usuario);
+
+        assertThat(vinculo.getOrganizacao())
+                .isSameAs(organizacao);
+
+        assertThat(vinculo.getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear cadastro de usuario duplicado"
+            "Deve bloquear cadastro de usuario duplicado "
+                    + "sem criar vinculo"
     )
-    void deveBloquearCadastroDeUsuarioDuplicado() {
+    void deveBloquearCadastroDeUsuarioDuplicadoSemCriarVinculo() {
         var dados = new UsuarioRecord(
                 "usuario@teste.com",
                 "Senha@123"
         );
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(10L);
 
         when(repository.existsByEmailIgnoreCase(
                 "usuario@teste.com"
@@ -114,12 +160,21 @@ class UsuarioServiceTest {
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage("Usuario ja cadastrado.");
 
-        verifyNoInteractions(usuarioSessaoService);
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
+
+        verifyNoInteractions(
+                organizacaoRepository,
+                usuarioOrganizacaoRepository,
+                passwordEncoder
+        );
     }
 
     @Test
-    @DisplayName("Deve listar usuarios ativos sem filtro")
-    void deveListarUsuariosAtivosSemFiltro() {
+    @DisplayName(
+            "Deve listar usuarios ativos da organizacao sem filtro"
+    )
+    void deveListarUsuariosAtivosDaOrganizacaoSemFiltro() {
         var paginacao = PageRequest.of(0, 10);
 
         var usuario = criarUsuario(
@@ -127,11 +182,20 @@ class UsuarioServiceTest {
                 "usuario@teste.com"
         );
 
-        when(repository.findAllByStatus(
-                paginacao,
-                StatusEnum.ATIVO
-        )).thenReturn(
-                new PageImpl<>(List.of(usuario))
+        var vinculo = criarVinculo(usuario);
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(10L);
+
+        when(usuarioOrganizacaoRepository
+                .findAllByOrganizacaoIdAndStatusAndUsuarioStatus(
+                        paginacao,
+                        10L,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
+                new PageImpl<>(List.of(vinculo))
         );
 
         var resultado = service.listar(
@@ -150,11 +214,26 @@ class UsuarioServiceTest {
 
         assertThat(resultado.getContent().get(0).status())
                 .isEqualTo(StatusEnum.ATIVO);
+
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
+
+        verify(usuarioOrganizacaoRepository)
+                .findAllByOrganizacaoIdAndStatusAndUsuarioStatus(
+                        paginacao,
+                        10L,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                );
+
+        verifyNoInteractions(repository);
     }
 
     @Test
-    @DisplayName("Deve listar usuarios ativos com filtro")
-    void deveListarUsuariosAtivosComFiltro() {
+    @DisplayName(
+            "Deve listar usuarios ativos da organizacao com filtro"
+    )
+    void deveListarUsuariosAtivosDaOrganizacaoComFiltro() {
         var paginacao = PageRequest.of(0, 10);
 
         var usuario = criarUsuario(
@@ -162,19 +241,26 @@ class UsuarioServiceTest {
                 "financeiro@teste.com"
         );
 
-        when(repository
-                .findByEmailContainingIgnoreCaseAndStatus(
+        var vinculo = criarVinculo(usuario);
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(10L);
+
+        when(usuarioOrganizacaoRepository
+                .findByOrganizacaoIdAndUsuarioEmailContainingIgnoreCaseAndStatusAndUsuarioStatus(
                         paginacao,
+                        10L,
                         "fin",
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(
-                new PageImpl<>(List.of(usuario))
+                new PageImpl<>(List.of(vinculo))
         );
 
         var resultado = service.listar(
                 paginacao,
-                "fin"
+                " fin "
         );
 
         assertThat(resultado.getContent())
@@ -185,295 +271,175 @@ class UsuarioServiceTest {
 
         assertThat(resultado.getContent().get(0).email())
                 .isEqualTo("financeiro@teste.com");
+
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
+
+        verify(usuarioOrganizacaoRepository)
+                .findByOrganizacaoIdAndUsuarioEmailContainingIgnoreCaseAndStatusAndUsuarioStatus(
+                        paginacao,
+                        10L,
+                        "fin",
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                );
+
+        verifyNoInteractions(repository);
     }
 
     @Test
-    @DisplayName("Deve detalhar usuario")
-    void deveDetalharUsuario() {
+    @DisplayName(
+            "Deve detalhar usuario ativo da organizacao"
+    )
+    void deveDetalharUsuarioAtivoDaOrganizacao() {
         var usuario = criarUsuario(
                 1L,
                 "usuario@teste.com"
         );
 
-        when(repository.getReferenceById(1L))
-                .thenReturn(usuario);
+        var vinculo = criarVinculo(usuario);
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(10L);
+
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        1L,
+                        10L,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(vinculo));
 
         var resultado = service.detalhar(1L);
 
-        assertThat(resultado.id()).isEqualTo(1L);
+        assertThat(resultado.id())
+                .isEqualTo(1L);
 
         assertThat(resultado.email())
                 .isEqualTo("usuario@teste.com");
 
         assertThat(resultado.status())
                 .isEqualTo(StatusEnum.ATIVO);
-    }
 
-    @Test
-    @DisplayName(
-            "Deve atualizar usuario quando email nao esta duplicado"
-    )
-    void deveAtualizarUsuarioQuandoEmailNaoEstaDuplicado() {
-        var dados = new AtualizaUsuarioRecord(
-                1L,
-                "Novo@Teste.com"
-        );
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
 
-        var usuario = criarUsuario(
-                1L,
-                "usuario@teste.com"
-        );
-
-        when(repository
-                .existsByEmailIgnoreCaseAndIdNot(
-                        "Novo@Teste.com",
-                        1L
-                )
-        ).thenReturn(false);
-
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuario));
-
-        var resultado = service.atualizar(dados);
-
-        assertThat(resultado.id()).isEqualTo(1L);
-
-        assertThat(resultado.email())
-                .isEqualTo("novo@teste.com");
-
-        assertThat(resultado.status())
-                .isEqualTo(StatusEnum.ATIVO);
-
-        verifyNoInteractions(usuarioSessaoService);
-    }
-
-    @Test
-    @DisplayName(
-            "Deve bloquear atualizacao quando email pertence a outro usuario"
-    )
-    void deveBloquearAtualizacaoQuandoEmailPertenceAOutroUsuario() {
-        var dados = new AtualizaUsuarioRecord(
-                1L,
-                "usuario@teste.com"
-        );
-
-        when(repository
-                .existsByEmailIgnoreCaseAndIdNot(
-                        "usuario@teste.com",
-                        1L
-                )
-        ).thenReturn(true);
-
-        assertThatThrownBy(() ->
-                service.atualizar(dados)
-        )
-                .isInstanceOf(ValidacaoException.class)
-                .hasMessage("Usuario ja cadastrado.");
-
-        verifyNoInteractions(usuarioSessaoService);
-    }
-
-    @Test
-    @DisplayName(
-            "Deve bloquear atualizacao de usuario removido"
-    )
-    void deveBloquearAtualizacaoDeUsuarioRemovido() {
-        var dados = new AtualizaUsuarioRecord(
-                1L,
-                "novo@teste.com"
-        );
-
-        when(repository
-                .existsByEmailIgnoreCaseAndIdNot(
-                        "novo@teste.com",
-                        1L
-                )
-        ).thenReturn(false);
-
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() ->
-                service.atualizar(dados)
-        )
-                .isInstanceOf(ValidacaoException.class)
-                .hasMessage(
-                        "Usuario nao encontrado ou removido."
-                );
-
-        verifyNoInteractions(usuarioSessaoService);
-    }
-
-    @Test
-    @DisplayName(
-            "Deve atualizar senha do usuario e revogar sessoes"
-    )
-    void deveAtualizarSenhaDoUsuarioERevogarSessoes() {
-        var dados = new AtualizaSenhaUsuarioRecord(
-                1L,
-                "Senha@123"
-        );
-
-        var usuario = criarUsuario(
-                1L,
-                "usuario@teste.com"
-        );
-
-        when(usuarioLogadoService.getId())
-                .thenReturn(10L);
-
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuario));
-
-        when(passwordEncoder.encode("Senha@123"))
-                .thenReturn("senha-criptografada-nova");
-
-        var resultado = service.atualizarSenha(dados);
-
-        assertThat(resultado.id()).isEqualTo(1L);
-
-        assertThat(resultado.email())
-                .isEqualTo("usuario@teste.com");
-
-        assertThat(usuario.getSenha())
-                .isEqualTo("senha-criptografada-nova");
-
-        verify(usuarioSessaoService)
-                .revogarSessoesDoUsuario(
+        verify(usuarioOrganizacaoRepository)
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         1L,
                         10L,
-                        "ALTERACAO_SENHA"
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
                 );
+
+        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear alteracao de senha de usuario removido"
+            "Deve bloquear detalhamento de usuario sem vinculo ativo "
+                    + "na organizacao"
     )
-    void deveBloquearAlteracaoDeSenhaDeUsuarioRemovido() {
-        var dados = new AtualizaSenhaUsuarioRecord(
-                1L,
-                "Senha@123"
-        );
-
-        when(usuarioLogadoService.getId())
+    void deveBloquearDetalhamentoDeUsuarioSemVinculoAtivoNaOrganizacao() {
+        when(contextoOrganizacao.getIdOrganizacao())
                 .thenReturn(10L);
 
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        1L,
+                        10L,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                service.atualizarSenha(dados)
+                service.detalhar(1L)
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Usuario nao encontrado ou removido."
                 );
 
-        verifyNoInteractions(usuarioSessaoService);
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
+
+        verify(usuarioOrganizacaoRepository)
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        1L,
+                        10L,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                );
+
+        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve remover usuario com auditoria e revogar sessoes"
+            "Deve inativar somente o vinculo do usuario "
+                    + "com a organizacao atual"
     )
-    void deveRemoverUsuarioComAuditoriaERevogarSessoes() {
+    void deveInativarSomenteVinculoDoUsuarioComOrganizacaoAtual() {
         var usuario = criarUsuario(
                 1L,
                 "usuario@teste.com"
         );
 
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuario));
+        var vinculo = criarVinculo(usuario);
 
-        when(usuarioEmpresaRepository
-                .existsByUsuarioIdAndStatus(
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(10L);
+
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         1L,
+                        10L,
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(false);
-
-        when(usuarioLogadoService.getId())
-                .thenReturn(10L);
+        ).thenReturn(Optional.of(vinculo));
 
         service.excluir(1L);
 
-        assertThat(usuario.getStatus())
-                .isEqualTo(StatusEnum.REMOVIDO);
-
-        assertThat(usuario.getRemovidoEm())
-                .isNotNull();
-
-        assertThat(usuario.getRemovidoPor())
-                .isEqualTo(10L);
-
-        verify(usuarioSessaoService)
-                .revogarSessoesDoUsuario(
-                        1L,
-                        10L,
-                        "USUARIO_REMOVIDO"
-                );
-    }
-
-    @Test
-    @DisplayName(
-            "Deve bloquear exclusao de usuario com empresas vinculadas"
-    )
-    void deveBloquearExclusaoDeUsuarioComEmpresasVinculadas() {
-        var usuario = criarUsuario(
-                1L,
-                "usuario@teste.com"
-        );
-
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuario));
-
-        when(usuarioEmpresaRepository
-                .existsByUsuarioIdAndStatus(
-                        1L,
-                        StatusEnum.ATIVO
-                )
-        ).thenReturn(true);
-
-        assertThatThrownBy(() ->
-                service.excluir(1L)
-        )
-                .isInstanceOf(ValidacaoException.class)
-                .hasMessage(
-                        "Usuario possui empresas vinculadas "
-                                + "e nao pode ser removido."
-                );
+        assertThat(vinculo.getStatus())
+                .isEqualTo(StatusEnum.INATIVO);
 
         assertThat(usuario.getStatus())
                 .isEqualTo(StatusEnum.ATIVO);
 
-        verifyNoInteractions(
-                usuarioLogadoService,
-                usuarioSessaoService
-        );
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
+
+        verify(usuarioOrganizacaoRepository)
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        1L,
+                        10L,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                );
+
+        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear exclusao de usuario inexistente"
+            "Deve bloquear exclusao de usuario sem vinculo ativo "
+                    + "na organizacao atual"
     )
-    void deveBloquearExclusaoDeUsuarioInexistente() {
-        when(repository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+    void deveBloquearExclusaoDeUsuarioSemVinculoAtivoNaOrganizacaoAtual() {
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(10L);
+
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        1L,
+                        10L,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.excluir(1L)
@@ -483,11 +449,18 @@ class UsuarioServiceTest {
                         "Usuario nao encontrado ou removido."
                 );
 
-        verifyNoInteractions(
-                usuarioEmpresaRepository,
-                usuarioLogadoService,
-                usuarioSessaoService
-        );
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
+
+        verify(usuarioOrganizacaoRepository)
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        1L,
+                        10L,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                );
+
+        verifyNoInteractions(repository);
     }
 
     @Test
@@ -514,7 +487,8 @@ class UsuarioServiceTest {
 
     @Test
     @DisplayName(
-            "Deve lancar excecao quando usuario autenticado nao for encontrado"
+            "Deve lancar excecao quando usuario autenticado "
+                    + "nao for encontrado"
     )
     void deveLancarExcecaoQuandoUsuarioAutenticadoNaoForEncontrado() {
         when(usuarioAutenticadoService.buscarPorEmail(
@@ -530,6 +504,25 @@ class UsuarioServiceTest {
                         UsernameNotFoundException.class
                 )
                 .hasMessage("Usuario nao encontrado");
+    }
+
+    private UsuarioOrganizacaoModel criarVinculo(
+            UsuarioModel usuario
+    ) {
+        var organizacao = new OrganizacaoModel(
+                "Organização Exemplo"
+        );
+
+        ReflectionTestUtils.setField(
+                organizacao,
+                "id",
+                10L
+        );
+
+        return new UsuarioOrganizacaoModel(
+                usuario,
+                organizacao
+        );
     }
 
     private UsuarioModel criarUsuario(

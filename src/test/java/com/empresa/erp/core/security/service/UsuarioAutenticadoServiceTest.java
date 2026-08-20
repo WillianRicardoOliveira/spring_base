@@ -43,7 +43,10 @@ class UsuarioAutenticadoServiceTest {
                 .thenReturn(usuario);
 
         when(usuarioPerfilRepository.buscarChavesPermissoesAtivasPorUsuario(eq(1L), any()))
-                .thenReturn(Set.of("ACESSO_USUARIO_LISTAR", "ACESSO_USUARIO_EDITAR"));
+        .thenReturn(Set.of(
+                "ACESSO_USUARIO_LISTAR",
+                "ACESSO_USUARIO_EXCLUIR"
+        ));
 
         var resultado = service.buscarPorEmail("usuario@teste.com");
 
@@ -57,7 +60,10 @@ class UsuarioAutenticadoServiceTest {
 
         assertThat(resultado.getAuthorities())
                 .extracting("authority")
-                .containsExactlyInAnyOrder("ACESSO_USUARIO_LISTAR", "ACESSO_USUARIO_EDITAR");
+                .containsExactlyInAnyOrder(
+                        "ACESSO_USUARIO_LISTAR",
+                        "ACESSO_USUARIO_EXCLUIR"
+                );
 
         verify(usuarioRepository).findByEmailIgnoreCase("usuario@teste.com");
         verify(usuarioPerfilRepository).buscarChavesPermissoesAtivasPorUsuario(eq(1L), any());

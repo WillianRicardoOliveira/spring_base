@@ -59,14 +59,6 @@ public interface UsuarioEmpresaRepository
                     StatusEnum status
             );
 
-    /*
-     * Métodos temporariamente mantidos para UsuarioService,
-     * EmpresaService e UsuarioSubsidiariaService.
-     *
-     * Devem ser removidos quando esses fluxos estiverem
-     * completamente isolados pela organização.
-     */
-
     boolean existsByUsuarioIdAndStatus(
             Long idUsuario,
             StatusEnum status
@@ -76,16 +68,4 @@ public interface UsuarioEmpresaRepository
             Long idEmpresa,
             StatusEnum status
     );
-
-    Optional<UsuarioEmpresaModel> findByIdAndStatus(
-            Long id,
-            StatusEnum status
-    );
-
-    Optional<UsuarioEmpresaModel>
-            findByUsuarioIdAndEmpresaIdAndStatus(
-                    Long idUsuario,
-                    Long idEmpresa,
-                    StatusEnum status
-            );
 }

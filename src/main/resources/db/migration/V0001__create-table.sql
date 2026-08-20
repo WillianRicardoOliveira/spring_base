@@ -551,7 +551,7 @@ INSERT INTO permissao (
     19,
     'Criar usuários',
     'ACESSO_USUARIO_CRIAR',
-    'Permite criar usuários',
+    'Permite criar usuários na organização',
     0,
     TRUE
 ),
@@ -559,7 +559,7 @@ INSERT INTO permissao (
     20,
     'Listar usuários',
     'ACESSO_USUARIO_LISTAR',
-    'Permite listar usuários',
+    'Permite listar usuários da organização',
     0,
     TRUE
 ),
@@ -567,31 +567,15 @@ INSERT INTO permissao (
     21,
     'Detalhar usuário',
     'ACESSO_USUARIO_DETALHAR',
-    'Permite detalhar usuário',
+    'Permite detalhar usuário da organização',
     0,
     TRUE
 ),
 (
     22,
-    'Editar usuário',
-    'ACESSO_USUARIO_EDITAR',
-    'Permite editar usuário',
-    0,
-    TRUE
-),
-(
-    23,
     'Excluir usuário',
     'ACESSO_USUARIO_EXCLUIR',
-    'Permite remover usuário',
-    0,
-    TRUE
-),
-(
-    24,
-    'Alterar senha de usuário',
-    'ACESSO_USUARIO_SENHA_EDITAR',
-    'Permite alterar senha de usuário',
+    'Permite remover o acesso do usuário à organização',
     0,
     TRUE
 );
@@ -769,9 +753,7 @@ WHERE permissao.chave IN (
     'ACESSO_USUARIO_CRIAR',
     'ACESSO_USUARIO_LISTAR',
     'ACESSO_USUARIO_DETALHAR',
-    'ACESSO_USUARIO_EDITAR',
     'ACESSO_USUARIO_EXCLUIR',
-    'ACESSO_USUARIO_SENHA_EDITAR',
     'CONFIGURACAO_EMPRESA_CRIAR',
     'CONFIGURACAO_EMPRESA_LISTAR',
     'CONFIGURACAO_EMPRESA_DETALHAR',

@@ -2,7 +2,6 @@ package com.empresa.erp.domain.usuario.model;
 
 import com.empresa.erp.domain.base.model.AuditoriaModel;
 import com.empresa.erp.domain.old.StatusEnum;
-import com.empresa.erp.domain.usuario.record.AtualizaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
 import jakarta.persistence.Entity;
@@ -30,40 +29,52 @@ public class UsuarioModel extends AuditoriaModel {
     private Long id;
 
     private String email;
+
     private String senha;
-    
+
     @Enumerated(EnumType.ORDINAL)
     private StatusEnum status;
 
-    public UsuarioModel(UsuarioRecord dados, String senhaCriptografada) {
-        this.email = normalizarEmail(dados.email());
-        this.senha = senhaCriptografada;
-        this.status = StatusEnum.ATIVO;
-    }
+    public UsuarioModel(
+            UsuarioRecord dados,
+            String senhaCriptografada
+    ) {
+        this.email =
+                normalizarEmail(dados.email());
 
-    public void atualizar(AtualizaUsuarioRecord dados) {
-        this.email = normalizarEmail(dados.email());
-    }
+        this.senha =
+                senhaCriptografada;
 
-    public void atualizarSenha(String senhaCriptografada) {
-        this.senha = senhaCriptografada;
+        this.status =
+                StatusEnum.ATIVO;
     }
 
     public void inativar() {
-    	this.status = StatusEnum.INATIVO;
+        this.status =
+                StatusEnum.INATIVO;
     }
-    
-    public void remover(Long idUsuario) {
-        this.status = StatusEnum.REMOVIDO;
+
+    public void remover(
+            Long idUsuario
+    ) {
+        this.status =
+                StatusEnum.REMOVIDO;
+
         registrarRemocao(idUsuario);
     }
 
-    private String normalizarEmail(String email) {
-        return email == null ? null : email.trim().toLowerCase();
+    private String normalizarEmail(
+            String email
+    ) {
+        return email == null
+                ? null
+                : email
+                        .trim()
+                        .toLowerCase();
     }
 
     public boolean isEnabled() {
-        return StatusEnum.ATIVO.equals(this.status);
+        return StatusEnum.ATIVO
+                .equals(this.status);
     }
-    
 }

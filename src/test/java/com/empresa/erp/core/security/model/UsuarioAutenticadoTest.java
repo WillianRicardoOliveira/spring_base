@@ -20,7 +20,9 @@ class UsuarioAutenticadoTest {
         var usuario = criarUsuario(1L, "usuario@teste.com", "senha-criptografada");
         var authorities = List.of(
                 new SimpleGrantedAuthority("ACESSO_USUARIO_LISTAR"),
-                new SimpleGrantedAuthority("ACESSO_USUARIO_EDITAR")
+                new SimpleGrantedAuthority(
+                        "ACESSO_USUARIO_EXCLUIR"
+                )
         );
 
         var usuarioAutenticado = new UsuarioAutenticado(usuario, authorities);
@@ -33,7 +35,10 @@ class UsuarioAutenticadoTest {
 
         assertThat(usuarioAutenticado.getAuthorities())
                 .extracting("authority")
-                .containsExactly("ACESSO_USUARIO_LISTAR", "ACESSO_USUARIO_EDITAR");
+                .containsExactly(
+                        "ACESSO_USUARIO_LISTAR",
+                        "ACESSO_USUARIO_EXCLUIR"
+                );
     }
 
     @Test

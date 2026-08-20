@@ -198,6 +198,29 @@ Essas funcionalidades não concedem acesso ao cadastro administrativo da organiz
 - A inativação do usuário global impede seu acesso a todas as organizações.
 - Uma organização pode não possuir usuários ativos, mas somente será operacional quando possuir ao menos um administrador interno válido.
 
+### Gestão de usuários da organização
+
+- A tela operacional de usuários representa os membros da organização atual, e não todas as identidades globais da plataforma.
+- A listagem deve retornar somente usuários que possuam vínculo `UsuarioOrganizacao` ativo com a organização atual.
+- O detalhamento deve exigir vínculo ativo entre o usuário solicitado e a organização atual.
+- O conhecimento do identificador global de um usuário não permite que outra organização o consulte ou administre.
+- O cadastro realizado por uma organização deve criar a identidade `Usuario` e o vínculo `UsuarioOrganizacao` na mesma transação.
+- Uma falha na criação da identidade ou do vínculo deve cancelar toda a operação.
+- Nesta primeira etapa, o cadastro operacional aceita somente e-mails ainda não existentes na plataforma.
+- Quando o e-mail já existir globalmente, o cadastro deve ser recusado sem criar outro usuário.
+- A associação de um usuário global já existente a outra organização deverá ser realizada futuramente por um fluxo específico de convite ou vinculação.
+- A limitação temporária para e-mails existentes não altera a regra de que um usuário pode pertencer a várias organizações.
+- A remoção operacional de um usuário deve inativar somente o vínculo `UsuarioOrganizacao` da organização atual.
+- A remoção operacional não deve inativar nem remover a identidade global `Usuario`.
+- A inativação do vínculo deve impedir imediatamente o acesso do usuário à organização correspondente.
+- A identidade global deve permanecer disponível para outras organizações com vínculos ativos.
+- A alteração do e-mail global não pertence à administração operacional comum de uma organização.
+- A alteração da senha global não pertence à administração operacional comum de uma organização.
+- A alteração da própria senha deverá ser tratada por um fluxo pessoal de conta.
+- A administração e a remoção da identidade global pertencem ao contexto administrativo da plataforma.
+- Antes de inativar um vínculo `UsuarioOrganizacao`, o sistema deve validar dependências organizacionais que impeçam a operação.
+- As validações de empresas, subsidiárias, perfis e demais acessos devem considerar somente a organização atual.
+
 ### Perfil
 
 - Um perfil interno pertence obrigatoriamente a uma única organização.

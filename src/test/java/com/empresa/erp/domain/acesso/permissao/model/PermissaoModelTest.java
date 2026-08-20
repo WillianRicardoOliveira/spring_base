@@ -39,14 +39,14 @@ class PermissaoModelTest {
 
         permissao.atualizar(new AtualizaPermissaoRecord(
                 1L,
-                "Editar usuarios",
-                "ACESSO_USUARIO_EDITAR",
-                "Permite editar usuarios"
+                "Excluir usuarios",
+                "ACESSO_USUARIO_EXCLUIR",
+                "Permite excluir usuarios"
         ));
 
-        assertThat(permissao.getNome()).isEqualTo("Editar usuarios");
-        assertThat(permissao.getChave()).isEqualTo("ACESSO_USUARIO_EDITAR");
-        assertThat(permissao.getDescricao()).isEqualTo("Permite editar usuarios");
+        assertThat(permissao.getNome()).isEqualTo("Excluir usuarios");
+        assertThat(permissao.getChave()).isEqualTo("ACESSO_USUARIO_EXCLUIR");
+        assertThat(permissao.getDescricao()).isEqualTo("Permite excluir usuarios");
     }
 
     @Test

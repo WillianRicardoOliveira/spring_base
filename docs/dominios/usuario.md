@@ -108,25 +108,26 @@
 
 ## Funcionalidades
 
-- [x] Cadastrar usuário.
-- [x] Listar usuários ativos com paginação.
-- [x] Pesquisar usuários por e-mail.
-- [x] Detalhar usuário.
-- [x] Editar e-mail do usuário.
-- [x] Alterar senha do usuário.
-- [x] Remover usuário por remoção lógica.
-- [x] Revogar sessões ao alterar senha.
-- [x] Revogar sessões ao remover usuário.
+- [x] Cadastrar nova identidade de usuário.
+- [x] Vincular automaticamente o novo usuário à organização atual.
+- [x] Listar usuários ativos vinculados à organização atual com paginação.
+- [x] Pesquisar usuários da organização atual por e-mail.
+- [x] Detalhar usuário ativo vinculado à organização atual.
+- [x] Remover o acesso do usuário à organização por inativação do vínculo.
+- [x] Preservar a identidade global e os acessos do usuário em outras organizações.
 - [x] Gerenciar perfis vinculados ao usuário por tela própria de Usuário x Perfil.
-- [x] Controlar botões e rotas do frontend conforme permissões do usuário logado.
+- [x] Gerenciar empresas e subsidiárias acessíveis ao usuário por telas próprias.
+- [x] Controlar botões e rotas do frontend conforme as permissões do usuário logado.
+- [ ] Disponibilizar futuramente a alteração do próprio e-mail em Minha Conta.
+- [ ] Disponibilizar futuramente a alteração da própria senha em Minha Conta.
+- [ ] Substituir futuramente a senha inicial definida pelo administrador por um fluxo de convite.
 
 ## Permissões
-
 
 - **Consultar/Listar:** `ACESSO_USUARIO_LISTAR`
 - **Cadastrar:** `ACESSO_USUARIO_CRIAR`
 - **Detalhar:** `ACESSO_USUARIO_DETALHAR`
-- **Editar:** `ACESSO_USUARIO_EDITAR`
-- **Remover:** `ACESSO_USUARIO_EXCLUIR`
-- **Alterar senha:** `ACESSO_USUARIO_SENHA_EDITAR`
+- **Remover acesso à organização:** `ACESSO_USUARIO_EXCLUIR`
 - **Gerenciar perfis do usuário:** `ACESSO_USUARIO_PERFIL_LISTAR`
+- **Gerenciar empresas do usuário:** `ACESSO_USUARIO_EMPRESA_LISTAR`
+- **Gerenciar subsidiárias do usuário:** `ACESSO_USUARIO_SUBSIDIARIA_LISTAR`

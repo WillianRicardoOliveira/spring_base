@@ -17,12 +17,17 @@ import jakarta.validation.ValidatorFactory;
 class UsuarioRecordsValidationTest {
 
     private ValidatorFactory factory;
+
     private Validator validator;
 
     @BeforeEach
     void setUp() {
-        factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+        factory =
+                Validation
+                        .buildDefaultValidatorFactory();
+
+        validator =
+                factory.getValidator();
     }
 
     @AfterEach
@@ -33,178 +38,223 @@ class UsuarioRecordsValidationTest {
     @Test
     @DisplayName("Deve validar UsuarioRecord valido")
     void deveValidarUsuarioRecordValido() {
-        var dados = new UsuarioRecord("usuario@teste.com", "Senha@123");
+        var dados = new UsuarioRecord(
+                "usuario@teste.com",
+                "Senha@123"
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).isEmpty();
+        assertThat(violacoes)
+                .isEmpty();
     }
 
     @Test
-    @DisplayName("Deve invalidar UsuarioRecord com email em branco")
+    @DisplayName(
+            "Deve invalidar UsuarioRecord "
+                    + "com email em branco"
+    )
     void deveInvalidarUsuarioRecordComEmailEmBranco() {
-        var dados = new UsuarioRecord("", "Senha@123");
+        var dados = new UsuarioRecord(
+                "",
+                "Senha@123"
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "email"));
+        assertThat(violacoes)
+                .anyMatch(
+                        violacao ->
+                                ehCampo(
+                                        violacao,
+                                        "email"
+                                )
+                );
     }
 
     @Test
-    @DisplayName("Deve invalidar UsuarioRecord com email invalido")
+    @DisplayName(
+            "Deve invalidar UsuarioRecord "
+                    + "com email invalido"
+    )
     void deveInvalidarUsuarioRecordComEmailInvalido() {
-        var dados = new UsuarioRecord("email-invalido", "Senha@123");
+        var dados = new UsuarioRecord(
+                "email-invalido",
+                "Senha@123"
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "email"));
+        assertThat(violacoes)
+                .anyMatch(
+                        violacao ->
+                                ehCampo(
+                                        violacao,
+                                        "email"
+                                )
+                );
     }
 
     @Test
-    @DisplayName("Deve invalidar UsuarioRecord com senha em branco")
+    @DisplayName(
+            "Deve invalidar UsuarioRecord "
+                    + "com senha em branco"
+    )
     void deveInvalidarUsuarioRecordComSenhaEmBranco() {
-        var dados = new UsuarioRecord("usuario@teste.com", "");
+        var dados = new UsuarioRecord(
+                "usuario@teste.com",
+                ""
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+        assertThat(violacoes)
+                .anyMatch(
+                        violacao ->
+                                ehCampo(
+                                        violacao,
+                                        "senha"
+                                )
+                );
     }
 
     @Test
-    @DisplayName("Deve invalidar UsuarioRecord com senha curta")
+    @DisplayName(
+            "Deve invalidar UsuarioRecord "
+                    + "com senha curta"
+    )
     void deveInvalidarUsuarioRecordComSenhaCurta() {
-        var dados = new UsuarioRecord("usuario@teste.com", "Se@1");
+        var dados = new UsuarioRecord(
+                "usuario@teste.com",
+                "Se@1"
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+        assertThat(violacoes)
+                .anyMatch(
+                        violacao ->
+                                ehCampo(
+                                        violacao,
+                                        "senha"
+                                )
+                );
     }
 
     @Test
-    @DisplayName("Deve invalidar UsuarioRecord com senha sem letra maiuscula")
+    @DisplayName(
+            "Deve invalidar UsuarioRecord "
+                    + "com senha sem letra maiuscula"
+    )
     void deveInvalidarUsuarioRecordComSenhaSemMaiuscula() {
-        var dados = new UsuarioRecord("usuario@teste.com", "senha@123");
+        var dados = new UsuarioRecord(
+                "usuario@teste.com",
+                "senha@123"
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+        assertThat(violacoes)
+                .anyMatch(
+                        violacao ->
+                                ehCampo(
+                                        violacao,
+                                        "senha"
+                                )
+                );
     }
 
     @Test
-    @DisplayName("Deve invalidar UsuarioRecord com senha sem letra minuscula")
+    @DisplayName(
+            "Deve invalidar UsuarioRecord "
+                    + "com senha sem letra minuscula"
+    )
     void deveInvalidarUsuarioRecordComSenhaSemMinuscula() {
-        var dados = new UsuarioRecord("usuario@teste.com", "SENHA@123");
+        var dados = new UsuarioRecord(
+                "usuario@teste.com",
+                "SENHA@123"
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+        assertThat(violacoes)
+                .anyMatch(
+                        violacao ->
+                                ehCampo(
+                                        violacao,
+                                        "senha"
+                                )
+                );
     }
 
     @Test
-    @DisplayName("Deve invalidar UsuarioRecord com senha sem numero")
+    @DisplayName(
+            "Deve invalidar UsuarioRecord "
+                    + "com senha sem numero"
+    )
     void deveInvalidarUsuarioRecordComSenhaSemNumero() {
-        var dados = new UsuarioRecord("usuario@teste.com", "Senha@abc");
+        var dados = new UsuarioRecord(
+                "usuario@teste.com",
+                "Senha@abc"
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+        assertThat(violacoes)
+                .anyMatch(
+                        violacao ->
+                                ehCampo(
+                                        violacao,
+                                        "senha"
+                                )
+                );
     }
 
     @Test
-    @DisplayName("Deve invalidar UsuarioRecord com senha sem caractere especial")
+    @DisplayName(
+            "Deve invalidar UsuarioRecord "
+                    + "com senha sem caractere especial"
+    )
     void deveInvalidarUsuarioRecordComSenhaSemCaractereEspecial() {
-        var dados = new UsuarioRecord("usuario@teste.com", "Senha123");
+        var dados = new UsuarioRecord(
+                "usuario@teste.com",
+                "Senha123"
+        );
 
-        var violacoes = validar(dados);
+        var violacoes =
+                validar(dados);
 
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
+        assertThat(violacoes)
+                .anyMatch(
+                        violacao ->
+                                ehCampo(
+                                        violacao,
+                                        "senha"
+                                )
+                );
     }
 
-    @Test
-    @DisplayName("Deve validar AtualizaUsuarioRecord valido")
-    void deveValidarAtualizaUsuarioRecordValido() {
-        var dados = new AtualizaUsuarioRecord(1L, "usuario@teste.com");
-
-        var violacoes = validar(dados);
-
-        assertThat(violacoes).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Deve invalidar AtualizaUsuarioRecord sem id")
-    void deveInvalidarAtualizaUsuarioRecordSemId() {
-        var dados = new AtualizaUsuarioRecord(null, "usuario@teste.com");
-
-        var violacoes = validar(dados);
-
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "id"));
-    }
-
-    @Test
-    @DisplayName("Deve invalidar AtualizaUsuarioRecord com email em branco")
-    void deveInvalidarAtualizaUsuarioRecordComEmailEmBranco() {
-        var dados = new AtualizaUsuarioRecord(1L, "");
-
-        var violacoes = validar(dados);
-
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "email"));
-    }
-
-    @Test
-    @DisplayName("Deve invalidar AtualizaUsuarioRecord com email invalido")
-    void deveInvalidarAtualizaUsuarioRecordComEmailInvalido() {
-        var dados = new AtualizaUsuarioRecord(1L, "email-invalido");
-
-        var violacoes = validar(dados);
-
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "email"));
-    }
-
-    @Test
-    @DisplayName("Deve validar AtualizaSenhaUsuarioRecord valido")
-    void deveValidarAtualizaSenhaUsuarioRecordValido() {
-        var dados = new AtualizaSenhaUsuarioRecord(1L, "Senha@123");
-
-        var violacoes = validar(dados);
-
-        assertThat(violacoes).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Deve invalidar AtualizaSenhaUsuarioRecord sem id")
-    void deveInvalidarAtualizaSenhaUsuarioRecordSemId() {
-        var dados = new AtualizaSenhaUsuarioRecord(null, "Senha@123");
-
-        var violacoes = validar(dados);
-
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "id"));
-    }
-
-    @Test
-    @DisplayName("Deve invalidar AtualizaSenhaUsuarioRecord com senha em branco")
-    void deveInvalidarAtualizaSenhaUsuarioRecordComSenhaEmBranco() {
-        var dados = new AtualizaSenhaUsuarioRecord(1L, "");
-
-        var violacoes = validar(dados);
-
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
-    }
-
-    @Test
-    @DisplayName("Deve invalidar AtualizaSenhaUsuarioRecord com senha fraca")
-    void deveInvalidarAtualizaSenhaUsuarioRecordComSenhaFraca() {
-        var dados = new AtualizaSenhaUsuarioRecord(1L, "12345678");
-
-        var violacoes = validar(dados);
-
-        assertThat(violacoes).anyMatch(v -> ehCampo(v, "senha"));
-    }
-
-    private Set<ConstraintViolation<Object>> validar(Object dados) {
+    private Set<ConstraintViolation<Object>> validar(
+            Object dados
+    ) {
         return validator.validate(dados);
     }
 
-    private boolean ehCampo(ConstraintViolation<?> violacao, String campo) {
-        return violacao.getPropertyPath().toString().equals(campo);
+    private boolean ehCampo(
+            ConstraintViolation<?> violacao,
+            String campo
+    ) {
+        return violacao
+                .getPropertyPath()
+                .toString()
+                .equals(campo);
     }
 }
