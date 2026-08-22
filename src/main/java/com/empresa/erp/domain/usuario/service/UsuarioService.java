@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +19,7 @@ import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacao
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
 import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
+import com.empresa.erp.domain.usuario.criacao.service.CriacaoUsuarioService;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.DetalheUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.ListaUsuarioRecord;
@@ -44,7 +44,8 @@ public class UsuarioService
     private final OrganizacaoRepository
             organizacaoRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private final CriacaoUsuarioService
+            criacaoUsuarioService;
 
     private final UsuarioAutenticadoService
             usuarioAutenticadoService;
@@ -62,23 +63,11 @@ public class UsuarioService
         Long idOrganizacao =
                 contextoOrganizacao.getIdOrganizacao();
 
-        if (repository.existsByEmailIgnoreCase(
-                dados.email()
-        )) {
-            throw new ValidacaoException(
-                    "Usuario ja cadastrado."
-            );
-        }
-
         UsuarioModel usuario =
-                new UsuarioModel(
-                        dados,
-                        passwordEncoder.encode(
-                                dados.senha()
-                        )
+                criacaoUsuarioService.criar(
+                        dados.email(),
+                        dados.senha()
                 );
-
-        repository.save(usuario);
 
         var organizacao =
                 organizacaoRepository.getReferenceById(

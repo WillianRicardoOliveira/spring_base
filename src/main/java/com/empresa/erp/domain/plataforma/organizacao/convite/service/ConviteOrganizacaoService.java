@@ -5,19 +5,29 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.security.service.TokenOpacoService;
+import com.empresa.erp.core.security.service.UsuarioLogadoService;
+import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
+import com.empresa.erp.domain.organizacao.provisionamento.service.ProvisionamentoOrganizacaoService;
 import com.empresa.erp.domain.plataforma.organizacao.convite.config.ConviteOrganizacaoProperties;
 import com.empresa.erp.domain.plataforma.organizacao.convite.event.ConviteOrganizacaoCriadoEvent;
 import com.empresa.erp.domain.plataforma.organizacao.convite.model.ConviteOrganizacaoModel;
 import com.empresa.erp.domain.plataforma.organizacao.convite.model.StatusConviteOrganizacaoEnum;
+import com.empresa.erp.domain.plataforma.organizacao.convite.record.AceiteConviteOrganizacaoNovoUsuarioRecord;
+import com.empresa.erp.domain.plataforma.organizacao.convite.record.AceiteConviteOrganizacaoUsuarioExistenteRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.record.ConsultaConviteOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.record.ConviteOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.record.DetalheConviteOrganizacaoRecord;
+import com.empresa.erp.domain.plataforma.organizacao.convite.record.ResultadoAceiteConviteOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.repository.ConviteOrganizacaoRepository;
+import com.empresa.erp.domain.usuario.criacao.service.CriacaoUsuarioService;
+import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +39,14 @@ public class ConviteOrganizacaoService {
     private final ConviteOrganizacaoRepository repository;
 
     private final UsuarioRepository usuarioRepository;
+
+    private final CriacaoUsuarioService
+            criacaoUsuarioService;
+
+    private final ProvisionamentoOrganizacaoService
+            provisionamentoOrganizacaoService;
+
+    private final UsuarioLogadoService usuarioLogadoService;
 
     private final TokenOpacoService tokenOpacoService;
 
@@ -49,6 +67,10 @@ public class ConviteOrganizacaoService {
                 normalizarEmail(
                         dados.emailAdministrador()
                 );
+
+        validarUsuarioExistenteDisponivel(
+                emailAdministrador
+        );
 
         validarAusenciaConvitePendente(
                 emailAdministrador,
@@ -109,18 +131,88 @@ public class ConviteOrganizacaoService {
         );
     }
 
+    @Transactional
+    public ResultadoAceiteConviteOrganizacaoRecord
+            aceitarUsuarioExistente(
+                    AceiteConviteOrganizacaoUsuarioExistenteRecord
+                            dados
+            ) {
+        LocalDateTime agora =
+                LocalDateTime.now(clock);
+
+        ConviteOrganizacaoModel convite =
+                buscarConviteValidoParaAtualizacao(
+                        dados.token(),
+                        agora
+                );
+
+        UsuarioModel administrador =
+                buscarUsuarioAutenticadoAtivo();
+
+        validarUsuarioDoConvite(
+                convite,
+                administrador
+        );
+
+        OrganizacaoModel organizacao =
+                provisionamentoOrganizacaoService
+                        .provisionar(
+                                convite.getNomeOrganizacao(),
+                                administrador
+                        );
+
+        convite.aceitar(agora);
+
+        return new ResultadoAceiteConviteOrganizacaoRecord(
+                organizacao
+        );
+    }
+
+    @Transactional
+    public ResultadoAceiteConviteOrganizacaoRecord
+            aceitarNovoUsuario(
+                    AceiteConviteOrganizacaoNovoUsuarioRecord
+                            dados
+            ) {
+        LocalDateTime agora =
+                LocalDateTime.now(clock);
+
+        ConviteOrganizacaoModel convite =
+                buscarConviteValidoParaAtualizacao(
+                        dados.token(),
+                        agora
+                );
+
+        validarAusenciaUsuarioParaConvite(
+                convite
+        );
+
+        UsuarioModel administrador =
+                criacaoUsuarioService.criar(
+                        convite.getEmailAdministrador(),
+                        dados.senha()
+                );
+
+        OrganizacaoModel organizacao =
+                provisionamentoOrganizacaoService
+                        .provisionar(
+                                convite.getNomeOrganizacao(),
+                                administrador
+                        );
+
+        convite.aceitar(agora);
+
+        return new ResultadoAceiteConviteOrganizacaoRecord(
+                organizacao
+        );
+    }
+
     private ConviteOrganizacaoModel buscarConviteValido(
             String token,
             LocalDateTime referencia
     ) {
-        if (token == null || token.isBlank()) {
-            throw conviteInvalido();
-        }
-
         String tokenHash =
-                tokenOpacoService.gerarHash(
-                        token.trim()
-                );
+                gerarHashToken(token);
 
         ConviteOrganizacaoModel convite =
                 repository
@@ -132,11 +224,119 @@ public class ConviteOrganizacaoService {
                                 this::conviteInvalido
                         );
 
-        if (!convite.podeSerAceito(referencia)) {
+        validarConviteNaoExpirado(
+                convite,
+                referencia
+        );
+
+        return convite;
+    }
+
+    private ConviteOrganizacaoModel
+            buscarConviteValidoParaAtualizacao(
+                    String token,
+                    LocalDateTime referencia
+            ) {
+        String tokenHash =
+                gerarHashToken(token);
+
+        ConviteOrganizacaoModel convite =
+                repository
+                        .buscarPorTokenHashEStatusParaAtualizacao(
+                                tokenHash,
+                                StatusConviteOrganizacaoEnum.PENDENTE
+                        )
+                        .orElseThrow(
+                                this::conviteInvalido
+                        );
+
+        validarConviteNaoExpirado(
+                convite,
+                referencia
+        );
+
+        return convite;
+    }
+
+    private String gerarHashToken(
+            String token
+    ) {
+        if (token == null || token.isBlank()) {
             throw conviteInvalido();
         }
 
-        return convite;
+        return tokenOpacoService.gerarHash(
+                token.trim()
+        );
+    }
+
+    private void validarConviteNaoExpirado(
+            ConviteOrganizacaoModel convite,
+            LocalDateTime referencia
+    ) {
+        if (!convite.podeSerAceito(referencia)) {
+            throw conviteInvalido();
+        }
+    }
+
+    private UsuarioModel buscarUsuarioAutenticadoAtivo() {
+        Long idUsuario =
+                usuarioLogadoService.getId();
+
+        return usuarioRepository
+                .findByIdAndStatus(
+                        idUsuario,
+                        StatusEnum.ATIVO
+                )
+                .orElseThrow(
+                        () -> new AccessDeniedException(
+                                "Acesso negado."
+                        )
+                );
+    }
+
+    private void validarUsuarioDoConvite(
+            ConviteOrganizacaoModel convite,
+            UsuarioModel usuario
+    ) {
+        if (!convite.getEmailAdministrador()
+                .equalsIgnoreCase(usuario.getEmail())) {
+            throw new AccessDeniedException(
+                    "Acesso negado."
+            );
+        }
+    }
+
+    private void validarAusenciaUsuarioParaConvite(
+            ConviteOrganizacaoModel convite
+    ) {
+        boolean usuarioExistente =
+                usuarioRepository.existsByEmailIgnoreCase(
+                        convite.getEmailAdministrador()
+                );
+
+        if (usuarioExistente) {
+            throw new ValidacaoException(
+                    "Ja existe uma conta para este convite. "
+                            + "Entre no sistema para aceita-lo."
+            );
+        }
+    }
+
+    private void validarUsuarioExistenteDisponivel(
+            String emailAdministrador
+    ) {
+        UsuarioModel usuario =
+                usuarioRepository.findByEmailIgnoreCase(
+                        emailAdministrador
+                );
+
+        if (usuario != null && !usuario.isEnabled()) {
+            throw new ValidacaoException(
+                    "O usuario deste e-mail esta inativo "
+                            + "ou removido."
+            );
+        }
     }
 
     private void validarAusenciaConvitePendente(

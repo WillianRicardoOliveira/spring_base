@@ -109,9 +109,15 @@ public class ConfigSecurity {
                     ).permitAll();
 
                     req.requestMatchers(
-                            HttpMethod.GET,
+                            HttpMethod.POST,
                             "/plataforma/organizacao/"
                                     + "convite/consulta"
+                    ).permitAll();
+
+                    req.requestMatchers(
+                            HttpMethod.POST,
+                            "/plataforma/organizacao/"
+                                    + "convite/aceite/novo-usuario"
                     ).permitAll();
 
                     if (swaggerPublic) {
