@@ -18,8 +18,14 @@ public record DetalheUsuarioEmpresaRecord(
     ) {
         this(
                 usuarioEmpresa.getId(),
-                usuarioEmpresa.getUsuario().getId(),
-                usuarioEmpresa.getUsuario().getEmail(),
+                usuarioEmpresa
+                        .getUsuarioOrganizacao()
+                        .getUsuario()
+                        .getId(),
+                usuarioEmpresa
+                        .getUsuarioOrganizacao()
+                        .getUsuario()
+                        .getEmail(),
                 usuarioEmpresa.getEmpresa().getId(),
                 usuarioEmpresa.getEmpresa().getNome(),
                 usuarioEmpresa.getTodasSubsidiarias(),

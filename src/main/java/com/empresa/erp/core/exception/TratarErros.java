@@ -2,6 +2,7 @@ package com.empresa.erp.core.exception;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -20,66 +21,172 @@ public class TratarErros {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErroResponse> tratarErro404() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErroResponse(404, "NAO_ENCONTRADO", "Recurso nao encontrado"));
+        return ResponseEntity.status(
+                HttpStatus.NOT_FOUND
+        ).body(
+                new ErroResponse(
+                        404,
+                        "NAO_ENCONTRADO",
+                        "Recurso nao encontrado"
+                )
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErroValidacaoResponse> tratarErro400(MethodArgumentNotValidException ex) {
-        var campos = ex.getFieldErrors().stream()
-                .map(DadosErroValidacao::new)
-                .toList();
+    public ResponseEntity<ErroValidacaoResponse>
+            tratarErro400(
+                    MethodArgumentNotValidException exception
+            ) {
+        List<DadosErroValidacao> campos =
+                exception.getFieldErrors()
+                        .stream()
+                        .map(DadosErroValidacao::new)
+                        .toList();
 
         return ResponseEntity.badRequest()
-                .body(new ErroValidacaoResponse(400, "VALIDACAO", "Dados invalidos", campos));
+                .body(
+                        new ErroValidacaoResponse(
+                                400,
+                                "VALIDACAO",
+                                "Dados invalidos",
+                                campos
+                        )
+                );
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErroResponse> tratarErro400(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErroResponse>
+            tratarErro400(
+                    HttpMessageNotReadableException exception
+            ) {
         return ResponseEntity.badRequest()
-                .body(new ErroResponse(400, "REQUISICAO_INVALIDA", "Corpo da requisicao invalido"));
+                .body(
+                        new ErroResponse(
+                                400,
+                                "REQUISICAO_INVALIDA",
+                                "Corpo da requisicao invalido"
+                        )
+                );
     }
 
     @ExceptionHandler(ValidacaoException.class)
-    public ResponseEntity<ErroResponse> tratarErroRegraDeNegocio(ValidacaoException ex) {
+    public ResponseEntity<ErroResponse>
+            tratarErroRegraDeNegocio(
+                    ValidacaoException exception
+            ) {
         return ResponseEntity.badRequest()
-                .body(new ErroResponse(400, "REGRA_DE_NEGOCIO", ex.getMessage()));
+                .body(
+                        new ErroResponse(
+                                400,
+                                "REGRA_DE_NEGOCIO",
+                                exception.getMessage()
+                        )
+                );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErroResponse>
+            tratarErroConflitoIntegridade() {
+        return ResponseEntity.status(
+                HttpStatus.CONFLICT
+        ).body(
+                new ErroResponse(
+                        409,
+                        "CONFLITO",
+                        "A operacao conflita "
+                                + "com dados existentes"
+                )
+        );
     }
 
     @ExceptionHandler(RefreshTokenException.class)
-    public ResponseEntity<ErroResponse> tratarErroRefreshToken(RefreshTokenException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErroResponse(401, "REFRESH_TOKEN_INVALIDO", ex.getMessage()));
+    public ResponseEntity<ErroResponse>
+            tratarErroRefreshToken(
+                    RefreshTokenException exception
+            ) {
+        return ResponseEntity.status(
+                HttpStatus.UNAUTHORIZED
+        ).body(
+                new ErroResponse(
+                        401,
+                        "REFRESH_TOKEN_INVALIDO",
+                        exception.getMessage()
+                )
+        );
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErroResponse> tratarErroBadCredentials() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErroResponse(401, "NAO_AUTENTICADO", "Credenciais invalidas"));
+    public ResponseEntity<ErroResponse>
+            tratarErroBadCredentials() {
+        return ResponseEntity.status(
+                HttpStatus.UNAUTHORIZED
+        ).body(
+                new ErroResponse(
+                        401,
+                        "NAO_AUTENTICADO",
+                        "Credenciais invalidas"
+                )
+        );
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErroResponse> tratarErroAuthentication() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErroResponse(401, "NAO_AUTENTICADO", "Falha na autenticacao"));
+    public ResponseEntity<ErroResponse>
+            tratarErroAuthentication() {
+        return ResponseEntity.status(
+                HttpStatus.UNAUTHORIZED
+        ).body(
+                new ErroResponse(
+                        401,
+                        "NAO_AUTENTICADO",
+                        "Falha na autenticacao"
+                )
+        );
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErroResponse> tratarErroAcessoNegado() {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErroResponse(403, "ACESSO_NEGADO", "Acesso negado"));
+    public ResponseEntity<ErroResponse>
+            tratarErroAcessoNegado() {
+        return ResponseEntity.status(
+                HttpStatus.FORBIDDEN
+        ).body(
+                new ErroResponse(
+                        403,
+                        "ACESSO_NEGADO",
+                        "Acesso negado"
+                )
+        );
     }
 
     @ExceptionHandler(SsoAuthenticationException.class)
-    public ResponseEntity<ErroResponse> tratarErroSsoAuthentication(SsoAuthenticationException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErroResponse(401, "SSO_INVALIDO", ex.getMessage()));
+    public ResponseEntity<ErroResponse>
+            tratarErroSsoAuthentication(
+                    SsoAuthenticationException exception
+            ) {
+        return ResponseEntity.status(
+                HttpStatus.UNAUTHORIZED
+        ).body(
+                new ErroResponse(
+                        401,
+                        "SSO_INVALIDO",
+                        exception.getMessage()
+                )
+        );
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErroResponse> tratarErro500(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErroResponse(500, "ERRO_INTERNO", "Erro interno do servidor"));
+    public ResponseEntity<ErroResponse>
+            tratarErro500(
+                    Exception exception
+            ) {
+        return ResponseEntity.status(
+                HttpStatus.INTERNAL_SERVER_ERROR
+        ).body(
+                new ErroResponse(
+                        500,
+                        "ERRO_INTERNO",
+                        "Erro interno do servidor"
+                )
+        );
     }
 
     private record ErroResponse(
@@ -101,8 +208,14 @@ public class TratarErros {
             String campo,
             String mensagem
     ) {
-        public DadosErroValidacao(FieldError erro) {
-            this(erro.getField(), erro.getDefaultMessage());
+
+        public DadosErroValidacao(
+                FieldError erro
+        ) {
+            this(
+                    erro.getField(),
+                    erro.getDefaultMessage()
+            );
         }
     }
 }

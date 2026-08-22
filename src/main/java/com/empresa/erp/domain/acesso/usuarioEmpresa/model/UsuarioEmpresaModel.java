@@ -1,10 +1,10 @@
 package com.empresa.erp.domain.acesso.usuarioEmpresa.model;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.base.model.AuditoriaModel;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.old.StatusEnum;
-import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,22 +27,44 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id", callSuper = false)
-public class UsuarioEmpresaModel extends AuditoriaModel {
+@EqualsAndHashCode(
+        of = "id",
+        callSuper = false
+)
+public class UsuarioEmpresaModel
+        extends AuditoriaModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+            strategy = GenerationType.IDENTITY
+    )
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private UsuarioModel usuario;
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false
+    )
+    @JoinColumn(
+            name = "id_usuario_organizacao",
+            nullable = false
+    )
+    private UsuarioOrganizacaoModel
+            usuarioOrganizacao;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_empresa", nullable = false)
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false
+    )
+    @JoinColumn(
+            name = "id_empresa",
+            nullable = false
+    )
     private EmpresaModel empresa;
 
-    @Column(name = "todas_subsidiarias", nullable = false)
+    @Column(
+            name = "todas_subsidiarias",
+            nullable = false
+    )
     private Boolean todasSubsidiarias;
 
     @Enumerated(EnumType.ORDINAL)
@@ -50,14 +72,21 @@ public class UsuarioEmpresaModel extends AuditoriaModel {
     private StatusEnum status;
 
     public UsuarioEmpresaModel(
-            UsuarioModel usuario,
+            UsuarioOrganizacaoModel usuarioOrganizacao,
             EmpresaModel empresa,
             Boolean todasSubsidiarias
     ) {
-        this.usuario = usuario;
-        this.empresa = empresa;
-        this.todasSubsidiarias = todasSubsidiarias;
-        this.status = StatusEnum.ATIVO;
+        this.usuarioOrganizacao =
+                usuarioOrganizacao;
+
+        this.empresa =
+                empresa;
+
+        this.todasSubsidiarias =
+                todasSubsidiarias;
+
+        this.status =
+                StatusEnum.ATIVO;
     }
 
     public void atualizar(
@@ -68,11 +97,16 @@ public class UsuarioEmpresaModel extends AuditoriaModel {
     }
 
     public void inativar() {
-        this.status = StatusEnum.INATIVO;
+        this.status =
+                StatusEnum.INATIVO;
     }
 
-    public void remover(Long idUsuario) {
-        this.status = StatusEnum.REMOVIDO;
+    public void remover(
+            Long idUsuario
+    ) {
+        this.status =
+                StatusEnum.REMOVIDO;
+
         registrarRemocao(idUsuario);
     }
 }

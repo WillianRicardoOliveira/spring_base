@@ -1,24 +1,42 @@
 package com.empresa.erp.domain.acesso.permissao.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
 import com.empresa.erp.domain.old.StatusEnum;
 
-public interface PermissaoRepository extends JpaRepository<PermissaoModel, Long> {
+public interface PermissaoRepository
+        extends JpaRepository<PermissaoModel, Long> {
 
-    Page<PermissaoModel> findByNomeContainingIgnoreCaseAndStatus(Pageable paginacao, String filtro, StatusEnum status);
+    Page<PermissaoModel>
+            findByNomeContainingIgnoreCaseAndEscopoAndStatus(
+                    Pageable paginacao,
+                    String filtro,
+                    EscopoPermissaoEnum escopo,
+                    StatusEnum status
+            );
 
-    Page<PermissaoModel> findAllByStatus(Pageable paginacao, StatusEnum status);
+    Page<PermissaoModel> findAllByEscopoAndStatus(
+            Pageable paginacao,
+            EscopoPermissaoEnum escopo,
+            StatusEnum status
+    );
 
-    boolean existsByChaveIgnoreCaseAndStatus(String chave, StatusEnum status);
+    List<PermissaoModel>
+            findAllBySistemaTrueAndEscopoAndStatusOrderByIdAsc(
+                    EscopoPermissaoEnum escopo,
+                    StatusEnum status
+            );
 
-    boolean existsByChaveIgnoreCaseAndStatusAndIdNot(String chave, StatusEnum status, Long id);
-    
-    Optional<PermissaoModel> findByIdAndStatus(Long id, StatusEnum status);
-    
+    Optional<PermissaoModel> findByIdAndEscopoAndStatus(
+            Long id,
+            EscopoPermissaoEnum escopo,
+            StatusEnum status
+    );
 }

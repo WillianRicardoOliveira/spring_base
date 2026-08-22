@@ -25,10 +25,12 @@ public record DetalheUsuarioSubsidiariaRecord(
                         .getId(),
                 usuarioSubsidiaria
                         .getUsuarioEmpresa()
+                        .getUsuarioOrganizacao()
                         .getUsuario()
                         .getId(),
                 usuarioSubsidiaria
                         .getUsuarioEmpresa()
+                        .getUsuarioOrganizacao()
                         .getUsuario()
                         .getEmail(),
                 usuarioSubsidiaria

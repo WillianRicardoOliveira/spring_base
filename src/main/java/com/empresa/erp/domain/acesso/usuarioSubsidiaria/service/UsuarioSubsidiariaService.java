@@ -49,19 +49,10 @@ public class UsuarioSubsidiariaService {
                 contextoOrganizacao.getIdOrganizacao();
 
         UsuarioEmpresaModel usuarioEmpresa =
-                usuarioEmpresaRepository
-                        .findByIdAndEmpresaOrganizacaoIdAndStatus(
-                                dados.idUsuarioEmpresa(),
-                                idOrganizacao,
-                                StatusEnum.ATIVO
-                        )
-                        .orElseThrow(() ->
-                                new ValidacaoException(
-                                        "Vinculo entre usuario "
-                                                + "e empresa nao encontrado "
-                                                + "ou removido."
-                                )
-                        );
+                buscarUsuarioEmpresaAtivo(
+                        dados.idUsuarioEmpresa(),
+                        idOrganizacao
+                );
 
         if (Boolean.TRUE.equals(
                 usuarioEmpresa.getTodasSubsidiarias()
@@ -73,18 +64,10 @@ public class UsuarioSubsidiariaService {
         }
 
         SubsidiariaModel subsidiaria =
-                subsidiariaRepository
-                        .findByIdAndEmpresaOrganizacaoIdAndStatus(
-                                dados.idSubsidiaria(),
-                                idOrganizacao,
-                                StatusEnum.ATIVO
-                        )
-                        .orElseThrow(() ->
-                                new ValidacaoException(
-                                        "Subsidiaria nao encontrada "
-                                                + "ou removida."
-                                )
-                        );
+                buscarSubsidiariaAtiva(
+                        dados.idSubsidiaria(),
+                        idOrganizacao
+                );
 
         validarEmpresa(
                 usuarioEmpresa,
@@ -120,23 +103,25 @@ public class UsuarioSubsidiariaService {
         Long idOrganizacao =
                 contextoOrganizacao.getIdOrganizacao();
 
+        Long idUsuarioEmpresaValidado =
+                null;
+
         if (idUsuarioEmpresa != null) {
-            return repository
-                    .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
-                            paginacao,
+            UsuarioEmpresaModel usuarioEmpresa =
+                    buscarUsuarioEmpresaAtivo(
                             idUsuarioEmpresa,
-                            idOrganizacao,
-                            StatusEnum.ATIVO
-                    )
-                    .map(
-                            ListaUsuarioSubsidiariaRecord::new
+                            idOrganizacao
                     );
+
+            idUsuarioEmpresaValidado =
+                    usuarioEmpresa.getId();
         }
 
         return repository
-                .findAllByUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         paginacao,
                         idOrganizacao,
+                        idUsuarioEmpresaValidado,
                         StatusEnum.ATIVO
                 )
                 .map(
@@ -154,7 +139,9 @@ public class UsuarioSubsidiariaService {
     }
 
     @Transactional
-    public void excluir(Long id) {
+    public void excluir(
+            Long id
+    ) {
         UsuarioSubsidiariaModel usuarioSubsidiaria =
                 buscarVinculoAtivo(id);
 
@@ -189,6 +176,44 @@ public class UsuarioSubsidiariaService {
         }
     }
 
+    private UsuarioEmpresaModel buscarUsuarioEmpresaAtivo(
+            Long idUsuarioEmpresa,
+            Long idOrganizacao
+    ) {
+        return usuarioEmpresaRepository
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
+                        idUsuarioEmpresa,
+                        idOrganizacao,
+                        idOrganizacao,
+                        StatusEnum.ATIVO
+                )
+                .orElseThrow(() ->
+                        new ValidacaoException(
+                                "Vinculo entre usuario "
+                                        + "e empresa nao encontrado "
+                                        + "ou removido."
+                        )
+                );
+    }
+
+    private SubsidiariaModel buscarSubsidiariaAtiva(
+            Long idSubsidiaria,
+            Long idOrganizacao
+    ) {
+        return subsidiariaRepository
+                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                        idSubsidiaria,
+                        idOrganizacao,
+                        StatusEnum.ATIVO
+                )
+                .orElseThrow(() ->
+                        new ValidacaoException(
+                                "Subsidiaria nao encontrada "
+                                        + "ou removida."
+                        )
+                );
+    }
+
     private UsuarioSubsidiariaModel buscarVinculoAtivo(
             Long id
     ) {
@@ -196,8 +221,9 @@ public class UsuarioSubsidiariaService {
                 contextoOrganizacao.getIdOrganizacao();
 
         return repository
-                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioEmpresaUsuarioOrganizacaoOrganizacaoIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         id,
+                        idOrganizacao,
                         idOrganizacao,
                         StatusEnum.ATIVO
                 )

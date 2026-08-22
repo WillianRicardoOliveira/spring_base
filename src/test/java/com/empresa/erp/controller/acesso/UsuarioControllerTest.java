@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.usuario.controller.UsuarioController;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.DetalheUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.ListaUsuarioRecord;

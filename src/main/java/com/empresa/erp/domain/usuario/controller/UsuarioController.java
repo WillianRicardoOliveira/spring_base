@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.acesso;
+package com.empresa.erp.domain.usuario.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,14 +8,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.empresa.erp.domain.usuario.model.UsuarioModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.usuario.record.DetalheUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.ListaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -32,26 +35,38 @@ public class UsuarioController {
     private final UsuarioService service;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ACESSO_USUARIO_CRIAR')")
+    @PreAuthorize(
+            "hasAuthority('ACESSO_USUARIO_CRIAR')"
+    )
     public ResponseEntity<DetalheUsuarioRecord> cadastrar(
             @RequestBody @Valid UsuarioRecord dados,
             UriComponentsBuilder uriBuilder
     ) {
-        UsuarioModel usuario =
+        UsuarioOrganizacaoModel usuarioOrganizacao =
                 service.cadastrar(dados);
 
         var uri = uriBuilder
                 .path("/usuario/{id}")
-                .buildAndExpand(usuario.getId())
+                .buildAndExpand(
+                        usuarioOrganizacao
+                                .getUsuario()
+                                .getId()
+                )
                 .toUri();
 
         return ResponseEntity
                 .created(uri)
-                .body(new DetalheUsuarioRecord(usuario));
+                .body(
+                        new DetalheUsuarioRecord(
+                                usuarioOrganizacao
+                        )
+                );
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ACESSO_USUARIO_LISTAR')")
+    @PreAuthorize(
+            "hasAuthority('ACESSO_USUARIO_LISTAR')"
+    )
     public ResponseEntity<Page<ListaUsuarioRecord>> listar(
             @PageableDefault(
                     page = 0,
@@ -60,18 +75,26 @@ public class UsuarioController {
                     direction = Sort.Direction.DESC
             )
             Pageable paginacao,
-            String filtro
+
+            @RequestParam(required = false)
+            String filtro,
+
+            @RequestParam(required = false)
+            StatusEnum status
     ) {
         return ResponseEntity.ok(
                 service.listar(
                         paginacao,
-                        filtro
+                        filtro,
+                        status
                 )
         );
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ACESSO_USUARIO_EXCLUIR')")
+    @PreAuthorize(
+            "hasAuthority('ACESSO_USUARIO_EXCLUIR')"
+    )
     public ResponseEntity<Void> excluir(
             @PathVariable Long id
     ) {
@@ -81,9 +104,23 @@ public class UsuarioController {
                 .noContent()
                 .build();
     }
+    
+    @PatchMapping("/{id}/reativar")
+    @PreAuthorize(
+            "hasAuthority('ACESSO_USUARIO_CRIAR')"
+    )
+    public ResponseEntity<DetalheUsuarioRecord> reativar(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                service.reativar(id)
+        );
+    }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ACESSO_USUARIO_DETALHAR')")
+    @PreAuthorize(
+            "hasAuthority('ACESSO_USUARIO_DETALHAR')"
+    )
     public ResponseEntity<DetalheUsuarioRecord> detalhar(
             @PathVariable Long id
     ) {

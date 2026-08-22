@@ -1,7 +1,3 @@
--- #################### --
--- USUÁRIO E SEGURANÇA  --
--- #################### --
-
 CREATE TABLE usuario (
     id BIGINT NOT NULL AUTO_INCREMENT,
     email VARCHAR(100) NOT NULL,
@@ -78,10 +74,6 @@ CREATE TABLE usuario_login_tentativa (
         UNIQUE (email)
 );
 
--- #################### --
--- ORGANIZAÇÃO          --
--- #################### --
-
 CREATE TABLE organizacao (
     id BIGINT NOT NULL AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
@@ -99,6 +91,35 @@ CREATE INDEX idx_organizacao_nome_status
 ON organizacao (
     nome,
     status
+);
+
+CREATE TABLE convite_organizacao (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    nome_organizacao VARCHAR(100) NOT NULL,
+    email_administrador VARCHAR(100) NOT NULL,
+    email_pendente VARCHAR(100),
+    token_hash VARCHAR(64) NOT NULL,
+    expira_em DATETIME NOT NULL,
+    aceito_em DATETIME,
+    status VARCHAR(30) NOT NULL,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_convite_organizacao_token_hash
+        UNIQUE (token_hash),
+    CONSTRAINT uk_convite_organizacao_email_pendente
+        UNIQUE (email_pendente)
+);
+
+CREATE INDEX idx_convite_organizacao_email_status_expiracao
+ON convite_organizacao (
+    email_administrador,
+    status,
+    expira_em
 );
 
 CREATE TABLE usuario_organizacao (
@@ -133,23 +154,35 @@ ON usuario_organizacao (
     id_organizacao
 );
 
--- #################### --
--- PERFIS E PERMISSÕES  --
--- #################### --
-
 CREATE TABLE perfil (
     id BIGINT NOT NULL AUTO_INCREMENT,
+    id_organizacao BIGINT NOT NULL,
     nome VARCHAR(100) NOT NULL,
     descricao VARCHAR(255),
+    tipo_sistema VARCHAR(50),
     status TINYINT NOT NULL DEFAULT 0,
-    sistema BOOLEAN NOT NULL DEFAULT FALSE,
     criado_em DATETIME,
     criado_por BIGINT,
     atualizado_em DATETIME,
     atualizado_por BIGINT,
     removido_em DATETIME,
     removido_por BIGINT,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT uk_perfil_organizacao_tipo_sistema
+        UNIQUE (
+            id_organizacao,
+            tipo_sistema
+        ),
+    CONSTRAINT fk_perfil_organizacao
+        FOREIGN KEY (id_organizacao)
+        REFERENCES organizacao (id)
+);
+
+CREATE INDEX idx_perfil_organizacao_status_nome
+ON perfil (
+    id_organizacao,
+    status,
+    nome
 );
 
 CREATE TABLE permissao (
@@ -159,6 +192,7 @@ CREATE TABLE permissao (
     descricao VARCHAR(255),
     status TINYINT NOT NULL DEFAULT 0,
     sistema BOOLEAN NOT NULL DEFAULT FALSE,
+    escopo VARCHAR(30) NOT NULL,
     criado_em DATETIME,
     criado_por BIGINT,
     atualizado_em DATETIME,
@@ -168,6 +202,87 @@ CREATE TABLE permissao (
     PRIMARY KEY (id),
     CONSTRAINT uk_permissao_chave
         UNIQUE (chave)
+);
+
+CREATE TABLE perfil_plataforma (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    descricao VARCHAR(255),
+    tipo_sistema VARCHAR(50),
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_perfil_plataforma_tipo_sistema
+        UNIQUE (tipo_sistema)
+);
+
+CREATE TABLE perfil_plataforma_permissao (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_perfil_plataforma BIGINT NOT NULL,
+    id_permissao BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_perfil_plataforma_permissao_perfil_permissao
+        UNIQUE (
+            id_perfil_plataforma,
+            id_permissao
+        ),
+    CONSTRAINT fk_perfil_plataforma_permissao_perfil
+        FOREIGN KEY (id_perfil_plataforma)
+        REFERENCES perfil_plataforma (id),
+    CONSTRAINT fk_perfil_plataforma_permissao_permissao
+        FOREIGN KEY (id_permissao)
+        REFERENCES permissao (id)
+);
+
+CREATE INDEX idx_perfil_plataforma_permissao_perfil_status
+ON perfil_plataforma_permissao (
+    id_perfil_plataforma,
+    status,
+    id_permissao
+);
+
+CREATE TABLE usuario_perfil_plataforma (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    id_usuario BIGINT NOT NULL,
+    id_perfil_plataforma BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    criado_por BIGINT,
+    atualizado_em DATETIME,
+    atualizado_por BIGINT,
+    removido_em DATETIME,
+    removido_por BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_usuario_perfil_plataforma_usuario_perfil
+        UNIQUE (
+            id_usuario,
+            id_perfil_plataforma
+        ),
+    CONSTRAINT fk_usuario_perfil_plataforma_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario (id),
+    CONSTRAINT fk_usuario_perfil_plataforma_perfil
+        FOREIGN KEY (id_perfil_plataforma)
+        REFERENCES perfil_plataforma (id)
+);
+
+CREATE INDEX idx_usuario_perfil_plataforma_usuario_status
+ON usuario_perfil_plataforma (
+    id_usuario,
+    status,
+    id_perfil_plataforma
 );
 
 CREATE TABLE perfil_permissao (
@@ -182,6 +297,11 @@ CREATE TABLE perfil_permissao (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
+    CONSTRAINT uk_perfil_permissao_perfil_permissao
+        UNIQUE (
+            id_perfil,
+            id_permissao
+        ),
     CONSTRAINT fk_perfil_permissao_perfil
         FOREIGN KEY (id_perfil)
         REFERENCES perfil (id),
@@ -190,9 +310,16 @@ CREATE TABLE perfil_permissao (
         REFERENCES permissao (id)
 );
 
+CREATE INDEX idx_perfil_permissao_perfil_status_permissao
+ON perfil_permissao (
+    id_perfil,
+    status,
+    id_permissao
+);
+
 CREATE TABLE usuario_perfil (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    id_usuario BIGINT NOT NULL,
+    id_usuario_organizacao BIGINT NOT NULL,
     id_perfil BIGINT NOT NULL,
     status TINYINT NOT NULL DEFAULT 0,
     criado_em DATETIME,
@@ -202,17 +329,20 @@ CREATE TABLE usuario_perfil (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
-    CONSTRAINT fk_usuario_perfil_usuario
-        FOREIGN KEY (id_usuario)
-        REFERENCES usuario (id),
+    CONSTRAINT fk_usuario_perfil_usuario_organizacao
+        FOREIGN KEY (id_usuario_organizacao)
+        REFERENCES usuario_organizacao (id),
     CONSTRAINT fk_usuario_perfil_perfil
         FOREIGN KEY (id_perfil)
         REFERENCES perfil (id)
 );
 
--- #################### --
--- EMPRESA              --
--- #################### --
+CREATE INDEX idx_usuario_perfil_vinculo_status_perfil
+ON usuario_perfil (
+    id_usuario_organizacao,
+    status,
+    id_perfil
+);
 
 CREATE TABLE empresa (
     id BIGINT NOT NULL AUTO_INCREMENT,
@@ -262,13 +392,9 @@ ON subsidiaria (
     status
 );
 
--- #################### --
--- ACESSOS              --
--- #################### --
-
 CREATE TABLE usuario_empresa (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    id_usuario BIGINT NOT NULL,
+    id_usuario_organizacao BIGINT NOT NULL,
     id_empresa BIGINT NOT NULL,
     todas_subsidiarias BOOLEAN NOT NULL DEFAULT FALSE,
     status TINYINT NOT NULL DEFAULT 0,
@@ -279,29 +405,23 @@ CREATE TABLE usuario_empresa (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
-    CONSTRAINT fk_usuario_empresa_usuario
-        FOREIGN KEY (id_usuario)
-        REFERENCES usuario (id),
+    CONSTRAINT fk_usuario_empresa_usuario_organizacao
+        FOREIGN KEY (id_usuario_organizacao)
+        REFERENCES usuario_organizacao (id),
     CONSTRAINT fk_usuario_empresa_empresa
         FOREIGN KEY (id_empresa)
         REFERENCES empresa (id)
 );
 
-CREATE INDEX idx_usuario_empresa_usuario_status
+CREATE INDEX idx_usuario_empresa_vinculo_status_empresa
 ON usuario_empresa (
-    id_usuario,
-    status
+    id_usuario_organizacao,
+    status,
+    id_empresa
 );
 
 CREATE INDEX idx_usuario_empresa_empresa_status
 ON usuario_empresa (
-    id_empresa,
-    status
-);
-
-CREATE INDEX idx_usuario_empresa_usuario_empresa_status
-ON usuario_empresa (
-    id_usuario,
     id_empresa,
     status
 );
@@ -345,63 +465,14 @@ ON usuario_subsidiaria (
     status
 );
 
--- #################### --
--- DADOS INICIAIS       --
--- #################### --
-
-INSERT INTO usuario (
-    id,
-    email,
-    senha,
-    status
-) VALUES (
-    1,
-    'admin@futuro.com',
-    '$2a$10$UsBJfx7xN/gblDp41EOBfeHhIKW/9Z7x9fUg4uVZJI0FtVQFDehSW',
-    0
-);
-
-INSERT INTO organizacao (
-    id,
-    nome,
-    status
-) VALUES (
-    1,
-    'Organização Principal',
-    0
-);
-
-INSERT INTO usuario_organizacao (
-    id_usuario,
-    id_organizacao,
-    status
-) VALUES (
-    1,
-    1,
-    0
-);
-
-INSERT INTO perfil (
-    id,
-    nome,
-    descricao,
-    status,
-    sistema
-) VALUES (
-    1,
-    'Administrador',
-    'Perfil com acesso total ao sistema',
-    0,
-    TRUE
-);
-
 INSERT INTO permissao (
     id,
     nome,
     chave,
     descricao,
     status,
-    sistema
+    sistema,
+    escopo
 ) VALUES
 (
     1,
@@ -409,7 +480,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_CRIAR',
     'Permite criar perfis de acesso',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     2,
@@ -417,7 +489,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_LISTAR',
     'Permite listar perfis de acesso',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     3,
@@ -425,7 +498,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_DETALHAR',
     'Permite detalhar perfil de acesso',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     4,
@@ -433,7 +507,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_EDITAR',
     'Permite editar perfil de acesso',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     5,
@@ -441,15 +516,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_EXCLUIR',
     'Permite remover perfil de acesso',
     0,
-    TRUE
-),
-(
-    6,
-    'Criar permissões',
-    'ACESSO_PERMISSAO_CRIAR',
-    'Permite criar permissões',
-    0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     7,
@@ -457,7 +525,8 @@ INSERT INTO permissao (
     'ACESSO_PERMISSAO_LISTAR',
     'Permite listar permissões',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     8,
@@ -465,23 +534,8 @@ INSERT INTO permissao (
     'ACESSO_PERMISSAO_DETALHAR',
     'Permite detalhar permissão',
     0,
-    TRUE
-),
-(
-    9,
-    'Editar permissão',
-    'ACESSO_PERMISSAO_EDITAR',
-    'Permite editar permissão',
-    0,
-    TRUE
-),
-(
-    10,
-    'Excluir permissão',
-    'ACESSO_PERMISSAO_EXCLUIR',
-    'Permite remover permissão',
-    0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     11,
@@ -489,7 +543,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_PERMISSAO_CRIAR',
     'Permite vincular permissão ao perfil',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     12,
@@ -497,7 +552,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_PERMISSAO_LISTAR',
     'Permite listar permissões vinculadas ao perfil',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     13,
@@ -505,7 +561,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_PERMISSAO_DETALHAR',
     'Permite detalhar vínculo entre perfil e permissão',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     14,
@@ -513,7 +570,8 @@ INSERT INTO permissao (
     'ACESSO_PERFIL_PERMISSAO_EXCLUIR',
     'Permite remover permissão vinculada ao perfil',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     15,
@@ -521,7 +579,8 @@ INSERT INTO permissao (
     'ACESSO_USUARIO_PERFIL_CRIAR',
     'Permite vincular perfil ao usuário',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     16,
@@ -529,7 +588,8 @@ INSERT INTO permissao (
     'ACESSO_USUARIO_PERFIL_LISTAR',
     'Permite listar perfis vinculados ao usuário',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     17,
@@ -537,7 +597,8 @@ INSERT INTO permissao (
     'ACESSO_USUARIO_PERFIL_DETALHAR',
     'Permite detalhar vínculo entre usuário e perfil',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     18,
@@ -545,7 +606,8 @@ INSERT INTO permissao (
     'ACESSO_USUARIO_PERFIL_EXCLUIR',
     'Permite remover perfil vinculado ao usuário',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     19,
@@ -553,7 +615,8 @@ INSERT INTO permissao (
     'ACESSO_USUARIO_CRIAR',
     'Permite criar usuários na organização',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     20,
@@ -561,7 +624,8 @@ INSERT INTO permissao (
     'ACESSO_USUARIO_LISTAR',
     'Permite listar usuários da organização',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     21,
@@ -569,7 +633,8 @@ INSERT INTO permissao (
     'ACESSO_USUARIO_DETALHAR',
     'Permite detalhar usuário da organização',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     22,
@@ -577,7 +642,8 @@ INSERT INTO permissao (
     'ACESSO_USUARIO_EXCLUIR',
     'Permite remover o acesso do usuário à organização',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 );
 
 INSERT INTO permissao (
@@ -585,204 +651,217 @@ INSERT INTO permissao (
     chave,
     descricao,
     status,
-    sistema
+    sistema,
+    escopo
 ) VALUES
 (
     'Criar empresas',
     'CONFIGURACAO_EMPRESA_CRIAR',
     'Permite criar empresas',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Listar empresas',
     'CONFIGURACAO_EMPRESA_LISTAR',
     'Permite listar empresas',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Detalhar empresa',
     'CONFIGURACAO_EMPRESA_DETALHAR',
     'Permite detalhar empresas',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Editar empresas',
     'CONFIGURACAO_EMPRESA_EDITAR',
     'Permite editar empresas',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Excluir empresas',
     'CONFIGURACAO_EMPRESA_EXCLUIR',
     'Permite remover empresas',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Criar subsidiárias',
     'CONFIGURACAO_SUBSIDIARIA_CRIAR',
     'Permite criar subsidiárias',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Listar subsidiárias',
     'CONFIGURACAO_SUBSIDIARIA_LISTAR',
     'Permite listar subsidiárias',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Detalhar subsidiária',
     'CONFIGURACAO_SUBSIDIARIA_DETALHAR',
     'Permite detalhar subsidiárias',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Editar subsidiárias',
     'CONFIGURACAO_SUBSIDIARIA_EDITAR',
     'Permite editar subsidiárias',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Excluir subsidiárias',
     'CONFIGURACAO_SUBSIDIARIA_EXCLUIR',
     'Permite remover subsidiárias',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Vincular usuário a empresa',
     'ACESSO_USUARIO_EMPRESA_CRIAR',
     'Permite vincular usuários a empresas',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Listar empresas do usuário',
     'ACESSO_USUARIO_EMPRESA_LISTAR',
     'Permite listar os vínculos entre usuários e empresas',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Detalhar empresa do usuário',
     'ACESSO_USUARIO_EMPRESA_DETALHAR',
     'Permite detalhar o vínculo entre usuário e empresa',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Editar empresa do usuário',
     'ACESSO_USUARIO_EMPRESA_EDITAR',
     'Permite editar o acesso do usuário à empresa',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Remover empresa do usuário',
     'ACESSO_USUARIO_EMPRESA_EXCLUIR',
     'Permite remover o vínculo entre usuário e empresa',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Vincular usuário a subsidiária',
     'ACESSO_USUARIO_SUBSIDIARIA_CRIAR',
     'Permite vincular usuários a subsidiárias',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Listar subsidiárias do usuário',
     'ACESSO_USUARIO_SUBSIDIARIA_LISTAR',
     'Permite listar os vínculos entre usuários e subsidiárias',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Detalhar subsidiária do usuário',
     'ACESSO_USUARIO_SUBSIDIARIA_DETALHAR',
     'Permite detalhar o vínculo entre usuário e subsidiária',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 ),
 (
     'Remover subsidiária do usuário',
     'ACESSO_USUARIO_SUBSIDIARIA_EXCLUIR',
     'Permite remover o vínculo entre usuário e subsidiária',
     0,
-    TRUE
+    TRUE,
+    'ORGANIZACAO'
 );
 
-INSERT INTO perfil_permissao (
-    id_perfil,
-    id_permissao,
-    status
-)
-SELECT
-    1,
-    permissao.id,
-    0
-FROM permissao
-WHERE permissao.chave IN (
-    'ACESSO_PERFIL_CRIAR',
-    'ACESSO_PERFIL_LISTAR',
-    'ACESSO_PERFIL_DETALHAR',
-    'ACESSO_PERFIL_EDITAR',
-    'ACESSO_PERFIL_EXCLUIR',
-    'ACESSO_PERMISSAO_CRIAR',
-    'ACESSO_PERMISSAO_LISTAR',
-    'ACESSO_PERMISSAO_DETALHAR',
-    'ACESSO_PERMISSAO_EDITAR',
-    'ACESSO_PERMISSAO_EXCLUIR',
-    'ACESSO_PERFIL_PERMISSAO_CRIAR',
-    'ACESSO_PERFIL_PERMISSAO_LISTAR',
-    'ACESSO_PERFIL_PERMISSAO_DETALHAR',
-    'ACESSO_PERFIL_PERMISSAO_EXCLUIR',
-    'ACESSO_USUARIO_PERFIL_CRIAR',
-    'ACESSO_USUARIO_PERFIL_LISTAR',
-    'ACESSO_USUARIO_PERFIL_DETALHAR',
-    'ACESSO_USUARIO_PERFIL_EXCLUIR',
-    'ACESSO_USUARIO_CRIAR',
-    'ACESSO_USUARIO_LISTAR',
-    'ACESSO_USUARIO_DETALHAR',
-    'ACESSO_USUARIO_EXCLUIR',
-    'CONFIGURACAO_EMPRESA_CRIAR',
-    'CONFIGURACAO_EMPRESA_LISTAR',
-    'CONFIGURACAO_EMPRESA_DETALHAR',
-    'CONFIGURACAO_EMPRESA_EDITAR',
-    'CONFIGURACAO_EMPRESA_EXCLUIR',
-    'CONFIGURACAO_SUBSIDIARIA_CRIAR',
-    'CONFIGURACAO_SUBSIDIARIA_LISTAR',
-    'CONFIGURACAO_SUBSIDIARIA_DETALHAR',
-    'CONFIGURACAO_SUBSIDIARIA_EDITAR',
-    'CONFIGURACAO_SUBSIDIARIA_EXCLUIR',
-    'ACESSO_USUARIO_EMPRESA_CRIAR',
-    'ACESSO_USUARIO_EMPRESA_LISTAR',
-    'ACESSO_USUARIO_EMPRESA_DETALHAR',
-    'ACESSO_USUARIO_EMPRESA_EDITAR',
-    'ACESSO_USUARIO_EMPRESA_EXCLUIR',
-    'ACESSO_USUARIO_SUBSIDIARIA_CRIAR',
-    'ACESSO_USUARIO_SUBSIDIARIA_LISTAR',
-    'ACESSO_USUARIO_SUBSIDIARIA_DETALHAR',
-    'ACESSO_USUARIO_SUBSIDIARIA_EXCLUIR'
-);
-
-INSERT INTO usuario_perfil (
-    id_usuario,
-    id_perfil,
-    status
-) VALUES (
-    1,
-    1,
-    0
+INSERT INTO permissao (
+    nome,
+    chave,
+    descricao,
+    status,
+    sistema,
+    escopo
+) VALUES
+(
+    'Criar organizações',
+    'PLATAFORMA_ORGANIZACAO_CRIAR',
+    'Permite criar organizações na plataforma',
+    0,
+    TRUE,
+    'PLATAFORMA'
+),
+(
+    'Listar organizações',
+    'PLATAFORMA_ORGANIZACAO_LISTAR',
+    'Permite listar organizações na plataforma',
+    0,
+    TRUE,
+    'PLATAFORMA'
+),
+(
+    'Detalhar organização',
+    'PLATAFORMA_ORGANIZACAO_DETALHAR',
+    'Permite detalhar organizações na plataforma',
+    0,
+    TRUE,
+    'PLATAFORMA'
+),
+(
+    'Editar organizações',
+    'PLATAFORMA_ORGANIZACAO_EDITAR',
+    'Permite editar organizações na plataforma',
+    0,
+    TRUE,
+    'PLATAFORMA'
+),
+(
+    'Alterar status de organizações',
+    'PLATAFORMA_ORGANIZACAO_STATUS',
+    'Permite inativar e reativar organizações',
+    0,
+    TRUE,
+    'PLATAFORMA'
+),
+(
+    'Excluir organizações',
+    'PLATAFORMA_ORGANIZACAO_EXCLUIR',
+    'Permite remover organizações logicamente',
+    0,
+    TRUE,
+    'PLATAFORMA'
 );
 
 -- ##################################################### --

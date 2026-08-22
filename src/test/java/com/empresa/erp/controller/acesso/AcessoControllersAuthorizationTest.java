@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.empresa.erp.domain.acesso.perfil.record.AtualizaPerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
 import com.empresa.erp.domain.acesso.perfilPermissao.record.PerfilPermissaoRecord;
+import com.empresa.erp.domain.acesso.permissao.controller.PermissaoController;
 import com.empresa.erp.domain.acesso.permissao.record.AtualizaPermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.record.PermissaoRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.controller.UsuarioEmpresaController;
@@ -19,6 +20,7 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioPerfil.record.UsuarioPerfilRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.controller.UsuarioSubsidiariaController;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.UsuarioSubsidiariaRecord;
+import com.empresa.erp.domain.usuario.controller.UsuarioController;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
 class AcessoControllersAuthorizationTest {

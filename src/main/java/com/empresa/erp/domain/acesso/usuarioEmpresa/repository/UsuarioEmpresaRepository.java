@@ -4,65 +4,83 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
-import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.old.StatusEnum;
-import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
 public interface UsuarioEmpresaRepository
         extends JpaRepository<UsuarioEmpresaModel, Long> {
 
+    @EntityGraph(
+            attributePaths = {
+                    "usuarioOrganizacao.usuario",
+                    "empresa"
+            }
+    )
+    @Query("""
+            SELECT usuarioEmpresa
+            FROM UsuarioEmpresaModel usuarioEmpresa
+            WHERE usuarioEmpresa.usuarioOrganizacao.organizacao.id =
+                    :idOrganizacao
+              AND usuarioEmpresa.empresa.organizacao.id =
+                    :idOrganizacao
+              AND usuarioEmpresa.usuarioOrganizacao.status =
+                    :status
+              AND usuarioEmpresa.usuarioOrganizacao.usuario.status =
+                    :status
+              AND usuarioEmpresa.status = :status
+              AND (
+                    :idUsuarioOrganizacao IS NULL
+                    OR usuarioEmpresa.usuarioOrganizacao.id =
+                        :idUsuarioOrganizacao
+              )
+              AND (
+                    :idEmpresa IS NULL
+                    OR usuarioEmpresa.empresa.id = :idEmpresa
+              )
+            """)
     Page<UsuarioEmpresaModel>
-            findAllByEmpresaOrganizacaoIdAndStatus(
+            buscarAtivosDaOrganizacao(
                     Pageable paginacao,
+
+                    @Param("idOrganizacao")
                     Long idOrganizacao,
+
+                    @Param("idUsuarioOrganizacao")
+                    Long idUsuarioOrganizacao,
+
+                    @Param("idEmpresa")
+                    Long idEmpresa,
+
+                    @Param("status")
                     StatusEnum status
             );
 
-    Page<UsuarioEmpresaModel>
-            findAllByUsuarioIdAndEmpresaOrganizacaoIdAndStatus(
-                    Pageable paginacao,
-                    Long idUsuario,
-                    Long idOrganizacao,
-                    StatusEnum status
-            );
-
-    Page<UsuarioEmpresaModel>
-            findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
-                    Pageable paginacao,
+    boolean
+            existsByUsuarioOrganizacaoIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                    Long idUsuarioOrganizacao,
                     Long idEmpresa,
                     Long idOrganizacao,
                     StatusEnum status
             );
 
-    Page<UsuarioEmpresaModel>
-            findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
-                    Pageable paginacao,
-                    Long idUsuario,
-                    Long idEmpresa,
-                    Long idOrganizacao,
-                    StatusEnum status
-            );
-
-    boolean existsByUsuarioAndEmpresaAndStatus(
-            UsuarioModel usuario,
-            EmpresaModel empresa,
-            StatusEnum status
-    );
-
+    @EntityGraph(
+            attributePaths = {
+                    "usuarioOrganizacao.usuario",
+                    "empresa"
+            }
+    )
     Optional<UsuarioEmpresaModel>
-            findByIdAndEmpresaOrganizacaoIdAndStatus(
+            findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                     Long id,
-                    Long idOrganizacao,
+                    Long idOrganizacaoUsuario,
+                    Long idOrganizacaoEmpresa,
                     StatusEnum status
             );
-
-    boolean existsByUsuarioIdAndStatus(
-            Long idUsuario,
-            StatusEnum status
-    );
 
     boolean existsByEmpresaIdAndStatus(
             Long idEmpresa,

@@ -19,28 +19,65 @@ import lombok.NoArgsConstructor;
 @Entity(name = "OrganizacaoModel")
 @Getter
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id", callSuper = false)
-public class OrganizacaoModel extends AuditoriaModel {
+@EqualsAndHashCode(
+        of = "id",
+        callSuper = false
+)
+public class OrganizacaoModel
+        extends AuditoriaModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+            strategy = GenerationType.IDENTITY
+    )
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(
+            nullable = false,
+            length = 100
+    )
     private String nome;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private StatusEnum status;
 
-    public OrganizacaoModel(String nome) {
+    public OrganizacaoModel(
+            String nome
+    ) {
         this.nome = normalizarNome(nome);
         this.status = StatusEnum.ATIVO;
     }
 
-    private String normalizarNome(String nome) {
+    public void atualizarNome(
+            String nome
+    ) {
+        this.nome = normalizarNome(nome);
+    }
+
+    public void inativar() {
+        this.status = StatusEnum.INATIVO;
+    }
+
+    public void reativar() {
+        this.status = StatusEnum.ATIVO;
+    }
+
+    public void remover(
+            Long idUsuario
+    ) {
+        this.status = StatusEnum.REMOVIDO;
+
+        registrarRemocao(idUsuario);
+    }
+
+    private String normalizarNome(
+            String nome
+    ) {
         return nome == null
                 ? null
-                : nome.trim().replaceAll("\\s+", " ");
+                : nome
+                        .trim()
+                        .replaceAll("\\s+", " ");
     }
 }

@@ -33,8 +33,15 @@ public abstract class AuditoriaModel {
 
     private Long removidoPor;
 
-    protected void registrarRemocao(Long idUsuario) {
+    protected void registrarRemocao(
+            Long idUsuario
+    ) {
         this.removidoEm = LocalDateTime.now();
         this.removidoPor = idUsuario;
+    }
+
+    protected void limparRemocao() {
+        this.removidoEm = null;
+        this.removidoPor = null;
     }
 }

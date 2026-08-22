@@ -28,6 +28,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.empresa.erp.domain.acesso.permissao.controller.PermissaoController;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
 import com.empresa.erp.domain.acesso.permissao.record.AtualizaPermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.record.DetalhePermissaoRecord;

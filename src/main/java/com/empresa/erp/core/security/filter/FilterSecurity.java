@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.empresa.erp.core.exception.AccessTokenException;
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
 import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
@@ -29,49 +30,67 @@ public class FilterSecurity extends OncePerRequestFilter {
     private final UsuarioSessaoService usuarioSessaoService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
         var tokenJWT = recuperarToken(request);
 
-        try {
-            if (tokenJWT != null) {
-                var subject = tokenService.getSubject(tokenJWT);
-                var accessTokenJti = tokenService.getJti(tokenJWT);
-
-                if (!usuarioSessaoService.accessTokenEstaAtivo(accessTokenJti)) {
-                    throw new RuntimeException("Token JWT revogado");
-                }
-
-                var usuarioAutenticado = usuarioAutenticadoService.buscarPorEmail(subject);
-
-                if (usuarioAutenticado != null) {
-                    var authentication = new UsernamePasswordAuthenticationToken(
-                            usuarioAutenticado,
-                            null,
-                            usuarioAutenticado.getAuthorities()
-                    );
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+        if (tokenJWT != null) {
+            try {
+                autenticar(tokenJWT);
+            } catch (AccessTokenException exception) {
+                responderTokenInvalido(response);
+                return;
             }
-
-            filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            SecurityContextHolder.clearContext();
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("""
-                    {"status":401,"erro":"TOKEN_INVALIDO","mensagem":"Token invalido ou expirado"}
-                    """);
         }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private void autenticar(String tokenJWT) {
+        var accessToken = tokenService.validarAccessToken(tokenJWT);
+
+        if (!usuarioSessaoService.accessTokenEstaAtivo(accessToken.jti())) {
+            throw new AccessTokenException("Token JWT revogado");
+        }
+
+        var usuarioAutenticado =
+                usuarioAutenticadoService.buscarPorEmail(accessToken.subject());
+
+        if (usuarioAutenticado == null) {
+            throw new AccessTokenException(
+                    "Usuario do token JWT inexistente ou inativo"
+            );
+        }
+
+        var authentication = new UsernamePasswordAuthenticationToken(
+                usuarioAutenticado,
+                null,
+                usuarioAutenticado.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private void responderTokenInvalido(HttpServletResponse response)
+            throws IOException {
+        SecurityContextHolder.clearContext();
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("""
+                {"status":401,"erro":"TOKEN_INVALIDO","mensagem":"Token invalido ou expirado"}
+                """);
     }
 
     private String recuperarToken(HttpServletRequest request) {
         var authorizationHeader = request.getHeader("Authorization");
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader != null
+                && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7).trim();
         }
 
