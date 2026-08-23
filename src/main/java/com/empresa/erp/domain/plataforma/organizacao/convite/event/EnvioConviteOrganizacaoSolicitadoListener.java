@@ -9,21 +9,30 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import com.empresa.erp.domain.plataforma.organizacao.convite.port.EnvioConviteOrganizacaoPort;
 
 @Component
-public class ConviteOrganizacaoCriadoListener {
+public class EnvioConviteOrganizacaoSolicitadoListener {
 
     private static final Logger LOGGER =
-            LoggerFactory.getLogger(ConviteOrganizacaoCriadoListener.class);
+            LoggerFactory.getLogger(
+                    EnvioConviteOrganizacaoSolicitadoListener.class
+            );
 
-    private final EnvioConviteOrganizacaoPort envioConviteOrganizacaoPort;
+    private final EnvioConviteOrganizacaoPort
+            envioConviteOrganizacaoPort;
 
-    public ConviteOrganizacaoCriadoListener(
-            EnvioConviteOrganizacaoPort envioConviteOrganizacaoPort
+    public EnvioConviteOrganizacaoSolicitadoListener(
+            EnvioConviteOrganizacaoPort
+                    envioConviteOrganizacaoPort
     ) {
-        this.envioConviteOrganizacaoPort = envioConviteOrganizacaoPort;
+        this.envioConviteOrganizacaoPort =
+                envioConviteOrganizacaoPort;
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void processar(ConviteOrganizacaoCriadoEvent evento) {
+    @TransactionalEventListener(
+            phase = TransactionPhase.AFTER_COMMIT
+    )
+    public void processar(
+            EnvioConviteOrganizacaoSolicitadoEvent evento
+    ) {
         try {
             envioConviteOrganizacaoPort.enviar(
                     evento.emailDestino(),
@@ -33,10 +42,13 @@ public class ConviteOrganizacaoCriadoListener {
             );
         } catch (RuntimeException exception) {
             LOGGER.error(
-                    "Não foi possível enviar o convite da organização. "
+                    "Não foi possível enviar o convite "
+                            + "da organização. "
                             + "idConvite={}, tipoErro={}",
                     evento.idConvite(),
-                    exception.getClass().getSimpleName()
+                    exception
+                            .getClass()
+                            .getSimpleName()
             );
         }
     }

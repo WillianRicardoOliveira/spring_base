@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +18,7 @@ import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.provisionamento.service.ProvisionamentoOrganizacaoService;
 import com.empresa.erp.domain.plataforma.organizacao.convite.config.ConviteOrganizacaoProperties;
-import com.empresa.erp.domain.plataforma.organizacao.convite.event.ConviteOrganizacaoCriadoEvent;
+import com.empresa.erp.domain.plataforma.organizacao.convite.event.EnvioConviteOrganizacaoSolicitadoEvent;
 import com.empresa.erp.domain.plataforma.organizacao.convite.model.ConviteOrganizacaoModel;
 import com.empresa.erp.domain.plataforma.organizacao.convite.model.StatusConviteOrganizacaoEnum;
 import com.empresa.erp.domain.plataforma.organizacao.convite.record.AceiteConviteOrganizacaoNovoUsuarioRecord;
@@ -24,12 +26,14 @@ import com.empresa.erp.domain.plataforma.organizacao.convite.record.AceiteConvit
 import com.empresa.erp.domain.plataforma.organizacao.convite.record.ConsultaConviteOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.record.ConviteOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.record.DetalheConviteOrganizacaoRecord;
+import com.empresa.erp.domain.plataforma.organizacao.convite.record.ListaConviteOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.record.ResultadoAceiteConviteOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.repository.ConviteOrganizacaoRepository;
 import com.empresa.erp.domain.usuario.criacao.service.CriacaoUsuarioService;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -90,7 +94,7 @@ public class ConviteOrganizacaoService {
         repository.save(convite);
 
         eventPublisher.publishEvent(
-                new ConviteOrganizacaoCriadoEvent(
+                new EnvioConviteOrganizacaoSolicitadoEvent(
                         convite.getId(),
                         convite.getEmailAdministrador(),
                         convite.getNomeOrganizacao(),
@@ -100,7 +104,8 @@ public class ConviteOrganizacaoService {
         );
 
         return new DetalheConviteOrganizacaoRecord(
-                convite
+                convite,
+                agora
         );
     }
 
@@ -128,6 +133,126 @@ public class ConviteOrganizacaoService {
                         convite.getEmailAdministrador()
                 ),
                 usuarioExistente
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ListaConviteOrganizacaoRecord> listar(
+            Pageable paginacao,
+            String filtro,
+            StatusConviteOrganizacaoEnum status
+    ) {
+        LocalDateTime agora =
+                LocalDateTime.now(clock);
+
+        String filtroNormalizado =
+                normalizarFiltro(filtro);
+
+        return repository
+                .listar(
+                        paginacao,
+                        filtroNormalizado,
+                        status
+                )
+                .map(convite ->
+                        new ListaConviteOrganizacaoRecord(
+                                convite,
+                                agora
+                        )
+                );
+    }
+
+    @Transactional(readOnly = true)
+    public DetalheConviteOrganizacaoRecord detalhar(
+            Long id
+    ) {
+        LocalDateTime agora =
+                LocalDateTime.now(clock);
+
+        ConviteOrganizacaoModel convite =
+                repository.findById(id)
+                        .orElseThrow(
+                                EntityNotFoundException::new
+                        );
+
+        return new DetalheConviteOrganizacaoRecord(
+                convite,
+                agora
+        );
+    }
+
+    @Transactional
+    public void revogar(
+            Long id
+    ) {
+        ConviteOrganizacaoModel convite =
+                repository
+                        .buscarPorIdParaAtualizacao(id)
+                        .orElseThrow(
+                                EntityNotFoundException::new
+                        );
+
+        if (StatusConviteOrganizacaoEnum.REVOGADO
+                .equals(convite.getStatus())) {
+            return;
+        }
+
+        if (!StatusConviteOrganizacaoEnum.PENDENTE
+                .equals(convite.getStatus())) {
+            throw new ValidacaoException(
+                    "Convite aceito nao pode ser revogado."
+            );
+        }
+
+        convite.revogar();
+    }
+    
+    @Transactional
+    public DetalheConviteOrganizacaoRecord reenviar(
+            Long id
+    ) {
+        LocalDateTime agora =
+                LocalDateTime.now(clock);
+
+        ConviteOrganizacaoModel convite =
+                repository
+                        .buscarPorIdParaAtualizacao(id)
+                        .orElseThrow(
+                                EntityNotFoundException::new
+                        );
+
+        if (!StatusConviteOrganizacaoEnum.PENDENTE
+                .equals(convite.getStatus())) {
+            throw new ValidacaoException(
+                    "Somente convites pendentes "
+                            + "podem ser reenviados."
+            );
+        }
+
+        validarUsuarioExistenteDisponivel(
+                convite.getEmailAdministrador()
+        );
+
+        String token = tokenOpacoService.gerar();
+
+        convite.renovar(
+                tokenOpacoService.gerarHash(token),
+                agora.plus(properties.validade())
+        );
+
+        eventPublisher.publishEvent(
+                new EnvioConviteOrganizacaoSolicitadoEvent(
+                        convite.getId(),
+                        convite.getEmailAdministrador(),
+                        convite.getNomeOrganizacao(),
+                        token,
+                        convite.getExpiraEm()
+                )
+        );
+
+        return new DetalheConviteOrganizacaoRecord(
+                convite,
+                agora
         );
     }
 
@@ -373,6 +498,14 @@ public class ConviteOrganizacaoService {
         return email.substring(0, 1)
                 + "***"
                 + email.substring(posicaoArroba);
+    }
+
+    private String normalizarFiltro(
+            String filtro
+    ) {
+        return filtro == null || filtro.isBlank()
+                ? null
+                : filtro.trim();
     }
 
     private ValidacaoException conviteInvalido() {

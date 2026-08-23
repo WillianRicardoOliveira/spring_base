@@ -63,6 +63,15 @@ public class ContextoOrganizacaoFilter
     }
 
     @Override
+    protected boolean shouldNotFilter(
+            HttpServletRequest request
+    ) {
+        return request
+                .getServletPath()
+                .startsWith("/plataforma/");
+    }
+    
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,

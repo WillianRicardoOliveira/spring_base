@@ -2,9 +2,12 @@ package com.empresa.erp.core.organizacao.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -22,21 +25,29 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.organizacao.service.ContextoOrganizacaoService;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
+import com.empresa.erp.core.security.service.AutoridadesOrganizacaoService;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
-import tools.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
+import tools.jackson.databind.ObjectMapper;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ContextoOrganizacaoFilterTest {
 
+    private static final Long ID_USUARIO = 10L;
+
     @Mock
     private ContextoOrganizacaoService
             contextoOrganizacaoService;
+
+    @Mock
+    private AutoridadesOrganizacaoService
+            autoridadesOrganizacaoService;
 
     @Mock
     private AccessDeniedHandler
@@ -51,8 +62,14 @@ class ContextoOrganizacaoFilterTest {
     void setUp() {
         SecurityContextHolder.clearContext();
 
+        when(autoridadesOrganizacaoService.buscar(
+                eq(ID_USUARIO),
+                anyLong()
+        )).thenReturn(List.of());
+
         filter = new ContextoOrganizacaoFilter(
                 contextoOrganizacaoService,
+                autoridadesOrganizacaoService,
                 acessoNegadoHandler,
                 new ObjectMapper()
         );
@@ -69,8 +86,11 @@ class ContextoOrganizacaoFilterTest {
             throws Exception {
         autenticarUsuario();
 
-        var request = new MockHttpServletRequest();
-        var response = new MockHttpServletResponse();
+        var request =
+                new MockHttpServletRequest();
+
+        var response =
+                new MockHttpServletResponse();
 
         filter.doFilter(
                 request,
@@ -85,16 +105,22 @@ class ContextoOrganizacaoFilterTest {
 
         verifyNoInteractions(
                 contextoOrganizacaoService,
+                autoridadesOrganizacaoService,
                 acessoNegadoHandler
         );
     }
 
     @Test
-    @DisplayName("Deve ignorar header sem usuário autenticado")
+    @DisplayName(
+            "Deve ignorar header sem usuário autenticado"
+    )
     void deveIgnorarHeaderSemUsuarioAutenticado()
             throws Exception {
-        var request = criarRequestComOrganizacao("20");
-        var response = new MockHttpServletResponse();
+        var request =
+                criarRequestComOrganizacao("20");
+
+        var response =
+                new MockHttpServletResponse();
 
         filter.doFilter(
                 request,
@@ -109,18 +135,61 @@ class ContextoOrganizacaoFilterTest {
 
         verifyNoInteractions(
                 contextoOrganizacaoService,
+                autoridadesOrganizacaoService,
                 acessoNegadoHandler
         );
     }
 
     @Test
-    @DisplayName("Deve validar organização e continuar")
-    void deveValidarOrganizacaoEContinuar()
+    @DisplayName(
+            "Deve ignorar contexto em endpoint da plataforma"
+    )
+    void deveIgnorarContextoEmEndpointDaPlataforma()
             throws Exception {
         autenticarUsuario();
 
-        var request = criarRequestComOrganizacao("20");
-        var response = new MockHttpServletResponse();
+        var request =
+                criarRequestComOrganizacao("invalido");
+
+        request.setServletPath(
+                "/plataforma/organizacao"
+        );
+
+        var response =
+                new MockHttpServletResponse();
+
+        filter.doFilter(
+                request,
+                response,
+                filterChain
+        );
+
+        verify(filterChain).doFilter(
+                request,
+                response
+        );
+
+        verifyNoInteractions(
+                contextoOrganizacaoService,
+                autoridadesOrganizacaoService,
+                acessoNegadoHandler
+        );
+    }
+
+    @Test
+    @DisplayName(
+            "Deve validar organização, carregar autoridades "
+                    + "e continuar"
+    )
+    void deveValidarOrganizacaoCarregarAutoridadesEContinuar()
+            throws Exception {
+        autenticarUsuario();
+
+        var request =
+                criarRequestComOrganizacao("20");
+
+        var response =
+                new MockHttpServletResponse();
 
         filter.doFilter(
                 request,
@@ -130,6 +199,12 @@ class ContextoOrganizacaoFilterTest {
 
         verify(contextoOrganizacaoService)
                 .definir(20L);
+
+        verify(autoridadesOrganizacaoService)
+                .buscar(
+                        ID_USUARIO,
+                        20L
+                );
 
         verify(filterChain).doFilter(
                 request,
@@ -140,14 +215,18 @@ class ContextoOrganizacaoFilterTest {
     }
 
     @Test
-    @DisplayName("Deve aceitar espaços ao redor do id")
+    @DisplayName(
+            "Deve aceitar espaços ao redor do id"
+    )
     void deveAceitarEspacosAoRedorDoId()
             throws Exception {
         autenticarUsuario();
 
         var request =
                 criarRequestComOrganizacao(" 20 ");
-        var response = new MockHttpServletResponse();
+
+        var response =
+                new MockHttpServletResponse();
 
         filter.doFilter(
                 request,
@@ -158,6 +237,12 @@ class ContextoOrganizacaoFilterTest {
         verify(contextoOrganizacaoService)
                 .definir(20L);
 
+        verify(autoridadesOrganizacaoService)
+                .buscar(
+                        ID_USUARIO,
+                        20L
+                );
+
         verify(filterChain).doFilter(
                 request,
                 response
@@ -165,13 +250,18 @@ class ContextoOrganizacaoFilterTest {
     }
 
     @Test
-    @DisplayName("Deve retornar 400 para header vazio")
+    @DisplayName(
+            "Deve retornar 400 para header vazio"
+    )
     void deveRetornar400ParaHeaderVazio()
             throws Exception {
         autenticarUsuario();
 
-        var request = criarRequestComOrganizacao("");
-        var response = new MockHttpServletResponse();
+        var request =
+                criarRequestComOrganizacao("");
+
+        var response =
+                new MockHttpServletResponse();
 
         filter.doFilter(
                 request,
@@ -198,24 +288,32 @@ class ContextoOrganizacaoFilterTest {
 
         verifyNoInteractions(
                 contextoOrganizacaoService,
+                autoridadesOrganizacaoService,
                 acessoNegadoHandler
         );
 
         verify(
                 filterChain,
                 never()
-        ).doFilter(request, response);
+        ).doFilter(
+                request,
+                response
+        );
     }
 
     @Test
-    @DisplayName("Deve retornar 400 para header não numérico")
+    @DisplayName(
+            "Deve retornar 400 para header não numérico"
+    )
     void deveRetornar400ParaHeaderNaoNumerico()
             throws Exception {
         autenticarUsuario();
 
         var request =
                 criarRequestComOrganizacao("abc");
-        var response = new MockHttpServletResponse();
+
+        var response =
+                new MockHttpServletResponse();
 
         filter.doFilter(
                 request,
@@ -233,29 +331,40 @@ class ContextoOrganizacaoFilterTest {
 
         verifyNoInteractions(
                 contextoOrganizacaoService,
+                autoridadesOrganizacaoService,
                 acessoNegadoHandler
         );
 
         verify(
                 filterChain,
                 never()
-        ).doFilter(request, response);
+        ).doFilter(
+                request,
+                response
+        );
     }
 
     @Test
-    @DisplayName("Deve retornar 400 para organização inválida")
+    @DisplayName(
+            "Deve retornar 400 para organização inválida"
+    )
     void deveRetornar400ParaOrganizacaoInvalida()
             throws Exception {
         autenticarUsuario();
 
-        var request = criarRequestComOrganizacao("0");
-        var response = new MockHttpServletResponse();
+        var request =
+                criarRequestComOrganizacao("0");
 
-        var exception = new ValidacaoException(
-                "Organizacao invalida."
-        );
+        var response =
+                new MockHttpServletResponse();
 
-        org.mockito.Mockito.doThrow(exception)
+        var exception =
+                new ValidacaoException(
+                        "Organizacao invalida."
+                );
+
+        org.mockito.Mockito
+                .doThrow(exception)
                 .when(contextoOrganizacaoService)
                 .definir(0L);
 
@@ -273,26 +382,41 @@ class ContextoOrganizacaoFilterTest {
                         "\"mensagem\":\"Organizacao invalida.\""
                 );
 
+        verifyNoInteractions(
+                autoridadesOrganizacaoService,
+                acessoNegadoHandler
+        );
+
         verify(
                 filterChain,
                 never()
-        ).doFilter(request, response);
+        ).doFilter(
+                request,
+                response
+        );
     }
 
     @Test
-    @DisplayName("Deve delegar acesso negado ao handler")
+    @DisplayName(
+            "Deve delegar acesso negado ao handler"
+    )
     void deveDelegarAcessoNegadoAoHandler()
             throws Exception {
         autenticarUsuario();
 
-        var request = criarRequestComOrganizacao("20");
-        var response = new MockHttpServletResponse();
+        var request =
+                criarRequestComOrganizacao("20");
 
-        var exception = new AccessDeniedException(
-                "Acesso negado."
-        );
+        var response =
+                new MockHttpServletResponse();
 
-        org.mockito.Mockito.doThrow(exception)
+        var exception =
+                new AccessDeniedException(
+                        "Acesso negado."
+                );
+
+        org.mockito.Mockito
+                .doThrow(exception)
                 .when(contextoOrganizacaoService)
                 .definir(20L);
 
@@ -308,10 +432,17 @@ class ContextoOrganizacaoFilterTest {
                 exception
         );
 
+        verifyNoInteractions(
+                autoridadesOrganizacaoService
+        );
+
         verify(
                 filterChain,
                 never()
-        ).doFilter(request, response);
+        ).doFilter(
+                request,
+                response
+        );
     }
 
     @Test
@@ -323,17 +454,23 @@ class ContextoOrganizacaoFilterTest {
             throws Exception {
         autenticarUsuario();
 
-        var request = criarRequestComOrganizacao("20");
-        var response = new MockHttpServletResponse();
+        var request =
+                criarRequestComOrganizacao("20");
 
-        org.mockito.Mockito.doThrow(
-                new ValidacaoException(
-                        "Erro do controller."
+        var response =
+                new MockHttpServletResponse();
+
+        org.mockito.Mockito
+                .doThrow(
+                        new ValidacaoException(
+                                "Erro do controller."
+                        )
                 )
-        ).when(filterChain).doFilter(
-                request,
-                response
-        );
+                .when(filterChain)
+                .doFilter(
+                        request,
+                        response
+                );
 
         assertThatThrownBy(() ->
                 filter.doFilter(
@@ -347,11 +484,20 @@ class ContextoOrganizacaoFilterTest {
 
         verify(contextoOrganizacaoService)
                 .definir(20L);
+
+        verify(autoridadesOrganizacaoService)
+                .buscar(
+                        ID_USUARIO,
+                        20L
+                );
     }
 
     private MockHttpServletRequest
-            criarRequestComOrganizacao(String id) {
-        var request = new MockHttpServletRequest();
+            criarRequestComOrganizacao(
+                    String id
+            ) {
+        var request =
+                new MockHttpServletRequest();
 
         request.addHeader(
                 ContextoOrganizacaoFilter
@@ -363,9 +509,18 @@ class ContextoOrganizacaoFilterTest {
     }
 
     private void autenticarUsuario() {
+        var usuario =
+                new UsuarioModel();
+
+        ReflectionTestUtils.setField(
+                usuario,
+                "id",
+                ID_USUARIO
+        );
+
         var usuarioAutenticado =
                 new UsuarioAutenticado(
-                        new UsuarioModel(),
+                        usuario,
                         List.of()
                 );
 
@@ -378,6 +533,8 @@ class ContextoOrganizacaoFilterTest {
 
         SecurityContextHolder
                 .getContext()
-                .setAuthentication(authentication);
+                .setAuthentication(
+                        authentication
+                );
     }
 }

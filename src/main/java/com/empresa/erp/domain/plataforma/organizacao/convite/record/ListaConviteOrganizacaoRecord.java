@@ -5,18 +5,17 @@ import java.time.LocalDateTime;
 import com.empresa.erp.domain.plataforma.organizacao.convite.model.ConviteOrganizacaoModel;
 import com.empresa.erp.domain.plataforma.organizacao.convite.model.StatusConviteOrganizacaoEnum;
 
-public record DetalheConviteOrganizacaoRecord(
+public record ListaConviteOrganizacaoRecord(
         Long id,
         String nomeOrganizacao,
         String emailAdministrador,
         LocalDateTime criadoEm,
         LocalDateTime expiraEm,
-        LocalDateTime aceitoEm,
         StatusConviteOrganizacaoEnum status,
         boolean expirado
 ) {
 
-    public DetalheConviteOrganizacaoRecord(
+    public ListaConviteOrganizacaoRecord(
             ConviteOrganizacaoModel convite,
             LocalDateTime referencia
     ) {
@@ -26,7 +25,6 @@ public record DetalheConviteOrganizacaoRecord(
                 convite.getEmailAdministrador(),
                 convite.getCriadoEm(),
                 convite.getExpiraEm(),
-                convite.getAceitoEm(),
                 convite.getStatus(),
                 convite.getStatus()
                         == StatusConviteOrganizacaoEnum.PENDENTE

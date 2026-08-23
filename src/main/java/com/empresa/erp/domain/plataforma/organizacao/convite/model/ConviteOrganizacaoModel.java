@@ -121,6 +121,14 @@ public class ConviteOrganizacaoModel
                 && expiraEm.isAfter(referencia);
     }
 
+    public void renovar(
+            String novoTokenHash,
+            LocalDateTime novaExpiracao
+    ) {
+        this.tokenHash = novoTokenHash;
+        this.expiraEm = novaExpiracao;
+    }
+
     public void aceitar(
             LocalDateTime dataAceitacao
     ) {
