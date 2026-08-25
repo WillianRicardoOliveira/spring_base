@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.auth;
+package com.empresa.erp.core.security.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;

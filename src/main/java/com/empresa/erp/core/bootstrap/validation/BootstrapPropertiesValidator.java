@@ -95,6 +95,13 @@ public class BootstrapPropertiesValidator {
             String email,
             String senha
     ) {
+        if (email != null) {
+            validarEmail(
+                    identificacao,
+                    email
+            );
+        }
+
         var credenciais =
                 new CredenciaisAdministrador(
                         email,
@@ -112,11 +119,6 @@ public class BootstrapPropertiesValidator {
                             + " invalidos"
             );
         }
-
-        validarEmail(
-                identificacao,
-                email
-        );
 
         validarSenha(
                 identificacao,

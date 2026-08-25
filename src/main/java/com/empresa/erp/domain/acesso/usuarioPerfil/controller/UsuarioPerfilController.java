@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.acesso;
+package com.empresa.erp.domain.acesso.usuarioPerfil.controller;
 
 import java.util.List;
 

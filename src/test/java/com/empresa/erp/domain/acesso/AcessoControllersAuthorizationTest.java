@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.acesso;
+package com.empresa.erp.domain.acesso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,8 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.empresa.erp.domain.acesso.perfil.controller.PerfilController;
 import com.empresa.erp.domain.acesso.perfil.record.AtualizaPerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
+import com.empresa.erp.domain.acesso.perfilPermissao.controller.PerfilPermissaoController;
 import com.empresa.erp.domain.acesso.perfilPermissao.record.PerfilPermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.controller.PermissaoController;
 import com.empresa.erp.domain.acesso.permissao.record.AtualizaPermissaoRecord;
@@ -17,6 +19,7 @@ import com.empresa.erp.domain.acesso.permissao.record.PermissaoRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.controller.UsuarioEmpresaController;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
+import com.empresa.erp.domain.acesso.usuarioPerfil.controller.UsuarioPerfilController;
 import com.empresa.erp.domain.acesso.usuarioPerfil.record.UsuarioPerfilRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.controller.UsuarioSubsidiariaController;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.UsuarioSubsidiariaRecord;
@@ -27,7 +30,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissoes do PerfilController"
+            "Deve validar permissões do PerfilController"
     )
     void deveValidarPermissoesDoPerfilController()
             throws Exception {
@@ -76,7 +79,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissoes do PermissaoController"
+            "Deve validar permissões do PermissaoController"
     )
     void deveValidarPermissoesDoPermissaoController()
             throws Exception {
@@ -125,7 +128,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissoes do PerfilPermissaoController"
+            "Deve validar permissões do PerfilPermissaoController"
     )
     void deveValidarPermissoesDoPerfilPermissaoController()
             throws Exception {
@@ -166,7 +169,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissoes do UsuarioPerfilController"
+            "Deve validar permissões do UsuarioPerfilController"
     )
     void deveValidarPermissoesDoUsuarioPerfilController()
             throws Exception {
@@ -206,7 +209,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissoes do UsuarioEmpresaController"
+            "Deve validar permissões do UsuarioEmpresaController"
     )
     void deveValidarPermissoesDoUsuarioEmpresaController()
             throws Exception {
@@ -265,7 +268,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissoes do UsuarioSubsidiariaController"
+            "Deve validar permissões do UsuarioSubsidiariaController"
     )
     void deveValidarPermissoesDoUsuarioSubsidiariaController()
             throws Exception {
@@ -306,7 +309,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissoes do UsuarioController"
+            "Deve validar permissões do UsuarioController"
     )
     void deveValidarPermissoesDoUsuarioController()
             throws Exception {

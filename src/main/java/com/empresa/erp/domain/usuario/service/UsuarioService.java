@@ -24,7 +24,6 @@ import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.DetalheUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.ListaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
-import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,8 +31,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UsuarioService
         implements UserDetailsService {
-
-    private final UsuarioRepository repository;
 
     private final UsuarioOrganizacaoRepository
             usuarioOrganizacaoRepository;

@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.acesso;
+package com.empresa.erp.domain.acesso.perfil.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

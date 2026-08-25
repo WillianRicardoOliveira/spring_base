@@ -1,4 +1,4 @@
-package com.empresa.erp.controller.auth;
+package com.empresa.erp.core.security.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
