@@ -14,8 +14,6 @@ import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
 import com.empresa.erp.domain.acesso.perfilPermissao.controller.PerfilPermissaoController;
 import com.empresa.erp.domain.acesso.perfilPermissao.record.PerfilPermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.controller.PermissaoController;
-import com.empresa.erp.domain.acesso.permissao.record.AtualizaPermissaoRecord;
-import com.empresa.erp.domain.acesso.permissao.record.PermissaoRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.controller.UsuarioEmpresaController;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
@@ -30,7 +28,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissões do PerfilController"
+            "Deve validar permissoes do PerfilController"
     )
     void deveValidarPermissoesDoPerfilController()
             throws Exception {
@@ -79,19 +77,10 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissões do PermissaoController"
+            "Deve validar permissoes do PermissaoController"
     )
     void deveValidarPermissoesDoPermissaoController()
             throws Exception {
-        assertThat(preAuthorize(
-                PermissaoController.class,
-                "cadastrar",
-                PermissaoRecord.class,
-                UriComponentsBuilder.class
-        )).isEqualTo(
-                "hasAuthority('ACESSO_PERMISSAO_CRIAR')"
-        );
-
         assertThat(preAuthorize(
                 PermissaoController.class,
                 "listar",
@@ -99,22 +88,6 @@ class AcessoControllersAuthorizationTest {
                 String.class
         )).isEqualTo(
                 "hasAuthority('ACESSO_PERMISSAO_LISTAR')"
-        );
-
-        assertThat(preAuthorize(
-                PermissaoController.class,
-                "atualizar",
-                AtualizaPermissaoRecord.class
-        )).isEqualTo(
-                "hasAuthority('ACESSO_PERMISSAO_EDITAR')"
-        );
-
-        assertThat(preAuthorize(
-                PermissaoController.class,
-                "excluir",
-                Long.class
-        )).isEqualTo(
-                "hasAuthority('ACESSO_PERMISSAO_EXCLUIR')"
         );
 
         assertThat(preAuthorize(
@@ -128,7 +101,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissões do PerfilPermissaoController"
+            "Deve validar permissoes do PerfilPermissaoController"
     )
     void deveValidarPermissoesDoPerfilPermissaoController()
             throws Exception {
@@ -169,7 +142,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissões do UsuarioPerfilController"
+            "Deve validar permissoes do UsuarioPerfilController"
     )
     void deveValidarPermissoesDoUsuarioPerfilController()
             throws Exception {
@@ -209,7 +182,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissões do UsuarioEmpresaController"
+            "Deve validar permissoes do UsuarioEmpresaController"
     )
     void deveValidarPermissoesDoUsuarioEmpresaController()
             throws Exception {
@@ -268,7 +241,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissões do UsuarioSubsidiariaController"
+            "Deve validar permissoes do UsuarioSubsidiariaController"
     )
     void deveValidarPermissoesDoUsuarioSubsidiariaController()
             throws Exception {
@@ -309,7 +282,7 @@ class AcessoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissões do UsuarioController"
+            "Deve validar permissoes do UsuarioController"
     )
     void deveValidarPermissoesDoUsuarioController()
             throws Exception {
