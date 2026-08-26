@@ -2,14 +2,17 @@ package com.empresa.erp.domain.acesso.permissao.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
-import com.empresa.erp.domain.acesso.permissao.record.PermissaoRecord;
 import com.empresa.erp.domain.old.StatusEnum;
 
 @DataJpaTest(properties = {
@@ -22,106 +25,350 @@ class PermissaoRepositoryTest {
     private PermissaoRepository repository;
 
     @Test
-    @DisplayName("Deve listar permissoes ativas")
-    void deveListarPermissoesAtivas() {
-        var permissaoAtiva = repository.save(new PermissaoModel(new PermissaoRecord(
-                "Listar usuarios",
-                "ACESSO_USUARIO_LISTAR",
-                "Permite listar usuarios"
-        )));
+    @DisplayName(
+            "Deve listar somente permissões ativas do escopo informado"
+    )
+    void deveListarSomentePermissoesAtivasDoEscopoInformado() {
+        var permissaoOrganizacaoAtiva =
+                salvarPermissao(
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR",
+                        "Permite listar usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
 
-        var permissaoInativa = repository.save(new PermissaoModel(new PermissaoRecord(
-        		"Excluir usuarios",
-        		"ACESSO_USUARIO_EXCLUIR",
-        		"Permite excluir usuarios"
-        )));
-        permissaoInativa.inativar();
-        repository.save(permissaoInativa);
+        var permissaoOrganizacaoInativa =
+                salvarPermissao(
+                        "Excluir usuários",
+                        "ACESSO_USUARIO_EXCLUIR",
+                        "Permite excluir usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.INATIVO
+                );
 
-        var resultado = repository.findAllByStatus(PageRequest.of(0, 10), StatusEnum.ATIVO);
+        var permissaoPlataformaAtiva =
+                salvarPermissao(
+                        "Listar organizações",
+                        "PLATAFORMA_ORGANIZACAO_LISTAR",
+                        "Permite listar organizações",
+                        true,
+                        EscopoPermissaoEnum.PLATAFORMA,
+                        StatusEnum.ATIVO
+                );
+
+        var resultado =
+                repository.findAllByEscopoAndStatus(
+                        PageRequest.of(0, 10),
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
 
         assertThat(resultado.getContent())
                 .extracting(PermissaoModel::getId)
-                .contains(permissaoAtiva.getId())
-                .doesNotContain(permissaoInativa.getId());
+                .containsExactly(
+                        permissaoOrganizacaoAtiva.getId()
+                )
+                .doesNotContain(
+                        permissaoOrganizacaoInativa.getId(),
+                        permissaoPlataformaAtiva.getId()
+                );
     }
 
     @Test
-    @DisplayName("Deve filtrar permissoes ativas por nome ignorando caixa")
-    void deveFiltrarPermissoesAtivasPorNomeIgnorandoCaixa() {
-        repository.save(new PermissaoModel(new PermissaoRecord(
-                "Listar usuarios",
-                "ACESSO_USUARIO_LISTAR",
-                "Permite listar usuarios"
-        )));
+    @DisplayName(
+            "Deve filtrar permissões por nome ignorando caixa, escopo e status"
+    )
+    void deveFiltrarPermissoesPorNomeIgnorandoCaixaEscopoEStatus() {
+        var permissaoEsperada =
+                salvarPermissao(
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR",
+                        "Permite listar usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
 
-        repository.save(new PermissaoModel(new PermissaoRecord(
+        salvarPermissao(
                 "Editar perfis",
                 "ACESSO_PERFIL_EDITAR",
-                "Permite editar perfis"
-        )));
-
-        var resultado = repository.findByNomeContainingIgnoreCaseAndStatus(
-                PageRequest.of(0, 10),
-                "LISTAR",
+                "Permite editar perfis",
+                true,
+                EscopoPermissaoEnum.ORGANIZACAO,
                 StatusEnum.ATIVO
         );
 
-        assertThat(resultado.getContent()).hasSize(1);
-        assertThat(resultado.getContent().get(0).getNome()).isEqualTo("Listar usuarios");
-    }
-
-    @Test
-    @DisplayName("Deve verificar existencia por chave ignorando caixa e status")
-    void deveVerificarExistenciaPorChaveIgnorandoCaixaEStatus() {
-        repository.save(new PermissaoModel(new PermissaoRecord(
-                "Listar usuarios",
-                "ACESSO_USUARIO_LISTAR",
-                "Permite listar usuarios"
-        )));
-
-        var existe = repository.existsByChaveIgnoreCaseAndStatus(
-                "acesso_usuario_listar",
+        salvarPermissao(
+                "Listar organizações",
+                "PLATAFORMA_ORGANIZACAO_LISTAR",
+                "Permite listar organizações",
+                true,
+                EscopoPermissaoEnum.PLATAFORMA,
                 StatusEnum.ATIVO
         );
 
-        var naoExiste = repository.existsByChaveIgnoreCaseAndStatus(
-                "acesso_usuario_listar",
+        salvarPermissao(
+                "Listar acessos removidos",
+                "ACESSO_REMOVIDO_LISTAR",
+                "Permite listar acessos removidos",
+                true,
+                EscopoPermissaoEnum.ORGANIZACAO,
                 StatusEnum.REMOVIDO
         );
 
-        assertThat(existe).isTrue();
-        assertThat(naoExiste).isFalse();
+        var resultado =
+                repository
+                        .findByNomeContainingIgnoreCaseAndEscopoAndStatus(
+                                PageRequest.of(0, 10),
+                                "LISTAR",
+                                EscopoPermissaoEnum.ORGANIZACAO,
+                                StatusEnum.ATIVO
+                        );
+
+        assertThat(resultado.getContent())
+                .extracting(PermissaoModel::getId)
+                .containsExactly(
+                        permissaoEsperada.getId()
+                );
     }
 
     @Test
-    @DisplayName("Deve verificar existencia por chave excluindo id")
-    void deveVerificarExistenciaPorChaveExcluindoId() {
-        var permissao = repository.save(new PermissaoModel(new PermissaoRecord(
-                "Listar usuarios",
-                "ACESSO_USUARIO_LISTAR",
-                "Permite listar usuarios"
-        )));
+    @DisplayName(
+            "Deve listar permissões do sistema por escopo e status ordenadas por id"
+    )
+    void deveListarPermissoesDoSistemaPorEscopoEStatusOrdenadasPorId() {
+        var primeiraPermissao =
+                salvarPermissao(
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR",
+                        "Permite listar usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
 
-        repository.save(new PermissaoModel(new PermissaoRecord(
-        		"Excluir usuarios",
-        		"ACESSO_USUARIO_EXCLUIR",
-        		"Permite excluir usuarios"
-        )));
+        var segundaPermissao =
+                salvarPermissao(
+                        "Editar usuários",
+                        "ACESSO_USUARIO_EDITAR",
+                        "Permite editar usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
 
-        var existeEmOutroRegistro = repository.existsByChaveIgnoreCaseAndStatusAndIdNot(
-        		"acesso_usuario_excluir",
-                StatusEnum.ATIVO,
-                permissao.getId()
+        var permissaoNaoControladaPeloSistema =
+                salvarPermissao(
+                        "Consultar relatório personalizado",
+                        "RELATORIO_PERSONALIZADO_CONSULTAR",
+                        "Permite consultar relatório personalizado",
+                        false,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
+
+        var permissaoDaPlataforma =
+                salvarPermissao(
+                        "Listar organizações",
+                        "PLATAFORMA_ORGANIZACAO_LISTAR",
+                        "Permite listar organizações",
+                        true,
+                        EscopoPermissaoEnum.PLATAFORMA,
+                        StatusEnum.ATIVO
+                );
+
+        var permissaoInativa =
+                salvarPermissao(
+                        "Excluir usuários",
+                        "ACESSO_USUARIO_EXCLUIR",
+                        "Permite excluir usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.INATIVO
+                );
+
+        var resultado =
+                repository
+                        .findAllBySistemaTrueAndEscopoAndStatusOrderByIdAsc(
+                                EscopoPermissaoEnum.ORGANIZACAO,
+                                StatusEnum.ATIVO
+                        );
+
+        assertThat(resultado)
+                .extracting(PermissaoModel::getId)
+                .containsExactly(
+                        primeiraPermissao.getId(),
+                        segundaPermissao.getId()
+                )
+                .doesNotContain(
+                        permissaoNaoControladaPeloSistema.getId(),
+                        permissaoDaPlataforma.getId(),
+                        permissaoInativa.getId()
+                );
+    }
+
+    @Test
+    @DisplayName(
+            "Deve buscar permissão por id, escopo e status"
+    )
+    void deveBuscarPermissaoPorIdEscopoEStatus() {
+        var permissao =
+                salvarPermissao(
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR",
+                        "Permite listar usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
+
+        var resultado =
+                repository.findByIdAndEscopoAndStatus(
+                        permissao.getId(),
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
+
+        assertThat(resultado)
+                .isPresent();
+
+        assertThat(resultado.get().getId())
+                .isEqualTo(permissao.getId());
+
+        assertThat(resultado.get().getNome())
+                .isEqualTo("Listar usuários");
+
+        assertThat(resultado.get().getEscopo())
+                .isEqualTo(EscopoPermissaoEnum.ORGANIZACAO);
+
+        assertThat(resultado.get().getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
+    }
+
+    @Test
+    @DisplayName(
+            "Não deve buscar permissão quando o escopo for diferente"
+    )
+    void naoDeveBuscarPermissaoQuandoEscopoForDiferente() {
+        var permissao =
+                salvarPermissao(
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR",
+                        "Permite listar usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
+
+        var resultado =
+                repository.findByIdAndEscopoAndStatus(
+                        permissao.getId(),
+                        EscopoPermissaoEnum.PLATAFORMA,
+                        StatusEnum.ATIVO
+                );
+
+        assertThat(resultado)
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName(
+            "Não deve buscar permissão quando o status for diferente"
+    )
+    void naoDeveBuscarPermissaoQuandoStatusForDiferente() {
+        var permissao =
+                salvarPermissao(
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR",
+                        "Permite listar usuários",
+                        true,
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.ATIVO
+                );
+
+        var resultado =
+                repository.findByIdAndEscopoAndStatus(
+                        permissao.getId(),
+                        EscopoPermissaoEnum.ORGANIZACAO,
+                        StatusEnum.REMOVIDO
+                );
+
+        assertThat(resultado)
+                .isEmpty();
+    }
+
+    private PermissaoModel salvarPermissao(
+            String nome,
+            String chave,
+            String descricao,
+            Boolean sistema,
+            EscopoPermissaoEnum escopo,
+            StatusEnum status
+    ) {
+        PermissaoModel permissao =
+                instanciarPermissao();
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "nome",
+                nome
         );
 
-        var naoExisteNoMesmoRegistro = repository.existsByChaveIgnoreCaseAndStatusAndIdNot(
-                "acesso_usuario_listar",
-                StatusEnum.ATIVO,
-                permissao.getId()
+        ReflectionTestUtils.setField(
+                permissao,
+                "chave",
+                chave
         );
 
-        assertThat(existeEmOutroRegistro).isTrue();
-        assertThat(naoExisteNoMesmoRegistro).isFalse();
+        ReflectionTestUtils.setField(
+                permissao,
+                "descricao",
+                descricao
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "sistema",
+                sistema
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "escopo",
+                escopo
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "status",
+                status
+        );
+
+        return repository.save(permissao);
+    }
+
+    private PermissaoModel instanciarPermissao() {
+        try {
+            var construtor =
+                    PermissaoModel.class
+                            .getDeclaredConstructor();
+
+            construtor.setAccessible(true);
+
+            return construtor.newInstance();
+        } catch (
+                InstantiationException
+                | IllegalAccessException
+                | InvocationTargetException
+                | NoSuchMethodException exception
+        ) {
+            throw new IllegalStateException(
+                    "Não foi possível criar permissão para o teste.",
+                    exception
+            );
+        }
     }
 }

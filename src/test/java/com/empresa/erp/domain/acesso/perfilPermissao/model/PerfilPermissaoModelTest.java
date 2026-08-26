@@ -2,54 +2,233 @@ package com.empresa.erp.domain.acesso.perfilPermissao.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.domain.acesso.perfil.model.PerfilModel;
 import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
+import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
-import com.empresa.erp.domain.acesso.permissao.record.PermissaoRecord;
 import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 class PerfilPermissaoModelTest {
 
     @Test
-    @DisplayName("Deve criar vinculo ativo entre perfil e permissao")
+    @DisplayName(
+            "Deve criar vínculo ativo entre perfil e permissão"
+    )
     void deveCriarVinculoAtivoEntrePerfilEPermissao() {
-        var perfil = criarPerfil(1L, "Administrador");
-        var permissao = criarPermissao(2L, "Listar usuarios", "ACESSO_USUARIO_LISTAR");
+        PerfilModel perfil =
+                criarPerfil(
+                        1L,
+                        "Administrador"
+                );
 
-        var perfilPermissao = new PerfilPermissaoModel(perfil, permissao);
+        PermissaoModel permissao =
+                criarPermissao(
+                        2L,
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR"
+                );
 
-        assertThat(perfilPermissao.getPerfil()).isEqualTo(perfil);
-        assertThat(perfilPermissao.getPermissao()).isEqualTo(permissao);
-        assertThat(perfilPermissao.getStatus()).isEqualTo(StatusEnum.ATIVO);
+        PerfilPermissaoModel perfilPermissao =
+                new PerfilPermissaoModel(
+                        perfil,
+                        permissao
+                );
+
+        assertThat(perfilPermissao.getPerfil())
+                .isSameAs(perfil);
+
+        assertThat(perfilPermissao.getPermissao())
+                .isSameAs(permissao);
+
+        assertThat(perfilPermissao.getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
+
+        assertThat(perfilPermissao.getRemovidoPor())
+                .isNull();
+
+        assertThat(perfilPermissao.getRemovidoEm())
+                .isNull();
     }
 
     @Test
-    @DisplayName("Deve remover vinculo entre perfil e permissao registrando auditoria")
+    @DisplayName(
+            "Deve remover vínculo entre perfil e permissão registrando auditoria"
+    )
     void deveRemoverVinculoEntrePerfilEPermissaoRegistrandoAuditoria() {
-        var perfil = criarPerfil(1L, "Administrador");
-        var permissao = criarPermissao(2L, "Listar usuarios", "ACESSO_USUARIO_LISTAR");
-        var perfilPermissao = new PerfilPermissaoModel(perfil, permissao);
+        PerfilModel perfil =
+                criarPerfil(
+                        1L,
+                        "Administrador"
+                );
+
+        PermissaoModel permissao =
+                criarPermissao(
+                        2L,
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR"
+                );
+
+        PerfilPermissaoModel perfilPermissao =
+                new PerfilPermissaoModel(
+                        perfil,
+                        permissao
+                );
 
         perfilPermissao.remover(10L);
 
-        assertThat(perfilPermissao.getStatus()).isEqualTo(StatusEnum.REMOVIDO);
-        assertThat(perfilPermissao.getRemovidoPor()).isEqualTo(10L);
-        assertThat(perfilPermissao.getRemovidoEm()).isNotNull();
+        assertThat(perfilPermissao.getStatus())
+                .isEqualTo(StatusEnum.REMOVIDO);
+
+        assertThat(perfilPermissao.getRemovidoPor())
+                .isEqualTo(10L);
+
+        assertThat(perfilPermissao.getRemovidoEm())
+                .isNotNull();
     }
 
-    private PerfilModel criarPerfil(Long id, String nome) {
-        var perfil = new PerfilModel(new PerfilRecord(nome, "Perfil " + nome));
-        ReflectionTestUtils.setField(perfil, "id", id);
+    @Test
+    @DisplayName(
+            "Deve reativar vínculo removido e limpar auditoria de remoção"
+    )
+    void deveReativarVinculoRemovidoELimparAuditoriaDeRemocao() {
+        PerfilModel perfil =
+                criarPerfil(
+                        1L,
+                        "Administrador"
+                );
+
+        PermissaoModel permissao =
+                criarPermissao(
+                        2L,
+                        "Listar usuários",
+                        "ACESSO_USUARIO_LISTAR"
+                );
+
+        PerfilPermissaoModel perfilPermissao =
+                new PerfilPermissaoModel(
+                        perfil,
+                        permissao
+                );
+
+        perfilPermissao.remover(10L);
+        perfilPermissao.reativar();
+
+        assertThat(perfilPermissao.getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
+
+        assertThat(perfilPermissao.getRemovidoPor())
+                .isNull();
+
+        assertThat(perfilPermissao.getRemovidoEm())
+                .isNull();
+    }
+
+    private PerfilModel criarPerfil(
+            Long id,
+            String nome
+    ) {
+        OrganizacaoModel organizacao =
+                new OrganizacaoModel(
+                        "Organização Principal"
+                );
+
+        PerfilModel perfil =
+                new PerfilModel(
+                        organizacao,
+                        new PerfilRecord(
+                                nome,
+                                "Perfil " + nome
+                        )
+                );
+
+        ReflectionTestUtils.setField(
+                perfil,
+                "id",
+                id
+        );
+
         return perfil;
     }
 
-    private PermissaoModel criarPermissao(Long id, String nome, String chave) {
-        var permissao = new PermissaoModel(new PermissaoRecord(nome, chave, "Permite " + nome));
-        ReflectionTestUtils.setField(permissao, "id", id);
+    private PermissaoModel criarPermissao(
+            Long id,
+            String nome,
+            String chave
+    ) {
+        PermissaoModel permissao =
+                instanciarPermissao();
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "id",
+                id
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "nome",
+                nome
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "chave",
+                chave
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "descricao",
+                "Permite " + nome
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "sistema",
+                true
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "escopo",
+                EscopoPermissaoEnum.ORGANIZACAO
+        );
+
+        ReflectionTestUtils.setField(
+                permissao,
+                "status",
+                StatusEnum.ATIVO
+        );
+
         return permissao;
+    }
+
+    private PermissaoModel instanciarPermissao() {
+        try {
+            var construtor =
+                    PermissaoModel.class
+                            .getDeclaredConstructor();
+
+            construtor.setAccessible(true);
+
+            return construtor.newInstance();
+        } catch (
+                InstantiationException
+                | IllegalAccessException
+                | InvocationTargetException
+                | NoSuchMethodException exception
+        ) {
+            throw new IllegalStateException(
+                    "Não foi possível criar permissão para o teste.",
+                    exception
+            );
+        }
     }
 }
