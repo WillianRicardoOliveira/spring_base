@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.old.StatusEnum;
@@ -18,17 +19,29 @@ class UsuarioEmpresaModelTest {
     @Test
     @DisplayName("Deve criar vinculo ativo")
     void deveCriarVinculoAtivo() {
+        var organizacao = criarOrganizacao();
         var usuario = criarUsuario();
-        var empresa = criarEmpresa();
+        var usuarioOrganizacao =
+                criarUsuarioOrganizacao(
+                        usuario,
+                        organizacao
+                );
+        var empresa = criarEmpresa(organizacao);
 
         var usuarioEmpresa = new UsuarioEmpresaModel(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
 
-        assertThat(usuarioEmpresa.getUsuario())
-                .isSameAs(usuario);
+        assertThat(usuarioEmpresa.getUsuarioOrganizacao())
+                .isSameAs(usuarioOrganizacao);
+
+        assertThat(
+                usuarioEmpresa
+                        .getUsuarioOrganizacao()
+                        .getUsuario()
+        ).isSameAs(usuario);
 
         assertThat(usuarioEmpresa.getEmpresa())
                 .isSameAs(empresa);
@@ -43,11 +56,7 @@ class UsuarioEmpresaModelTest {
     @Test
     @DisplayName("Deve atualizar acesso a todas subsidiarias")
     void deveAtualizarAcessoATodasSubsidiarias() {
-        var usuarioEmpresa = new UsuarioEmpresaModel(
-                criarUsuario(),
-                criarEmpresa(),
-                false
-        );
+        var usuarioEmpresa = criarUsuarioEmpresa(false);
 
         usuarioEmpresa.atualizar(
                 new AtualizaUsuarioEmpresaRecord(
@@ -63,11 +72,7 @@ class UsuarioEmpresaModelTest {
     @Test
     @DisplayName("Deve inativar vinculo")
     void deveInativarVinculo() {
-        var usuarioEmpresa = new UsuarioEmpresaModel(
-                criarUsuario(),
-                criarEmpresa(),
-                false
-        );
+        var usuarioEmpresa = criarUsuarioEmpresa(false);
 
         usuarioEmpresa.inativar();
 
@@ -78,11 +83,7 @@ class UsuarioEmpresaModelTest {
     @Test
     @DisplayName("Deve remover vinculo com auditoria")
     void deveRemoverVinculoComAuditoria() {
-        var usuarioEmpresa = new UsuarioEmpresaModel(
-                criarUsuario(),
-                criarEmpresa(),
-                false
-        );
+        var usuarioEmpresa = criarUsuarioEmpresa(false);
 
         usuarioEmpresa.remover(10L);
 
@@ -96,6 +97,32 @@ class UsuarioEmpresaModelTest {
                 .isNotNull();
     }
 
+    private UsuarioEmpresaModel criarUsuarioEmpresa(
+            Boolean todasSubsidiarias
+    ) {
+        var organizacao = criarOrganizacao();
+
+        return new UsuarioEmpresaModel(
+                criarUsuarioOrganizacao(
+                        criarUsuario(),
+                        organizacao
+                ),
+                criarEmpresa(organizacao),
+                todasSubsidiarias
+        );
+    }
+
+    private UsuarioOrganizacaoModel
+            criarUsuarioOrganizacao(
+                    UsuarioModel usuario,
+                    OrganizacaoModel organizacao
+            ) {
+        return new UsuarioOrganizacaoModel(
+                usuario,
+                organizacao
+        );
+    }
+
     private UsuarioModel criarUsuario() {
         return new UsuarioModel(
                 new UsuarioRecord(
@@ -106,12 +133,15 @@ class UsuarioEmpresaModelTest {
         );
     }
 
-    private EmpresaModel criarEmpresa() {
-        var organizacao =
-                new OrganizacaoModel(
-                        "Organizacao Principal"
-                );
+    private OrganizacaoModel criarOrganizacao() {
+        return new OrganizacaoModel(
+                "Organizacao Principal"
+        );
+    }
 
+    private EmpresaModel criarEmpresa(
+            OrganizacaoModel organizacao
+    ) {
         return new EmpresaModel(
                 organizacao,
                 new EmpresaRecord(
