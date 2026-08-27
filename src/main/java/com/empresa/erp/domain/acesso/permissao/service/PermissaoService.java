@@ -11,7 +11,7 @@ import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
 import com.empresa.erp.domain.acesso.permissao.record.DetalhePermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.record.ListaPermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.repository.PermissaoRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
 

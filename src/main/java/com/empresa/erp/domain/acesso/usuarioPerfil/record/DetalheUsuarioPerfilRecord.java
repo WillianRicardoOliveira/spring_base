@@ -1,7 +1,7 @@
 package com.empresa.erp.domain.acesso.usuarioPerfil.record;
 
 import com.empresa.erp.domain.acesso.usuarioPerfil.model.UsuarioPerfilModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 public record DetalheUsuarioPerfilRecord(
         Long id,

@@ -33,7 +33,7 @@ import com.empresa.erp.domain.acesso.perfil.record.DetalhePerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.ListaPerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.service.PerfilService;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

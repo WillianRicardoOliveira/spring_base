@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.usuarioPerfil.repository.UsuarioPerfilRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 @ExtendWith(MockitoExtension.class)
 class AutoridadesOrganizacaoServiceTest {

@@ -24,7 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.core.security.service.AutoridadesPlataformaService;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
 import jakarta.servlet.FilterChain;

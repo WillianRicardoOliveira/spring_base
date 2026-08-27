@@ -33,13 +33,14 @@ import com.empresa.erp.core.security.service.SsoSecurity;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
 import com.empresa.erp.domain.acesso.usuarioLoginTentativa.service.UsuarioLoginTentativaService;
 import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
-
+import org.springframework.test.context.ActiveProfiles;
 import jakarta.servlet.Filter;
 
 @WebMvcTest(
         controllers = AutenticacaoController.class,
         properties = "app.security.swagger-public=false"
 )
+@ActiveProfiles("test")
 @Import({
         ConfigSecurity.class,
         FilterSecurity.class,

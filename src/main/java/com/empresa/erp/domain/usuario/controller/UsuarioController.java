@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.usuario.record.DetalheUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.ListaUsuarioRecord;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;

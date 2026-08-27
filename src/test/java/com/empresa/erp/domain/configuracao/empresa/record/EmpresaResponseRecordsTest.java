@@ -6,8 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 class EmpresaResponseRecordsTest {

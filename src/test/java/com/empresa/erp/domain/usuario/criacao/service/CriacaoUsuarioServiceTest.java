@@ -24,7 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.empresa.erp.core.exception.ValidacaoException;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 import com.empresa.erp.domain.usuario.repository.UsuarioRepository;

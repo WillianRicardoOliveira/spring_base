@@ -1,7 +1,7 @@
 package com.empresa.erp.domain.usuario.model;
 
 import com.empresa.erp.domain.base.model.AuditoriaModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
 import jakarta.persistence.Entity;

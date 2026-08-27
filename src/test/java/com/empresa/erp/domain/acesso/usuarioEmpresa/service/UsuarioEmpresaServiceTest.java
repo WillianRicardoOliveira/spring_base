@@ -32,12 +32,12 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRep
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.empresa.service.EmpresaService;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;

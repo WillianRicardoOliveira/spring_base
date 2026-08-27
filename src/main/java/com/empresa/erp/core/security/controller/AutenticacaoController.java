@@ -3,7 +3,7 @@ package com.empresa.erp.core.security.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -192,28 +192,18 @@ public class AutenticacaoController {
     }
 
     @GetMapping("/permissoes")
-    public ResponseEntity<PermissoesUsuarioSecurity>
-            consultarPermissoes(
-                    @AuthenticationPrincipal
-                    UsuarioAutenticado
-                            usuarioAutenticado
-            ) {
-        var permissoes =
-                usuarioAutenticado
-                        .getAuthorities()
-                        .stream()
-                        .map(
-                                authority ->
-                                        authority
-                                                .getAuthority()
-                        )
-                        .sorted()
-                        .toList();
+    public ResponseEntity<PermissoesUsuarioSecurity> consultarPermissoes(
+            Authentication authentication
+    ) {
+        var permissoes = authentication
+                .getAuthorities()
+                .stream()
+                .map(authority -> authority.getAuthority())
+                .sorted()
+                .toList();
 
         return ResponseEntity.ok(
-                new PermissoesUsuarioSecurity(
-                        permissoes
-                )
+                new PermissoesUsuarioSecurity(permissoes)
         );
     }
 

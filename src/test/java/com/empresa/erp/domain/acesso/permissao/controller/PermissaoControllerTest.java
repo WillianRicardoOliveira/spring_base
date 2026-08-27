@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.empresa.erp.domain.acesso.permissao.record.DetalhePermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.record.ListaPermissaoRecord;
 import com.empresa.erp.domain.acesso.permissao.service.PermissaoService;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 class PermissaoControllerTest {
 

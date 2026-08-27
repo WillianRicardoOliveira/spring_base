@@ -18,7 +18,7 @@ import com.empresa.erp.domain.acesso.usuarioPerfil.record.DetalheUsuarioPerfilRe
 import com.empresa.erp.domain.acesso.usuarioPerfil.record.ListaUsuarioPerfilRecord;
 import com.empresa.erp.domain.acesso.usuarioPerfil.record.UsuarioPerfilRecord;
 import com.empresa.erp.domain.acesso.usuarioPerfil.repository.UsuarioPerfilRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
 

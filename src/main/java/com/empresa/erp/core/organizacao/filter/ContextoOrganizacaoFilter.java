@@ -66,11 +66,30 @@ public class ContextoOrganizacaoFilter
     protected boolean shouldNotFilter(
             HttpServletRequest request
     ) {
-        return request
-                .getServletPath()
-                .startsWith("/plataforma/");
+        String caminho =
+                request.getServletPath();
+
+        if (caminho == null || caminho.isBlank()) {
+            caminho =
+                    request.getRequestURI();
+        }
+
+        String contextPath =
+                request.getContextPath();
+
+        if (contextPath != null
+                && !contextPath.isBlank()
+                && caminho.startsWith(contextPath)) {
+            caminho =
+                    caminho.substring(
+                            contextPath.length()
+                    );
+        }
+
+        return caminho.equals("/plataforma")
+                || caminho.startsWith("/plataforma/");
     }
-    
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,

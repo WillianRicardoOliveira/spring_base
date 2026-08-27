@@ -11,13 +11,15 @@ import org.springframework.data.domain.PageRequest;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.model.UsuarioSubsidiariaModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
@@ -38,6 +40,10 @@ class UsuarioSubsidiariaRepositoryTest {
             usuarioEmpresaRepository;
 
     @Autowired
+    private UsuarioOrganizacaoRepository
+            usuarioOrganizacaoRepository;
+
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
@@ -54,6 +60,9 @@ class UsuarioSubsidiariaRepositoryTest {
     private OrganizacaoModel organizacao;
     private OrganizacaoModel outraOrganizacao;
     private UsuarioModel usuario;
+    private UsuarioOrganizacaoModel usuarioOrganizacao;
+    private UsuarioOrganizacaoModel
+            usuarioOrganizacaoDeOutraOrganizacao;
     private UsuarioEmpresaModel usuarioEmpresa;
     private UsuarioEmpresaModel
             usuarioEmpresaDeOutraOrganizacao;
@@ -86,6 +95,22 @@ class UsuarioSubsidiariaRepositoryTest {
                 )
         );
 
+        usuarioOrganizacao =
+                usuarioOrganizacaoRepository.save(
+                        new UsuarioOrganizacaoModel(
+                                usuario,
+                                organizacao
+                        )
+                );
+
+        usuarioOrganizacaoDeOutraOrganizacao =
+                usuarioOrganizacaoRepository.save(
+                        new UsuarioOrganizacaoModel(
+                                usuario,
+                                outraOrganizacao
+                        )
+                );
+
         var empresa = empresaRepository.save(
                 new EmpresaModel(
                         organizacao,
@@ -108,7 +133,7 @@ class UsuarioSubsidiariaRepositoryTest {
         usuarioEmpresa =
                 usuarioEmpresaRepository.save(
                         new UsuarioEmpresaModel(
-                                usuario,
+                                usuarioOrganizacao,
                                 empresa,
                                 false
                         )
@@ -117,7 +142,7 @@ class UsuarioSubsidiariaRepositoryTest {
         usuarioEmpresaDeOutraOrganizacao =
                 usuarioEmpresaRepository.save(
                         new UsuarioEmpresaModel(
-                                usuario,
+                                usuarioOrganizacaoDeOutraOrganizacao,
                                 empresaDeOutraOrganizacao,
                                 false
                         )
@@ -171,9 +196,10 @@ class UsuarioSubsidiariaRepositoryTest {
         );
 
         var resultado = repository
-                .findAllByUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
                         organizacao.getId(),
+                        null,
                         StatusEnum.ATIVO
                 );
 
@@ -199,18 +225,18 @@ class UsuarioSubsidiariaRepositoryTest {
         );
 
         var resultadoCorreto = repository
-                .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
-                        usuarioEmpresa.getId(),
                         organizacao.getId(),
+                        usuarioEmpresa.getId(),
                         StatusEnum.ATIVO
                 );
 
         var resultadoOutraOrganizacao = repository
-                .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
-                        usuarioEmpresa.getId(),
                         outraOrganizacao.getId(),
+                        usuarioEmpresa.getId(),
                         StatusEnum.ATIVO
                 );
 
@@ -232,10 +258,10 @@ class UsuarioSubsidiariaRepositoryTest {
         );
 
         var resultado = repository
-                .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
-                        usuarioEmpresaDeOutraOrganizacao.getId(),
                         organizacao.getId(),
+                        usuarioEmpresaDeOutraOrganizacao.getId(),
                         StatusEnum.ATIVO
                 );
 
@@ -361,15 +387,17 @@ class UsuarioSubsidiariaRepositoryTest {
         );
 
         var resultadoCorreto = repository
-                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioEmpresaUsuarioOrganizacaoOrganizacaoIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         vinculo.getId(),
+                        organizacao.getId(),
                         organizacao.getId(),
                         StatusEnum.ATIVO
                 );
 
         var resultadoOutraOrganizacao = repository
-                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioEmpresaUsuarioOrganizacaoOrganizacaoIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         vinculo.getId(),
+                        outraOrganizacao.getId(),
                         outraOrganizacao.getId(),
                         StatusEnum.ATIVO
                 );
@@ -397,8 +425,9 @@ class UsuarioSubsidiariaRepositoryTest {
         repository.save(vinculo);
 
         var resultado = repository
-                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioEmpresaUsuarioOrganizacaoOrganizacaoIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         vinculo.getId(),
+                        organizacao.getId(),
                         organizacao.getId(),
                         StatusEnum.ATIVO
                 );

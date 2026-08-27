@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -21,6 +22,19 @@ public class TratarErros {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErroResponse> tratarErro404() {
+        return ResponseEntity.status(
+                HttpStatus.NOT_FOUND
+        ).body(
+                new ErroResponse(
+                        404,
+                        "NAO_ENCONTRADO",
+                        "Recurso nao encontrado"
+                )
+        );
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErroResponse> tratarErroRecursoNaoEncontrado() {
         return ResponseEntity.status(
                 HttpStatus.NOT_FOUND
         ).body(

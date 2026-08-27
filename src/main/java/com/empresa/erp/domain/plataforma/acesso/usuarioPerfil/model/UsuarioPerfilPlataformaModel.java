@@ -1,7 +1,7 @@
 package com.empresa.erp.domain.plataforma.acesso.usuarioPerfil.model;
 
 import com.empresa.erp.domain.base.model.AuditoriaModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.plataforma.acesso.perfil.model.PerfilPlataformaModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 

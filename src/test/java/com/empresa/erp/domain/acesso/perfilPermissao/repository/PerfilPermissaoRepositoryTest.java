@@ -18,7 +18,7 @@ import com.empresa.erp.domain.acesso.perfilPermissao.model.PerfilPermissaoModel;
 import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
 import com.empresa.erp.domain.acesso.permissao.repository.PermissaoRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 

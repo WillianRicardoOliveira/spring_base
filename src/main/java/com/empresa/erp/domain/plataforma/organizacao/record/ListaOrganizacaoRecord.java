@@ -1,6 +1,6 @@
 package com.empresa.erp.domain.plataforma.organizacao.record;
 
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 public record ListaOrganizacaoRecord(

@@ -27,15 +27,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.model.UsuarioSubsidiariaModel;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.DetalheUsuarioSubsidiariaRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.ListaUsuarioSubsidiariaRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.UsuarioSubsidiariaRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.service.UsuarioSubsidiariaService;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -104,48 +105,15 @@ class UsuarioSubsidiariaControllerTest {
                                         + "usuario-subsidiaria/6"
                         )
                 )
-                .andExpect(
-                        jsonPath("$.id")
-                                .value(6L)
-                )
-                .andExpect(
-                        jsonPath("$.idUsuarioEmpresa")
-                                .value(3L)
-                )
-                .andExpect(
-                        jsonPath("$.idUsuario")
-                                .value(1L)
-                )
-                .andExpect(
-                        jsonPath("$.usuario")
-                                .value(
-                                        "usuario@teste.com"
-                                )
-                )
-                .andExpect(
-                        jsonPath("$.idEmpresa")
-                                .value(2L)
-                )
-                .andExpect(
-                        jsonPath("$.empresa")
-                                .value(
-                                        "Empresa Exemplo"
-                                )
-                )
-                .andExpect(
-                        jsonPath("$.idSubsidiaria")
-                                .value(4L)
-                )
-                .andExpect(
-                        jsonPath("$.subsidiaria")
-                                .value(
-                                        "Filial Curitiba"
-                                )
-                )
-                .andExpect(
-                        jsonPath("$.status")
-                                .value("ATIVO")
-                );
+                .andExpect(jsonPath("$.id").value(6L))
+                .andExpect(jsonPath("$.idUsuarioEmpresa").value(3L))
+                .andExpect(jsonPath("$.idUsuario").value(1L))
+                .andExpect(jsonPath("$.usuario").value("usuario@teste.com"))
+                .andExpect(jsonPath("$.idEmpresa").value(2L))
+                .andExpect(jsonPath("$.empresa").value("Empresa Exemplo"))
+                .andExpect(jsonPath("$.idSubsidiaria").value(4L))
+                .andExpect(jsonPath("$.subsidiaria").value("Filial Curitiba"))
+                .andExpect(jsonPath("$.status").value("ATIVO"));
     }
 
     @Test
@@ -208,35 +176,11 @@ class UsuarioSubsidiariaControllerTest {
                         )
                 )
                 .andExpect(status().isOk())
-                .andExpect(
-                        jsonPath("$.content[0].id")
-                                .value(6L)
-                )
-                .andExpect(
-                        jsonPath(
-                                "$.content[0]"
-                                        + ".idUsuarioEmpresa"
-                        ).value(3L)
-                )
-                .andExpect(
-                        jsonPath(
-                                "$.content[0]"
-                                        + ".idSubsidiaria"
-                        ).value(4L)
-                )
-                .andExpect(
-                        jsonPath(
-                                "$.content[0]"
-                                        + ".subsidiaria"
-                        ).value(
-                                "Filial Curitiba"
-                        )
-                )
-                .andExpect(
-                        jsonPath(
-                                "$.content[0].status"
-                        ).value("ATIVO")
-                );
+                .andExpect(jsonPath("$.content[0].id").value(6L))
+                .andExpect(jsonPath("$.content[0].idUsuarioEmpresa").value(3L))
+                .andExpect(jsonPath("$.content[0].idSubsidiaria").value(4L))
+                .andExpect(jsonPath("$.content[0].subsidiaria").value("Filial Curitiba"))
+                .andExpect(jsonPath("$.content[0].status").value("ATIVO"));
 
         verify(service).listar(
                 any(Pageable.class),
@@ -270,10 +214,7 @@ class UsuarioSubsidiariaControllerTest {
                                 )
                 )
                 .andExpect(status().isOk())
-                .andExpect(
-                        jsonPath("$.content")
-                                .isEmpty()
-                );
+                .andExpect(jsonPath("$.content").isEmpty());
 
         verify(service).listar(
                 any(Pageable.class),
@@ -308,36 +249,13 @@ class UsuarioSubsidiariaControllerTest {
                         )
                 )
                 .andExpect(status().isOk())
-                .andExpect(
-                        jsonPath("$.id")
-                                .value(6L)
-                )
-                .andExpect(
-                        jsonPath("$.idUsuarioEmpresa")
-                                .value(3L)
-                )
-                .andExpect(
-                        jsonPath("$.idUsuario")
-                                .value(1L)
-                )
-                .andExpect(
-                        jsonPath("$.idEmpresa")
-                                .value(2L)
-                )
-                .andExpect(
-                        jsonPath("$.idSubsidiaria")
-                                .value(4L)
-                )
-                .andExpect(
-                        jsonPath("$.subsidiaria")
-                                .value(
-                                        "Filial Curitiba"
-                                )
-                )
-                .andExpect(
-                        jsonPath("$.status")
-                                .value("ATIVO")
-                );
+                .andExpect(jsonPath("$.id").value(6L))
+                .andExpect(jsonPath("$.idUsuarioEmpresa").value(3L))
+                .andExpect(jsonPath("$.idUsuario").value(1L))
+                .andExpect(jsonPath("$.idEmpresa").value(2L))
+                .andExpect(jsonPath("$.idSubsidiaria").value(4L))
+                .andExpect(jsonPath("$.subsidiaria").value("Filial Curitiba"))
+                .andExpect(jsonPath("$.status").value("ATIVO"));
     }
 
     @Test
@@ -355,8 +273,7 @@ class UsuarioSubsidiariaControllerTest {
         verify(service).excluir(6L);
     }
 
-    private UsuarioSubsidiariaModel
-            criarUsuarioSubsidiaria() {
+    private UsuarioSubsidiariaModel criarUsuarioSubsidiaria() {
         var usuario = new UsuarioModel(
                 new UsuarioRecord(
                         "usuario@teste.com",
@@ -395,9 +312,21 @@ class UsuarioSubsidiariaControllerTest {
                 2L
         );
 
+        var usuarioOrganizacao =
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                );
+
+        ReflectionTestUtils.setField(
+                usuarioOrganizacao,
+                "id",
+                5L
+        );
+
         var usuarioEmpresa =
                 new UsuarioEmpresaModel(
-                        usuario,
+                        usuarioOrganizacao,
                         empresa,
                         false
                 );

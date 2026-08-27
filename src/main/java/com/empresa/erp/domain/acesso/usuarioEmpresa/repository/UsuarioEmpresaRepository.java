@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 public interface UsuarioEmpresaRepository
         extends JpaRepository<UsuarioEmpresaModel, Long> {

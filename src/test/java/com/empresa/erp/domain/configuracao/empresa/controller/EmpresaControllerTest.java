@@ -27,13 +27,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.AtualizaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.DetalheEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.service.EmpresaService;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

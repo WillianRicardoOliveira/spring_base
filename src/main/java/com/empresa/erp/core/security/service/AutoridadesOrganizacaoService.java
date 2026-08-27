@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.usuarioPerfil.repository.UsuarioPerfilRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
 

@@ -27,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
@@ -35,7 +36,6 @@ import com.empresa.erp.domain.configuracao.subsidiaria.record.DetalheSubsidiaria
 import com.empresa.erp.domain.configuracao.subsidiaria.record.ListaSubsidiariaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.record.SubsidiariaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.service.SubsidiariaService;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

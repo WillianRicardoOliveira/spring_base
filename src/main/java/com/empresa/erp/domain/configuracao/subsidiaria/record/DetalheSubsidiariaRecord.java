@@ -1,7 +1,7 @@
 package com.empresa.erp.domain.configuracao.subsidiaria.record;
 
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
-import com.empresa.erp.domain.old.StatusEnum;
 
 public record DetalheSubsidiariaRecord(
         Long id,

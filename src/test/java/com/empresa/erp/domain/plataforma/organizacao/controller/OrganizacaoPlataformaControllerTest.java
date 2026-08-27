@@ -26,7 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.plataforma.organizacao.record.DetalheOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.record.ListaOrganizacaoRecord;
 import com.empresa.erp.domain.plataforma.organizacao.record.OrganizacaoRecord;

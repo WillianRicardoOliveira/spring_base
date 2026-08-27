@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,8 +22,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,12 +42,11 @@ import com.empresa.erp.core.security.handler.AcessoNegadoHandler;
 import com.empresa.erp.core.security.handler.AutenticacaoEntryPoint;
 import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
-import com.empresa.erp.core.security.record.AccessTokenValidadoSecurity;
 import com.empresa.erp.core.security.service.AutoridadesOrganizacaoService;
 import com.empresa.erp.core.security.service.AutoridadesPlataformaService;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
 import com.empresa.erp.domain.acesso.usuarioSessao.service.UsuarioSessaoService;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
 @WebMvcTest(
@@ -56,20 +58,23 @@ import com.empresa.erp.domain.usuario.model.UsuarioModel;
         },
         properties = "app.security.swagger-public=false"
 )
+@ActiveProfiles("test")
 @Import({
         ConfigSecurity.class,
         FilterSecurity.class,
         AutenticacaoEntryPoint.class,
         AcessoNegadoHandler.class,
-        TratarErros.class
+        TratarErros.class,
+        ContextoOrganizacaoSecurityIntegrationTest
+                .OperacionalControllerTeste.class,
+        ContextoOrganizacaoSecurityIntegrationTest
+                .PlataformaControllerTeste.class
 })
 class ContextoOrganizacaoSecurityIntegrationTest {
 
     private static final Long ID_USUARIO = 10L;
     private static final Long ID_ORGANIZACAO = 20L;
 
-    private static final String TOKEN = "token-valido";
-    private static final String JTI = "jti-valido";
     private static final String EMAIL = "admin@teste.com";
 
     private static final String PERMISSAO_ORGANIZACIONAL =
@@ -102,20 +107,6 @@ class ContextoOrganizacaoSecurityIntegrationTest {
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
-
-        when(tokenSecurity.validarAccessToken(TOKEN))
-                .thenReturn(
-                        new AccessTokenValidadoSecurity(
-                                EMAIL,
-                                JTI
-                        )
-                );
-
-        when(usuarioSessaoService.accessTokenEstaAtivo(JTI))
-                .thenReturn(true);
-
-        when(usuarioAutenticadoService.buscarPorEmail(EMAIL))
-                .thenReturn(usuarioAutenticado());
 
         when(autoridadesPlataformaService.buscar(ID_USUARIO))
                 .thenReturn(List.of());
@@ -291,9 +282,14 @@ class ContextoOrganizacaoSecurityIntegrationTest {
             String endpoint
     ) {
         return get(endpoint)
-                .header(
-                        "Authorization",
-                        "Bearer " + TOKEN
+                .with(
+                        authentication(
+                                new UsernamePasswordAuthenticationToken(
+                                        usuarioAutenticado(),
+                                        null,
+                                        List.of()
+                                )
+                        )
                 );
     }
 

@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.empresa.erp.domain.acesso.perfil.model.TipoPerfilSistemaEnum;
 import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.usuarioPerfil.model.UsuarioPerfilModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 public interface UsuarioPerfilRepository
         extends JpaRepository<UsuarioPerfilModel, Long> {

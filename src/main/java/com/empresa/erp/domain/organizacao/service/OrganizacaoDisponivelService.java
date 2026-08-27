@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.record.OrganizacaoDisponivelRecord;
 
 import lombok.RequiredArgsConstructor;

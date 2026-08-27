@@ -3,7 +3,7 @@ package com.empresa.erp.domain.acesso.perfilPermissao.model;
 import com.empresa.erp.domain.acesso.perfil.model.PerfilModel;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
 import com.empresa.erp.domain.base.model.AuditoriaModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

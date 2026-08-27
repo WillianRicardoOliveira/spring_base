@@ -2,8 +2,8 @@ package com.empresa.erp.domain.acesso.usuarioSubsidiaria.model;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.base.model.AuditoriaModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
-import com.empresa.erp.domain.old.StatusEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

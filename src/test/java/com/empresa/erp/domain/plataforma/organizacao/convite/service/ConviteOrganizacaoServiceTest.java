@@ -33,7 +33,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.security.service.TokenOpacoService;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.provisionamento.service.ProvisionamentoOrganizacaoService;
 import com.empresa.erp.domain.plataforma.organizacao.convite.config.ConviteOrganizacaoProperties;

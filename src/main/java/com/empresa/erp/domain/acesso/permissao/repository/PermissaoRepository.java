@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 public interface PermissaoRepository
         extends JpaRepository<PermissaoModel, Long> {

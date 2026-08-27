@@ -28,7 +28,9 @@ import com.empresa.erp.domain.acesso.perfil.model.PerfilModel;
 import com.empresa.erp.domain.acesso.perfil.record.AtualizaPerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.repository.PerfilRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.acesso.perfilPermissao.repository.PerfilPermissaoRepository;
+import com.empresa.erp.domain.acesso.usuarioPerfil.repository.UsuarioPerfilRepository;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 
@@ -42,6 +44,12 @@ class PerfilServiceTest {
 
     @Mock
     private OrganizacaoRepository organizacaoRepository;
+
+    @Mock
+    private PerfilPermissaoRepository perfilPermissaoRepository;
+
+    @Mock
+    private UsuarioPerfilRepository usuarioPerfilRepository;
 
     @Mock
     private UsuarioLogadoService usuarioLogadoService;
@@ -63,9 +71,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve cadastrar perfil na organizacao ativa"
-    )
+    @DisplayName("Deve cadastrar perfil na organizacao ativa")
     void deveCadastrarPerfilNaOrganizacaoAtiva() {
         PerfilRecord dados = new PerfilRecord(
                 "  Financeiro  ",
@@ -104,7 +110,7 @@ class PerfilServiceTest {
         assertThat(perfil.getDescricao())
                 .isEqualTo("Perfil financeiro");
 
-        assertThat(perfil.getSistema())
+        assertThat(perfil.isSistema())
                 .isFalse();
 
         assertThat(perfil.getStatus())
@@ -114,9 +120,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear perfil duplicado na mesma organizacao"
-    )
+    @DisplayName("Deve bloquear perfil duplicado na mesma organizacao")
     void deveBloquearPerfilDuplicadoNaMesmaOrganizacao() {
         PerfilRecord dados = new PerfilRecord(
                 "Financeiro",
@@ -148,9 +152,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar perfis ativos da organizacao sem filtro"
-    )
+    @DisplayName("Deve listar perfis ativos da organizacao sem filtro")
     void deveListarPerfisAtivosDaOrganizacaoSemFiltro() {
         var paginacao =
                 PageRequest.of(0, 10);
@@ -189,9 +191,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar perfis ativos da organizacao com filtro"
-    )
+    @DisplayName("Deve listar perfis ativos da organizacao com filtro")
     void deveListarPerfisAtivosDaOrganizacaoComFiltro() {
         var paginacao =
                 PageRequest.of(0, 10);
@@ -230,9 +230,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve detalhar perfil ativo da organizacao"
-    )
+    @DisplayName("Deve detalhar perfil ativo da organizacao")
     void deveDetalharPerfilAtivoDaOrganizacao() {
         var perfil = criarPerfil(
                 1L,
@@ -266,9 +264,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve impedir detalhar perfil fora da organizacao"
-    )
+    @DisplayName("Deve impedir detalhar perfil fora da organizacao")
     void deveImpedirDetalharPerfilForaDaOrganizacao() {
         when(contextoOrganizacao.getIdOrganizacao())
                 .thenReturn(ID_ORGANIZACAO);
@@ -289,9 +285,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve atualizar perfil da organizacao"
-    )
+    @DisplayName("Deve atualizar perfil da organizacao")
     void deveAtualizarPerfilDaOrganizacao() {
         var dados = new AtualizaPerfilRecord(
                 2L,
@@ -340,9 +334,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear nome duplicado ao atualizar perfil"
-    )
+    @DisplayName("Deve bloquear nome duplicado ao atualizar perfil")
     void deveBloquearNomeDuplicadoAoAtualizarPerfil() {
         var dados = new AtualizaPerfilRecord(
                 2L,
@@ -382,9 +374,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear atualizacao de perfil fora da organizacao"
-    )
+    @DisplayName("Deve bloquear atualizacao de perfil fora da organizacao")
     void deveBloquearAtualizacaoDePerfilForaDaOrganizacao() {
         var dados = new AtualizaPerfilRecord(
                 99L,
@@ -411,9 +401,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear atualizacao de perfil critico"
-    )
+    @DisplayName("Deve bloquear atualizacao de perfil critico")
     void deveBloquearAtualizacaoDePerfilCritico() {
         var dados = new AtualizaPerfilRecord(
                 2L,
@@ -421,17 +409,7 @@ class PerfilServiceTest {
                 "Perfil atualizado"
         );
 
-        var perfil = criarPerfil(
-                2L,
-                "Administrador",
-                "Perfil administrador"
-        );
-
-        ReflectionTestUtils.setField(
-                perfil,
-                "sistema",
-                true
-        );
+        var perfil = criarPerfilAdministrador(2L);
 
         when(contextoOrganizacao.getIdOrganizacao())
                 .thenReturn(ID_ORGANIZACAO);
@@ -460,9 +438,7 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve remover perfil da organizacao com auditoria"
-    )
+    @DisplayName("Deve remover perfil da organizacao com auditoria")
     void deveRemoverPerfilDaOrganizacaoComAuditoria() {
         var perfil = criarPerfil(
                 2L,
@@ -478,6 +454,22 @@ class PerfilServiceTest {
                 ID_ORGANIZACAO,
                 StatusEnum.ATIVO
         )).thenReturn(Optional.of(perfil));
+
+        when(usuarioPerfilRepository
+                .existsByPerfilIdAndPerfilOrganizacaoIdAndStatus(
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(false);
+
+        when(perfilPermissaoRepository
+                .existsByPerfilIdAndPerfilOrganizacaoIdAndStatus(
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(false);
 
         when(usuarioLogadoService.getId())
                 .thenReturn(10L);
@@ -495,21 +487,9 @@ class PerfilServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear remocao de perfil critico"
-    )
+    @DisplayName("Deve bloquear remocao de perfil critico")
     void deveBloquearRemocaoDePerfilCritico() {
-        var perfil = criarPerfil(
-                2L,
-                "Administrador",
-                "Perfil administrador"
-        );
-
-        ReflectionTestUtils.setField(
-                perfil,
-                "sistema",
-                true
-        );
+        var perfil = criarPerfilAdministrador(2L);
 
         when(contextoOrganizacao.getIdOrganizacao())
                 .thenReturn(ID_ORGANIZACAO);
@@ -528,6 +508,113 @@ class PerfilServiceTest {
                         "Perfil critico do sistema nao pode ser alterado."
                 );
 
+        verify(usuarioPerfilRepository, never())
+                .existsByPerfilIdAndPerfilOrganizacaoIdAndStatus(
+                        any(),
+                        any(),
+                        any()
+                );
+
+        verify(perfilPermissaoRepository, never())
+                .existsByPerfilIdAndPerfilOrganizacaoIdAndStatus(
+                        any(),
+                        any(),
+                        any()
+                );
+
+        verify(usuarioLogadoService, never())
+                .getId();
+    }
+
+    @Test
+    @DisplayName("Deve bloquear remocao de perfil com usuarios vinculados")
+    void deveBloquearRemocaoDePerfilComUsuariosVinculados() {
+        var perfil = criarPerfil(
+                2L,
+                "Financeiro",
+                "Perfil financeiro"
+        );
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(ID_ORGANIZACAO);
+
+        when(repository.findByIdAndOrganizacaoIdAndStatus(
+                2L,
+                ID_ORGANIZACAO,
+                StatusEnum.ATIVO
+        )).thenReturn(Optional.of(perfil));
+
+        when(usuarioPerfilRepository
+                .existsByPerfilIdAndPerfilOrganizacaoIdAndStatus(
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(true);
+
+        assertThatThrownBy(() ->
+                service.excluir(2L)
+        )
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage(
+                        "Perfil possui usuarios vinculados "
+                                + "e nao pode ser removido."
+                );
+
+        verify(perfilPermissaoRepository, never())
+                .existsByPerfilIdAndPerfilOrganizacaoIdAndStatus(
+                        any(),
+                        any(),
+                        any()
+                );
+
+        verify(usuarioLogadoService, never())
+                .getId();
+    }
+
+    @Test
+    @DisplayName("Deve bloquear remocao de perfil com permissoes vinculadas")
+    void deveBloquearRemocaoDePerfilComPermissoesVinculadas() {
+        var perfil = criarPerfil(
+                2L,
+                "Financeiro",
+                "Perfil financeiro"
+        );
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(ID_ORGANIZACAO);
+
+        when(repository.findByIdAndOrganizacaoIdAndStatus(
+                2L,
+                ID_ORGANIZACAO,
+                StatusEnum.ATIVO
+        )).thenReturn(Optional.of(perfil));
+
+        when(usuarioPerfilRepository
+                .existsByPerfilIdAndPerfilOrganizacaoIdAndStatus(
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(false);
+
+        when(perfilPermissaoRepository
+                .existsByPerfilIdAndPerfilOrganizacaoIdAndStatus(
+                        2L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(true);
+
+        assertThatThrownBy(() ->
+                service.excluir(2L)
+        )
+                .isInstanceOf(ValidacaoException.class)
+                .hasMessage(
+                        "Perfil possui permissoes vinculadas "
+                                + "e nao pode ser removido."
+                );
+
         verify(usuarioLogadoService, never())
                 .getId();
     }
@@ -541,6 +628,23 @@ class PerfilServiceTest {
                 organizacao,
                 new PerfilRecord(nome, descricao)
         );
+
+        ReflectionTestUtils.setField(
+                perfil,
+                "id",
+                id
+        );
+
+        return perfil;
+    }
+
+    private PerfilModel criarPerfilAdministrador(
+            Long id
+    ) {
+        var perfil =
+                PerfilModel.criarAdministradorSistema(
+                        organizacao
+                );
 
         ReflectionTestUtils.setField(
                 perfil,

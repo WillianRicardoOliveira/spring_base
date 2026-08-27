@@ -26,14 +26,15 @@ import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.model.UsuarioSubsidiariaModel;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.UsuarioSubsidiariaRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -47,20 +48,16 @@ class UsuarioSubsidiariaServiceTest {
     private UsuarioSubsidiariaRepository repository;
 
     @Mock
-    private UsuarioEmpresaRepository
-            usuarioEmpresaRepository;
+    private UsuarioEmpresaRepository usuarioEmpresaRepository;
 
     @Mock
-    private SubsidiariaRepository
-            subsidiariaRepository;
+    private SubsidiariaRepository subsidiariaRepository;
 
     @Mock
-    private UsuarioLogadoService
-            usuarioLogadoService;
+    private UsuarioLogadoService usuarioLogadoService;
 
     @Mock
-    private ContextoOrganizacao
-            contextoOrganizacao;
+    private ContextoOrganizacao contextoOrganizacao;
 
     @InjectMocks
     private UsuarioSubsidiariaService service;
@@ -72,29 +69,16 @@ class UsuarioSubsidiariaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve cadastrar vinculo na organizacao atual"
-    )
+    @DisplayName("Deve cadastrar vinculo na organizacao atual")
     void deveCadastrarVinculoNaOrganizacaoAtual() {
-        var empresa = criarEmpresa(
-                2L,
-                "Empresa Exemplo"
-        );
-
-        var usuarioEmpresa = criarUsuarioEmpresa(
-                empresa,
-                false
-        );
-
-        var subsidiaria = criarSubsidiaria(
-                4L,
-                empresa,
-                "Filial Curitiba"
-        );
+        var empresa = criarEmpresa(2L, "Empresa Exemplo");
+        var usuarioEmpresa = criarUsuarioEmpresa(empresa, false);
+        var subsidiaria = criarSubsidiaria(4L, empresa, "Filial Curitiba");
 
         when(usuarioEmpresaRepository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -116,18 +100,11 @@ class UsuarioSubsidiariaServiceTest {
                 )
         ).thenReturn(false);
 
-        when(repository.save(
-                any(UsuarioSubsidiariaModel.class)
-        )).thenAnswer(
-                invocacao ->
-                        invocacao.getArgument(0)
-        );
+        when(repository.save(any(UsuarioSubsidiariaModel.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
 
         var resultado = service.cadastrar(
-                new UsuarioSubsidiariaRecord(
-                        3L,
-                        4L
-                )
+                new UsuarioSubsidiariaRecord(3L, 4L)
         );
 
         assertThat(resultado.getUsuarioEmpresa())
@@ -141,25 +118,19 @@ class UsuarioSubsidiariaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear usuario empresa fora da organizacao"
-    )
+    @DisplayName("Deve bloquear usuario empresa fora da organizacao")
     void deveBloquearUsuarioEmpresaForaDaOrganizacao() {
         when(usuarioEmpresaRepository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                service.cadastrar(
-                        new UsuarioSubsidiariaRecord(
-                                3L,
-                                4L
-                        )
-                )
+                service.cadastrar(new UsuarioSubsidiariaRecord(3L, 4L))
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
@@ -175,43 +146,26 @@ class UsuarioSubsidiariaServiceTest {
                 );
 
         verify(repository, never())
-                .save(
-                        any(
-                                UsuarioSubsidiariaModel.class
-                        )
-                );
+                .save(any(UsuarioSubsidiariaModel.class));
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear cadastro quando usuario acessa todas subsidiarias"
-    )
+    @DisplayName("Deve bloquear cadastro quando usuario acessa todas subsidiarias")
     void deveBloquearCadastroQuandoUsuarioAcessaTodasSubsidiarias() {
-        var empresa = criarEmpresa(
-                2L,
-                "Empresa Exemplo"
-        );
-
-        var usuarioEmpresa = criarUsuarioEmpresa(
-                empresa,
-                true
-        );
+        var empresa = criarEmpresa(2L, "Empresa Exemplo");
+        var usuarioEmpresa = criarUsuarioEmpresa(empresa, true);
 
         when(usuarioEmpresaRepository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(Optional.of(usuarioEmpresa));
 
         assertThatThrownBy(() ->
-                service.cadastrar(
-                        new UsuarioSubsidiariaRecord(
-                                3L,
-                                4L
-                        )
-                )
+                service.cadastrar(new UsuarioSubsidiariaRecord(3L, 4L))
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
@@ -227,31 +181,19 @@ class UsuarioSubsidiariaServiceTest {
                 );
 
         verify(repository, never())
-                .save(
-                        any(
-                                UsuarioSubsidiariaModel.class
-                        )
-                );
+                .save(any(UsuarioSubsidiariaModel.class));
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear subsidiaria fora da organizacao"
-    )
+    @DisplayName("Deve bloquear subsidiaria fora da organizacao")
     void deveBloquearSubsidiariaForaDaOrganizacao() {
-        var empresa = criarEmpresa(
-                2L,
-                "Empresa Exemplo"
-        );
-
-        var usuarioEmpresa = criarUsuarioEmpresa(
-                empresa,
-                false
-        );
+        var empresa = criarEmpresa(2L, "Empresa Exemplo");
+        var usuarioEmpresa = criarUsuarioEmpresa(empresa, false);
 
         when(usuarioEmpresaRepository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -266,55 +208,27 @@ class UsuarioSubsidiariaServiceTest {
         ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                service.cadastrar(
-                        new UsuarioSubsidiariaRecord(
-                                3L,
-                                4L
-                        )
-                )
+                service.cadastrar(new UsuarioSubsidiariaRecord(3L, 4L))
         )
                 .isInstanceOf(ValidacaoException.class)
-                .hasMessage(
-                        "Subsidiaria nao encontrada ou removida."
-                );
+                .hasMessage("Subsidiaria nao encontrada ou removida.");
 
         verify(repository, never())
-                .save(
-                        any(
-                                UsuarioSubsidiariaModel.class
-                        )
-                );
+                .save(any(UsuarioSubsidiariaModel.class));
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear subsidiaria de outra empresa"
-    )
+    @DisplayName("Deve bloquear subsidiaria de outra empresa")
     void deveBloquearSubsidiariaDeOutraEmpresa() {
-        var empresa = criarEmpresa(
-                2L,
-                "Empresa Exemplo"
-        );
-
-        var outraEmpresa = criarEmpresa(
-                5L,
-                "Outra Empresa"
-        );
-
-        var usuarioEmpresa = criarUsuarioEmpresa(
-                empresa,
-                false
-        );
-
-        var subsidiaria = criarSubsidiaria(
-                4L,
-                outraEmpresa,
-                "Filial Curitiba"
-        );
+        var empresa = criarEmpresa(2L, "Empresa Exemplo");
+        var outraEmpresa = criarEmpresa(5L, "Outra Empresa");
+        var usuarioEmpresa = criarUsuarioEmpresa(empresa, false);
+        var subsidiaria = criarSubsidiaria(4L, outraEmpresa, "Filial Curitiba");
 
         when(usuarioEmpresaRepository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -329,12 +243,7 @@ class UsuarioSubsidiariaServiceTest {
         ).thenReturn(Optional.of(subsidiaria));
 
         assertThatThrownBy(() ->
-                service.cadastrar(
-                        new UsuarioSubsidiariaRecord(
-                                3L,
-                                4L
-                        )
-                )
+                service.cadastrar(new UsuarioSubsidiariaRecord(3L, 4L))
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
@@ -343,35 +252,20 @@ class UsuarioSubsidiariaServiceTest {
                 );
 
         verify(repository, never())
-                .save(
-                        any(
-                                UsuarioSubsidiariaModel.class
-                        )
-                );
+                .save(any(UsuarioSubsidiariaModel.class));
     }
 
     @Test
     @DisplayName("Deve bloquear vinculo duplicado")
     void deveBloquearVinculoDuplicado() {
-        var empresa = criarEmpresa(
-                2L,
-                "Empresa Exemplo"
-        );
-
-        var usuarioEmpresa = criarUsuarioEmpresa(
-                empresa,
-                false
-        );
-
-        var subsidiaria = criarSubsidiaria(
-                4L,
-                empresa,
-                "Filial Curitiba"
-        );
+        var empresa = criarEmpresa(2L, "Empresa Exemplo");
+        var usuarioEmpresa = criarUsuarioEmpresa(empresa, false);
+        var subsidiaria = criarSubsidiaria(4L, empresa, "Filial Curitiba");
 
         when(usuarioEmpresaRepository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -394,52 +288,31 @@ class UsuarioSubsidiariaServiceTest {
         ).thenReturn(true);
 
         assertThatThrownBy(() ->
-                service.cadastrar(
-                        new UsuarioSubsidiariaRecord(
-                                3L,
-                                4L
-                        )
-                )
+                service.cadastrar(new UsuarioSubsidiariaRecord(3L, 4L))
         )
                 .isInstanceOf(ValidacaoException.class)
-                .hasMessage(
-                        "Usuario ja vinculado a esta subsidiaria."
-                );
+                .hasMessage("Usuario ja vinculado a esta subsidiaria.");
 
         verify(repository, never())
-                .save(
-                        any(
-                                UsuarioSubsidiariaModel.class
-                        )
-                );
+                .save(any(UsuarioSubsidiariaModel.class));
     }
 
     @Test
-    @DisplayName(
-            "Deve listar vinculos da organizacao sem filtro"
-    )
+    @DisplayName("Deve listar vinculos da organizacao sem filtro")
     void deveListarVinculosDaOrganizacaoSemFiltro() {
         var paginacao = PageRequest.of(0, 10);
-
-        var usuarioSubsidiaria =
-                criarUsuarioSubsidiaria();
+        var usuarioSubsidiaria = criarUsuarioSubsidiaria();
 
         when(repository
-                .findAllByUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         paginacao,
                         ID_ORGANIZACAO,
+                        null,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(
-                new PageImpl<>(
-                        List.of(usuarioSubsidiaria)
-                )
-        );
+        ).thenReturn(new PageImpl<>(List.of(usuarioSubsidiaria)));
 
-        var resultado = service.listar(
-                paginacao,
-                null
-        );
+        var resultado = service.listar(paginacao, null);
 
         assertThat(resultado.getContent())
                 .hasSize(1);
@@ -449,54 +322,54 @@ class UsuarioSubsidiariaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar por usuario empresa e organizacao"
-    )
+    @DisplayName("Deve listar por usuario empresa e organizacao")
     void deveListarPorUsuarioEmpresaEOrganizacao() {
         var paginacao = PageRequest.of(0, 10);
+        var empresa = criarEmpresa(2L, "Empresa Exemplo");
+        var usuarioEmpresa = criarUsuarioEmpresa(empresa, false);
 
-        when(repository
-                .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
-                        paginacao,
+        when(usuarioEmpresaRepository
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(
-                new PageImpl<>(List.of())
-        );
+        ).thenReturn(Optional.of(usuarioEmpresa));
 
-        service.listar(
-                paginacao,
-                3L
-        );
+        when(repository
+                .buscarAtivosDaOrganizacao(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        3L,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(new PageImpl<>(List.of()));
+
+        service.listar(paginacao, 3L);
 
         verify(repository)
-                .findAllByUsuarioEmpresaIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         paginacao,
-                        3L,
                         ID_ORGANIZACAO,
+                        3L,
                         StatusEnum.ATIVO
                 );
     }
 
     @Test
-    @DisplayName(
-            "Deve detalhar vinculo da organizacao"
-    )
+    @DisplayName("Deve detalhar vinculo da organizacao")
     void deveDetalharVinculoDaOrganizacao() {
-        var usuarioSubsidiaria =
-                criarUsuarioSubsidiaria();
+        var usuarioSubsidiaria = criarUsuarioSubsidiaria();
 
         when(repository
-                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioEmpresaUsuarioOrganizacaoOrganizacaoIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         6L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(
-                Optional.of(usuarioSubsidiaria)
-        );
+        ).thenReturn(Optional.of(usuarioSubsidiaria));
 
         var resultado = service.detalhar(6L);
 
@@ -517,21 +390,18 @@ class UsuarioSubsidiariaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear detalhe de outra organizacao"
-    )
+    @DisplayName("Deve bloquear detalhe de outra organizacao")
     void deveBloquearDetalheDeOutraOrganizacao() {
         when(repository
-                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioEmpresaUsuarioOrganizacaoOrganizacaoIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         6L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() ->
-                service.detalhar(6L)
-        )
+        assertThatThrownBy(() -> service.detalhar(6L))
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Vinculo entre usuario e subsidiaria "
@@ -540,22 +410,18 @@ class UsuarioSubsidiariaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve remover vinculo da organizacao com auditoria"
-    )
+    @DisplayName("Deve remover vinculo da organizacao com auditoria")
     void deveRemoverVinculoDaOrganizacaoComAuditoria() {
-        var usuarioSubsidiaria =
-                criarUsuarioSubsidiaria();
+        var usuarioSubsidiaria = criarUsuarioSubsidiaria();
 
         when(repository
-                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioEmpresaUsuarioOrganizacaoOrganizacaoIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         6L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(
-                Optional.of(usuarioSubsidiaria)
-        );
+        ).thenReturn(Optional.of(usuarioSubsidiaria));
 
         when(usuarioLogadoService.getId())
                 .thenReturn(10L);
@@ -573,21 +439,18 @@ class UsuarioSubsidiariaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear exclusao de outra organizacao"
-    )
+    @DisplayName("Deve bloquear exclusao de outra organizacao")
     void deveBloquearExclusaoDeOutraOrganizacao() {
         when(repository
-                .findByIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioEmpresaUsuarioOrganizacaoOrganizacaoIdAndUsuarioEmpresaEmpresaOrganizacaoIdAndStatus(
                         6L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() ->
-                service.excluir(6L)
-        )
+        assertThatThrownBy(() -> service.excluir(6L))
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
                         "Vinculo entre usuario e subsidiaria "
@@ -620,10 +483,9 @@ class UsuarioSubsidiariaServiceTest {
             Long id,
             String nome
     ) {
-        var organizacao =
-                new OrganizacaoModel(
-                        "Organizacao Principal"
-                );
+        var organizacao = new OrganizacaoModel(
+                "Organizacao Principal"
+        );
 
         ReflectionTestUtils.setField(
                 organizacao,
@@ -649,9 +511,21 @@ class UsuarioSubsidiariaServiceTest {
             EmpresaModel empresa,
             Boolean todasSubsidiarias
     ) {
+        var usuarioOrganizacao =
+                new UsuarioOrganizacaoModel(
+                        criarUsuario(),
+                        empresa.getOrganizacao()
+                );
+
+        ReflectionTestUtils.setField(
+                usuarioOrganizacao,
+                "id",
+                11L
+        );
+
         var usuarioEmpresa =
                 new UsuarioEmpresaModel(
-                        criarUsuario(),
+                        usuarioOrganizacao,
                         empresa,
                         todasSubsidiarias
                 );
@@ -684,8 +558,7 @@ class UsuarioSubsidiariaServiceTest {
         return subsidiaria;
     }
 
-    private UsuarioSubsidiariaModel
-            criarUsuarioSubsidiaria() {
+    private UsuarioSubsidiariaModel criarUsuarioSubsidiaria() {
         var empresa = criarEmpresa(
                 2L,
                 "Empresa Exemplo"

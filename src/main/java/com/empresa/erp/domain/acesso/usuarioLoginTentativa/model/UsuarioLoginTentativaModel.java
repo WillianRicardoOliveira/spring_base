@@ -3,7 +3,7 @@ package com.empresa.erp.domain.acesso.usuarioLoginTentativa.model;
 import java.time.LocalDateTime;
 
 import com.empresa.erp.domain.base.model.AuditoriaModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

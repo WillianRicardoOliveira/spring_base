@@ -16,7 +16,7 @@ import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.repository.PerfilRepository;
 import com.empresa.erp.domain.acesso.perfilPermissao.repository.PerfilPermissaoRepository;
 import com.empresa.erp.domain.acesso.usuarioPerfil.repository.UsuarioPerfilRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 

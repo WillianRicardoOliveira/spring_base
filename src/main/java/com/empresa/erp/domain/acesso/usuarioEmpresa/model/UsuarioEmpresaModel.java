@@ -3,8 +3,8 @@ package com.empresa.erp.domain.acesso.usuarioEmpresa.model;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.base.model.AuditoriaModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
-import com.empresa.erp.domain.old.StatusEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

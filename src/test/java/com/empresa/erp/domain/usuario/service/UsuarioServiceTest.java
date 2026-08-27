@@ -27,7 +27,7 @@ import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.administrador.service.ProtecaoAdministradorOrganizacaoService;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 import com.empresa.erp.domain.usuario.criacao.service.CriacaoUsuarioService;

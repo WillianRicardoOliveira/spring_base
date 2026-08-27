@@ -11,8 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.model.UsuarioSubsidiariaModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
-import com.empresa.erp.domain.old.StatusEnum;
 
 public interface UsuarioSubsidiariaRepository
         extends JpaRepository<UsuarioSubsidiariaModel, Long> {

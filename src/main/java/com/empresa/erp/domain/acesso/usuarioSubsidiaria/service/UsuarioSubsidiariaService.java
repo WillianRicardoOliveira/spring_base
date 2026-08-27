@@ -17,9 +17,9 @@ import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.DetalheUsuarioSub
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.ListaUsuarioSubsidiariaRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.UsuarioSubsidiariaRecord;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
-import com.empresa.erp.domain.old.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
 

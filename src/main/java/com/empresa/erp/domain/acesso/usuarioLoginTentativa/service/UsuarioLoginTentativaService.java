@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.domain.acesso.usuarioLoginTentativa.model.UsuarioLoginTentativaModel;
 import com.empresa.erp.domain.acesso.usuarioLoginTentativa.repository.UsuarioLoginTentativaRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

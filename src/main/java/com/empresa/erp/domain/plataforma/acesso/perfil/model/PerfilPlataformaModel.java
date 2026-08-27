@@ -1,7 +1,7 @@
 package com.empresa.erp.domain.plataforma.acesso.perfil.model;
 
 import com.empresa.erp.domain.base.model.AuditoriaModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

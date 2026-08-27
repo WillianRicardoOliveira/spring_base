@@ -35,7 +35,7 @@ import com.empresa.erp.domain.acesso.perfilPermissao.record.PerfilPermissaoRecor
 import com.empresa.erp.domain.acesso.perfilPermissao.service.PerfilPermissaoService;
 import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

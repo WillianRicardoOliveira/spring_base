@@ -13,7 +13,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.empresa.erp.domain.acesso.permissao.model.EscopoPermissaoEnum;
 import com.empresa.erp.domain.acesso.permissao.model.PermissaoModel;
 import com.empresa.erp.domain.acesso.permissao.repository.PermissaoRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.plataforma.acesso.perfil.model.PerfilPlataformaModel;
 import com.empresa.erp.domain.plataforma.acesso.perfil.repository.PerfilPlataformaRepository;
 import com.empresa.erp.domain.plataforma.acesso.perfilPermissao.model.PerfilPlataformaPermissaoModel;

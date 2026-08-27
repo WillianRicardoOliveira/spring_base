@@ -33,10 +33,11 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.record.DetalheUsuarioEmpresa
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.ListaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.service.UsuarioEmpresaService;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -564,6 +565,18 @@ class UsuarioEmpresaControllerTest {
                 1L
         );
 
+        var usuarioOrganizacao =
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                );
+
+        ReflectionTestUtils.setField(
+                usuarioOrganizacao,
+                "id",
+                10L
+        );
+
         var empresa = new EmpresaModel(
                 organizacao,
                 new EmpresaRecord(
@@ -579,7 +592,7 @@ class UsuarioEmpresaControllerTest {
 
         var usuarioEmpresa =
                 new UsuarioEmpresaModel(
-                        usuario,
+                        usuarioOrganizacao,
                         empresa,
                         true
                 );
