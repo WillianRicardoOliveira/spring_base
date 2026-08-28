@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -86,7 +87,6 @@ class AutenticacaoControllerPermissoesTest {
                         1L,
                         "usuario@teste.com"
                 );
-
         var usuarioAutenticado =
                 new UsuarioAutenticado(
                         usuario,
@@ -100,9 +100,16 @@ class AutenticacaoControllerPermissoesTest {
                         )
                 );
 
+        var authentication =
+                new UsernamePasswordAuthenticationToken(
+                        usuarioAutenticado,
+                        null,
+                        usuarioAutenticado.getAuthorities()
+                );
+
         var resposta =
                 controller.consultarPermissoes(
-                        usuarioAutenticado
+                        authentication
                 );
 
         assertEquals(

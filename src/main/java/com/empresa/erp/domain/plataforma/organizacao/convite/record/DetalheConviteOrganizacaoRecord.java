@@ -2,6 +2,7 @@ package com.empresa.erp.domain.plataforma.organizacao.convite.record;
 
 import java.time.LocalDateTime;
 
+import com.empresa.erp.domain.base.record.AuditoriaRecord;
 import com.empresa.erp.domain.plataforma.organizacao.convite.model.ConviteOrganizacaoModel;
 import com.empresa.erp.domain.plataforma.organizacao.convite.model.StatusConviteOrganizacaoEnum;
 
@@ -13,8 +14,32 @@ public record DetalheConviteOrganizacaoRecord(
         LocalDateTime expiraEm,
         LocalDateTime aceitoEm,
         StatusConviteOrganizacaoEnum status,
-        boolean expirado
+        boolean expirado,
+        AuditoriaRecord auditoria
 ) {
+
+    public DetalheConviteOrganizacaoRecord(
+            Long id,
+            String nomeOrganizacao,
+            String emailAdministrador,
+            LocalDateTime criadoEm,
+            LocalDateTime expiraEm,
+            LocalDateTime aceitoEm,
+            StatusConviteOrganizacaoEnum status,
+            boolean expirado
+    ) {
+        this(
+                id,
+                nomeOrganizacao,
+                emailAdministrador,
+                criadoEm,
+                expiraEm,
+                aceitoEm,
+                status,
+                expirado,
+                null
+        );
+    }
 
     public DetalheConviteOrganizacaoRecord(
             ConviteOrganizacaoModel convite,
@@ -31,7 +56,8 @@ public record DetalheConviteOrganizacaoRecord(
                 convite.getStatus()
                         == StatusConviteOrganizacaoEnum.PENDENTE
                         && !convite.getExpiraEm()
-                                .isAfter(referencia)
+                                .isAfter(referencia),
+                new AuditoriaRecord(convite)
         );
     }
 }

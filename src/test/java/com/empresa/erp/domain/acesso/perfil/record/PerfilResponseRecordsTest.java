@@ -42,6 +42,9 @@ class PerfilResponseRecordsTest {
 
         assertThat(detalhe.status())
                 .isEqualTo(StatusEnum.ATIVO);
+        
+        assertThat(detalhe.auditoria())
+        		.isNotNull();
     }
 
     @Test

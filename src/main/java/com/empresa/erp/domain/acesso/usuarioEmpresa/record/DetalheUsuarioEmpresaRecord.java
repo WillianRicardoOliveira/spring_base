@@ -2,6 +2,7 @@ package com.empresa.erp.domain.acesso.usuarioEmpresa.record;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.base.model.StatusEnum;
+import com.empresa.erp.domain.base.record.AuditoriaRecord;
 
 public record DetalheUsuarioEmpresaRecord(
         Long id,
@@ -10,8 +11,30 @@ public record DetalheUsuarioEmpresaRecord(
         Long idEmpresa,
         String empresa,
         Boolean todasSubsidiarias,
-        StatusEnum status
+        StatusEnum status,
+        AuditoriaRecord auditoria
 ) {
+
+    public DetalheUsuarioEmpresaRecord(
+            Long id,
+            Long idUsuario,
+            String usuario,
+            Long idEmpresa,
+            String empresa,
+            Boolean todasSubsidiarias,
+            StatusEnum status
+    ) {
+        this(
+                id,
+                idUsuario,
+                usuario,
+                idEmpresa,
+                empresa,
+                todasSubsidiarias,
+                status,
+                null
+        );
+    }
 
     public DetalheUsuarioEmpresaRecord(
             UsuarioEmpresaModel usuarioEmpresa
@@ -29,7 +52,8 @@ public record DetalheUsuarioEmpresaRecord(
                 usuarioEmpresa.getEmpresa().getId(),
                 usuarioEmpresa.getEmpresa().getNome(),
                 usuarioEmpresa.getTodasSubsidiarias(),
-                usuarioEmpresa.getStatus()
+                usuarioEmpresa.getStatus(),
+                new AuditoriaRecord(usuarioEmpresa)
         );
     }
 }
