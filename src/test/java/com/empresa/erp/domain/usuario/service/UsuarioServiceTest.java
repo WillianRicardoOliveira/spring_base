@@ -12,49 +12,60 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
 import com.empresa.erp.core.security.service.UsuarioAutenticadoService;
+import com.empresa.erp.core.security.service.UsuarioLogadoService;
+import com.empresa.erp.domain.acesso.administrador.service.ProtecaoAdministradorOrganizacaoService;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
+import com.empresa.erp.domain.usuario.criacao.service.CriacaoUsuarioService;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
-import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
 
-    @Mock
-    private UsuarioRepository repository;
+    private static final Long ID_ORGANIZACAO =
+            10L;
+
+    private static final Long ID_USUARIO =
+            20L;
 
     @Mock
     private UsuarioOrganizacaoRepository
             usuarioOrganizacaoRepository;
 
     @Mock
+    private ProtecaoAdministradorOrganizacaoService
+            protecaoAdministradorOrganizacaoService;
+
+    @Mock
     private OrganizacaoRepository
             organizacaoRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private CriacaoUsuarioService
+            criacaoUsuarioService;
 
     @Mock
     private UsuarioAutenticadoService
             usuarioAutenticadoService;
+
+    @Mock
+    private UsuarioLogadoService
+            usuarioLogadoService;
 
     @Mock
     private ContextoOrganizacao
@@ -65,152 +76,172 @@ class UsuarioServiceTest {
 
     @Test
     @DisplayName(
-            "Deve cadastrar usuario e vincular à organizacao atual"
+            "Deve criar usuário global e vinculá-lo à organização atual"
     )
-    void deveCadastrarUsuarioEVincularAOrganizacaoAtual() {
-        var dados = new UsuarioRecord(
-                "Usuario@Teste.com",
-                "Senha@123"
-        );
-
-        var organizacao = new OrganizacaoModel(
-                "Organização Exemplo"
-        );
-
-        ReflectionTestUtils.setField(
-                organizacao,
-                "id",
-                10L
-        );
-
-        when(contextoOrganizacao.getIdOrganizacao())
-                .thenReturn(10L);
-
-        when(repository.existsByEmailIgnoreCase(
-                "Usuario@Teste.com"
-        )).thenReturn(false);
-
-        when(passwordEncoder.encode("Senha@123"))
-                .thenReturn("senha-criptografada");
-
-        when(organizacaoRepository.getReferenceById(10L))
-                .thenReturn(organizacao);
+    void deveCriarUsuarioGlobalEVinculaLoAOrganizacaoAtual() {
+        UsuarioRecord dados =
+                new UsuarioRecord(
+                        "usuario@teste.com",
+                        "Senha@2026"
+                );
 
         UsuarioModel usuario =
+                criarUsuario(
+                        ID_USUARIO,
+                        "usuario@teste.com"
+                );
+
+        OrganizacaoModel organizacao =
+                new OrganizacaoModel(
+                        "Organização Principal"
+                );
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(ID_ORGANIZACAO);
+
+        when(criacaoUsuarioService.criar(
+                dados.email(),
+                dados.senha()
+        )).thenReturn(usuario);
+
+        when(organizacaoRepository.getReferenceById(
+                ID_ORGANIZACAO
+        )).thenReturn(organizacao);
+
+        when(usuarioOrganizacaoRepository.save(
+                org.mockito.ArgumentMatchers.any(
+                        UsuarioOrganizacaoModel.class
+                )
+        )).thenAnswer(
+                invocacao ->
+                        invocacao.getArgument(0)
+        );
+
+        UsuarioOrganizacaoModel resultado =
                 service.cadastrar(dados);
 
-        assertThat(usuario.getEmail())
-                .isEqualTo("usuario@teste.com");
+        assertThat(resultado.getUsuario())
+                .isSameAs(usuario);
 
-        assertThat(usuario.getSenha())
-                .isEqualTo("senha-criptografada");
+        assertThat(resultado.getOrganizacao())
+                .isSameAs(organizacao);
 
-        assertThat(usuario.getStatus())
+        assertThat(resultado.getStatus())
                 .isEqualTo(StatusEnum.ATIVO);
 
         verify(contextoOrganizacao)
                 .getIdOrganizacao();
 
-        verify(repository)
-                .save(usuario);
+        verify(criacaoUsuarioService)
+                .criar(
+                        "usuario@teste.com",
+                        "Senha@2026"
+                );
 
         verify(organizacaoRepository)
-                .getReferenceById(10L);
-
-        var captor = ArgumentCaptor.forClass(
-                UsuarioOrganizacaoModel.class
-        );
+                .getReferenceById(
+                        ID_ORGANIZACAO
+                );
 
         verify(usuarioOrganizacaoRepository)
-                .save(captor.capture());
-
-        var vinculo = captor.getValue();
-
-        assertThat(vinculo.getUsuario())
-                .isSameAs(usuario);
-
-        assertThat(vinculo.getOrganizacao())
-                .isSameAs(organizacao);
-
-        assertThat(vinculo.getStatus())
-                .isEqualTo(StatusEnum.ATIVO);
+                .save(resultado);
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear cadastro de usuario duplicado "
-                    + "sem criar vinculo"
+            "Não deve criar vínculo quando a criação global do usuário falhar"
     )
-    void deveBloquearCadastroDeUsuarioDuplicadoSemCriarVinculo() {
-        var dados = new UsuarioRecord(
-                "usuario@teste.com",
-                "Senha@123"
-        );
+    void naoDeveCriarVinculoQuandoCriacaoGlobalDoUsuarioFalhar() {
+        UsuarioRecord dados =
+                new UsuarioRecord(
+                        "usuario@teste.com",
+                        "Senha@2026"
+                );
 
         when(contextoOrganizacao.getIdOrganizacao())
-                .thenReturn(10L);
+                .thenReturn(ID_ORGANIZACAO);
 
-        when(repository.existsByEmailIgnoreCase(
-                "usuario@teste.com"
-        )).thenReturn(true);
+        when(criacaoUsuarioService.criar(
+                dados.email(),
+                dados.senha()
+        )).thenThrow(
+                new ValidacaoException(
+                        "Usuario ja cadastrado."
+                )
+        );
 
-        assertThatThrownBy(() ->
-                service.cadastrar(dados)
+        assertThatThrownBy(
+                () -> service.cadastrar(dados)
         )
-                .isInstanceOf(ValidacaoException.class)
-                .hasMessage("Usuario ja cadastrado.");
+                .isInstanceOf(
+                        ValidacaoException.class
+                )
+                .hasMessage(
+                        "Usuario ja cadastrado."
+                );
 
         verify(contextoOrganizacao)
                 .getIdOrganizacao();
+
+        verify(criacaoUsuarioService)
+                .criar(
+                        dados.email(),
+                        dados.senha()
+                );
 
         verifyNoInteractions(
                 organizacaoRepository,
-                usuarioOrganizacaoRepository,
-                passwordEncoder
+                usuarioOrganizacaoRepository
         );
     }
 
     @Test
     @DisplayName(
-            "Deve listar usuarios ativos da organizacao sem filtro"
+            "Deve listar usuários ativos da organização sem filtro"
     )
     void deveListarUsuariosAtivosDaOrganizacaoSemFiltro() {
-        var paginacao = PageRequest.of(0, 10);
+        var paginacao =
+                PageRequest.of(0, 10);
 
-        var usuario = criarUsuario(
-                1L,
-                "usuario@teste.com"
-        );
-
-        var vinculo = criarVinculo(usuario);
+        UsuarioOrganizacaoModel vinculo =
+                criarVinculo(
+                        ID_USUARIO,
+                        "usuario@teste.com"
+                );
 
         when(contextoOrganizacao.getIdOrganizacao())
-                .thenReturn(10L);
+                .thenReturn(ID_ORGANIZACAO);
 
         when(usuarioOrganizacaoRepository
                 .findAllByOrganizacaoIdAndStatusAndUsuarioStatus(
                         paginacao,
-                        10L,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(
-                new PageImpl<>(List.of(vinculo))
+                new PageImpl<>(
+                        List.of(vinculo)
+                )
         );
 
-        var resultado = service.listar(
-                paginacao,
-                null
-        );
+        var resultado =
+                service.listar(
+                        paginacao,
+                        null,
+                        null
+                );
 
         assertThat(resultado.getContent())
                 .hasSize(1);
 
         assertThat(resultado.getContent().get(0).id())
-                .isEqualTo(1L);
+                .isEqualTo(ID_USUARIO);
 
         assertThat(resultado.getContent().get(0).email())
-                .isEqualTo("usuario@teste.com");
+                .isEqualTo(
+                        "usuario@teste.com"
+                );
 
         assertThat(resultado.getContent().get(0).status())
                 .isEqualTo(StatusEnum.ATIVO);
@@ -221,56 +252,65 @@ class UsuarioServiceTest {
         verify(usuarioOrganizacaoRepository)
                 .findAllByOrganizacaoIdAndStatusAndUsuarioStatus(
                         paginacao,
-                        10L,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 );
-
-        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve listar usuarios ativos da organizacao com filtro"
+            "Deve listar usuários inativos com filtro normalizado"
     )
-    void deveListarUsuariosAtivosDaOrganizacaoComFiltro() {
-        var paginacao = PageRequest.of(0, 10);
+    void deveListarUsuariosInativosComFiltroNormalizado() {
+        var paginacao =
+                PageRequest.of(0, 10);
 
-        var usuario = criarUsuario(
-                1L,
-                "financeiro@teste.com"
-        );
+        UsuarioOrganizacaoModel vinculo =
+                criarVinculo(
+                        ID_USUARIO,
+                        "financeiro@teste.com"
+                );
 
-        var vinculo = criarVinculo(usuario);
+        vinculo.inativar();
 
         when(contextoOrganizacao.getIdOrganizacao())
-                .thenReturn(10L);
+                .thenReturn(ID_ORGANIZACAO);
 
         when(usuarioOrganizacaoRepository
                 .findByOrganizacaoIdAndUsuarioEmailContainingIgnoreCaseAndStatusAndUsuarioStatus(
                         paginacao,
-                        10L,
+                        ID_ORGANIZACAO,
                         "fin",
-                        StatusEnum.ATIVO,
+                        StatusEnum.INATIVO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(
-                new PageImpl<>(List.of(vinculo))
+                new PageImpl<>(
+                        List.of(vinculo)
+                )
         );
 
-        var resultado = service.listar(
-                paginacao,
-                " fin "
-        );
+        var resultado =
+                service.listar(
+                        paginacao,
+                        " fin ",
+                        StatusEnum.INATIVO
+                );
 
         assertThat(resultado.getContent())
                 .hasSize(1);
 
         assertThat(resultado.getContent().get(0).id())
-                .isEqualTo(1L);
+                .isEqualTo(ID_USUARIO);
 
         assertThat(resultado.getContent().get(0).email())
-                .isEqualTo("financeiro@teste.com");
+                .isEqualTo(
+                        "financeiro@teste.com"
+                );
+
+        assertThat(resultado.getContent().get(0).status())
+                .isEqualTo(StatusEnum.INATIVO);
 
         verify(contextoOrganizacao)
                 .getIdOrganizacao();
@@ -278,46 +318,81 @@ class UsuarioServiceTest {
         verify(usuarioOrganizacaoRepository)
                 .findByOrganizacaoIdAndUsuarioEmailContainingIgnoreCaseAndStatusAndUsuarioStatus(
                         paginacao,
-                        10L,
+                        ID_ORGANIZACAO,
                         "fin",
-                        StatusEnum.ATIVO,
+                        StatusEnum.INATIVO,
                         StatusEnum.ATIVO
                 );
-
-        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve detalhar usuario ativo da organizacao"
+            "Não deve listar usuários com status removido"
     )
-    void deveDetalharUsuarioAtivoDaOrganizacao() {
-        var usuario = criarUsuario(
-                1L,
-                "usuario@teste.com"
-        );
-
-        var vinculo = criarVinculo(usuario);
+    void naoDeveListarUsuariosComStatusRemovido() {
+        var paginacao =
+                PageRequest.of(0, 10);
 
         when(contextoOrganizacao.getIdOrganizacao())
-                .thenReturn(10L);
+                .thenReturn(ID_ORGANIZACAO);
+
+        assertThatThrownBy(
+                () -> service.listar(
+                        paginacao,
+                        null,
+                        StatusEnum.REMOVIDO
+                )
+        )
+                .isInstanceOf(
+                        ValidacaoException.class
+                )
+                .hasMessage(
+                        "Status de usuario invalido."
+                );
+
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
+
+        verifyNoInteractions(
+                usuarioOrganizacaoRepository
+        );
+    }
+
+    @Test
+    @DisplayName(
+            "Deve detalhar usuário ativo somente na organização atual"
+    )
+    void deveDetalharUsuarioAtivoSomenteNaOrganizacaoAtual() {
+        UsuarioOrganizacaoModel vinculo =
+                criarVinculo(
+                        ID_USUARIO,
+                        "usuario@teste.com"
+                );
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(ID_ORGANIZACAO);
 
         when(usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
-                        1L,
-                        10L,
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(Optional.of(vinculo));
+        ).thenReturn(
+                Optional.of(vinculo)
+        );
 
-        var resultado = service.detalhar(1L);
+        var resultado =
+                service.detalhar(ID_USUARIO);
 
         assertThat(resultado.id())
-                .isEqualTo(1L);
+                .isEqualTo(ID_USUARIO);
 
         assertThat(resultado.email())
-                .isEqualTo("usuario@teste.com");
+                .isEqualTo(
+                        "usuario@teste.com"
+                );
 
         assertThat(resultado.status())
                 .isEqualTo(StatusEnum.ATIVO);
@@ -327,37 +402,38 @@ class UsuarioServiceTest {
 
         verify(usuarioOrganizacaoRepository)
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
-                        1L,
-                        10L,
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 );
-
-        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear detalhamento de usuario sem vinculo ativo "
-                    + "na organizacao"
+            "Não deve detalhar usuário sem vínculo ativo na organização"
     )
-    void deveBloquearDetalhamentoDeUsuarioSemVinculoAtivoNaOrganizacao() {
+    void naoDeveDetalharUsuarioSemVinculoAtivoNaOrganizacao() {
         when(contextoOrganizacao.getIdOrganizacao())
-                .thenReturn(10L);
+                .thenReturn(ID_ORGANIZACAO);
 
         when(usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
-                        1L,
-                        10L,
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(Optional.empty());
+        ).thenReturn(
+                Optional.empty()
+        );
 
-        assertThatThrownBy(() ->
-                service.detalhar(1L)
+        assertThatThrownBy(
+                () -> service.detalhar(ID_USUARIO)
         )
-                .isInstanceOf(ValidacaoException.class)
+                .isInstanceOf(
+                        ValidacaoException.class
+                )
                 .hasMessage(
                         "Usuario nao encontrado ou removido."
                 );
@@ -367,46 +443,237 @@ class UsuarioServiceTest {
 
         verify(usuarioOrganizacaoRepository)
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
-                        1L,
-                        10L,
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 );
-
-        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve inativar somente o vinculo do usuario "
-                    + "com a organizacao atual"
+            "Não deve permitir que usuário remova o próprio acesso"
     )
-    void deveInativarSomenteVinculoDoUsuarioComOrganizacaoAtual() {
-        var usuario = criarUsuario(
-                1L,
-                "usuario@teste.com"
-        );
+    void naoDevePermitirQueUsuarioRemovaOProprioAcesso() {
+        when(usuarioLogadoService.getId())
+                .thenReturn(ID_USUARIO);
 
-        var vinculo = criarVinculo(usuario);
+        assertThatThrownBy(
+                () -> service.excluir(ID_USUARIO)
+        )
+                .isInstanceOf(
+                        ValidacaoException.class
+                )
+                .hasMessage(
+                        "O usuario nao pode remover o proprio "
+                                + "acesso a organizacao."
+                );
+
+        verify(usuarioLogadoService)
+                .getId();
+
+        verifyNoInteractions(
+                contextoOrganizacao,
+                usuarioOrganizacaoRepository,
+                protecaoAdministradorOrganizacaoService
+        );
+    }
+
+    @Test
+    @DisplayName(
+            "Deve validar proteção administrativa e inativar somente o vínculo"
+    )
+    void deveValidarProtecaoAdministrativaEInativarSomenteOVinculo() {
+        UsuarioOrganizacaoModel vinculo =
+                criarVinculo(
+                        ID_USUARIO,
+                        "usuario@teste.com"
+                );
+
+        when(usuarioLogadoService.getId())
+                .thenReturn(99L);
 
         when(contextoOrganizacao.getIdOrganizacao())
-                .thenReturn(10L);
+                .thenReturn(ID_ORGANIZACAO);
 
         when(usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
-                        1L,
-                        10L,
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(Optional.of(vinculo));
+        ).thenReturn(
+                Optional.of(vinculo)
+        );
 
-        service.excluir(1L);
+        service.excluir(ID_USUARIO);
+
+        verify(usuarioLogadoService)
+                .getId();
+
+        verify(contextoOrganizacao)
+                .getIdOrganizacao();
+
+        verify(usuarioOrganizacaoRepository)
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                );
+
+        verify(protecaoAdministradorOrganizacaoService)
+                .validarInativacaoUsuario(
+                        vinculo,
+                        ID_ORGANIZACAO
+                );
 
         assertThat(vinculo.getStatus())
                 .isEqualTo(StatusEnum.INATIVO);
 
-        assertThat(usuario.getStatus())
+        assertThat(vinculo.getUsuario().getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
+    }
+
+    @Test
+    @DisplayName(
+            "Não deve inativar vínculo quando proteção administrativa bloquear"
+    )
+    void naoDeveInativarVinculoQuandoProtecaoAdministrativaBloquear() {
+        UsuarioOrganizacaoModel vinculo =
+                criarVinculo(
+                        ID_USUARIO,
+                        "administrador@teste.com"
+                );
+
+        when(usuarioLogadoService.getId())
+                .thenReturn(99L);
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(ID_ORGANIZACAO);
+
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
+                Optional.of(vinculo)
+        );
+
+        org.mockito.Mockito.doThrow(
+                new ValidacaoException(
+                        "A organização deve manter um administrador ativo."
+                )
+        ).when(
+                protecaoAdministradorOrganizacaoService
+        ).validarInativacaoUsuario(
+                vinculo,
+                ID_ORGANIZACAO
+        );
+
+        assertThatThrownBy(
+                () -> service.excluir(ID_USUARIO)
+        )
+                .isInstanceOf(
+                        ValidacaoException.class
+                )
+                .hasMessage(
+                        "A organização deve manter um administrador ativo."
+                );
+
+        assertThat(vinculo.getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
+
+        verify(protecaoAdministradorOrganizacaoService)
+                .validarInativacaoUsuario(
+                        vinculo,
+                        ID_ORGANIZACAO
+                );
+    }
+
+    @Test
+    @DisplayName(
+            "Não deve inativar usuário sem vínculo ativo na organização"
+    )
+    void naoDeveInativarUsuarioSemVinculoAtivoNaOrganizacao() {
+        when(usuarioLogadoService.getId())
+                .thenReturn(99L);
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(ID_ORGANIZACAO);
+
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
+                Optional.empty()
+        );
+
+        assertThatThrownBy(
+                () -> service.excluir(ID_USUARIO)
+        )
+                .isInstanceOf(
+                        ValidacaoException.class
+                )
+                .hasMessage(
+                        "Usuario nao encontrado ou removido."
+                );
+
+        verifyNoInteractions(
+                protecaoAdministradorOrganizacaoService
+        );
+    }
+
+    @Test
+    @DisplayName(
+            "Deve reativar vínculo inativo na organização atual"
+    )
+    void deveReativarVinculoInativoNaOrganizacaoAtual() {
+        UsuarioOrganizacaoModel vinculo =
+                criarVinculo(
+                        ID_USUARIO,
+                        "usuario@teste.com"
+                );
+
+        vinculo.inativar();
+
+        when(contextoOrganizacao.getIdOrganizacao())
+                .thenReturn(ID_ORGANIZACAO);
+
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
+                        StatusEnum.INATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(
+                Optional.of(vinculo)
+        );
+
+        var resultado =
+                service.reativar(ID_USUARIO);
+
+        assertThat(vinculo.getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
+
+        assertThat(resultado.id())
+                .isEqualTo(ID_USUARIO);
+
+        assertThat(resultado.email())
+                .isEqualTo(
+                        "usuario@teste.com"
+                );
+
+        assertThat(resultado.status())
                 .isEqualTo(StatusEnum.ATIVO);
 
         verify(contextoOrganizacao)
@@ -414,39 +681,40 @@ class UsuarioServiceTest {
 
         verify(usuarioOrganizacaoRepository)
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
-                        1L,
-                        10L,
-                        StatusEnum.ATIVO,
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
+                        StatusEnum.INATIVO,
                         StatusEnum.ATIVO
                 );
-
-        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve bloquear exclusao de usuario sem vinculo ativo "
-                    + "na organizacao atual"
+            "Não deve reativar vínculo inexistente"
     )
-    void deveBloquearExclusaoDeUsuarioSemVinculoAtivoNaOrganizacaoAtual() {
+    void naoDeveReativarVinculoInexistente() {
         when(contextoOrganizacao.getIdOrganizacao())
-                .thenReturn(10L);
+                .thenReturn(ID_ORGANIZACAO);
 
         when(usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
-                        1L,
-                        10L,
-                        StatusEnum.ATIVO,
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
+                        StatusEnum.INATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(Optional.empty());
+        ).thenReturn(
+                Optional.empty()
+        );
 
-        assertThatThrownBy(() ->
-                service.excluir(1L)
+        assertThatThrownBy(
+                () -> service.reativar(ID_USUARIO)
         )
-                .isInstanceOf(ValidacaoException.class)
+                .isInstanceOf(
+                        ValidacaoException.class
+                )
                 .hasMessage(
-                        "Usuario nao encontrado ou removido."
+                        "Usuario inativo nao encontrado."
                 );
 
         verify(contextoOrganizacao)
@@ -454,21 +722,19 @@ class UsuarioServiceTest {
 
         verify(usuarioOrganizacaoRepository)
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
-                        1L,
-                        10L,
-                        StatusEnum.ATIVO,
+                        ID_USUARIO,
+                        ID_ORGANIZACAO,
+                        StatusEnum.INATIVO,
                         StatusEnum.ATIVO
                 );
-
-        verifyNoInteractions(repository);
     }
 
     @Test
     @DisplayName(
-            "Deve carregar usuario autenticado pelo email"
+            "Deve carregar usuário autenticado pelo e-mail"
     )
     void deveCarregarUsuarioAutenticadoPeloEmail() {
-        var usuarioAutenticado =
+        UsuarioAutenticado usuarioAutenticado =
                 org.mockito.Mockito.mock(
                         UsuarioAutenticado.class
                 );
@@ -477,47 +743,61 @@ class UsuarioServiceTest {
                 "usuario@teste.com"
         )).thenReturn(usuarioAutenticado);
 
-        var resultado = service.loadUserByUsername(
-                "usuario@teste.com"
-        );
+        var resultado =
+                service.loadUserByUsername(
+                        "usuario@teste.com"
+                );
 
         assertThat(resultado)
-                .isEqualTo(usuarioAutenticado);
+                .isSameAs(usuarioAutenticado);
+
+        verify(usuarioAutenticadoService)
+                .buscarPorEmail(
+                        "usuario@teste.com"
+                );
     }
 
     @Test
     @DisplayName(
-            "Deve lancar excecao quando usuario autenticado "
-                    + "nao for encontrado"
+            "Deve lançar exceção quando usuário autenticado não for encontrado"
     )
     void deveLancarExcecaoQuandoUsuarioAutenticadoNaoForEncontrado() {
         when(usuarioAutenticadoService.buscarPorEmail(
                 "usuario@teste.com"
         )).thenReturn(null);
 
-        assertThatThrownBy(() ->
-                service.loadUserByUsername(
+        assertThatThrownBy(
+                () -> service.loadUserByUsername(
                         "usuario@teste.com"
                 )
         )
                 .isInstanceOf(
                         UsernameNotFoundException.class
                 )
-                .hasMessage("Usuario nao encontrado");
+                .hasMessage(
+                        "Usuario nao encontrado"
+                );
+
+        verify(usuarioAutenticadoService)
+                .buscarPorEmail(
+                        "usuario@teste.com"
+                );
     }
 
     private UsuarioOrganizacaoModel criarVinculo(
-            UsuarioModel usuario
+            Long idUsuario,
+            String email
     ) {
-        var organizacao = new OrganizacaoModel(
-                "Organização Exemplo"
-        );
+        UsuarioModel usuario =
+                criarUsuario(
+                        idUsuario,
+                        email
+                );
 
-        ReflectionTestUtils.setField(
-                organizacao,
-                "id",
-                10L
-        );
+        OrganizacaoModel organizacao =
+                new OrganizacaoModel(
+                        "Organização Principal"
+                );
 
         return new UsuarioOrganizacaoModel(
                 usuario,
@@ -529,20 +809,11 @@ class UsuarioServiceTest {
             Long id,
             String email
     ) {
-        var usuario = new UsuarioModel(
-                new UsuarioRecord(
-                        email,
-                        "Senha@123"
-                ),
-                "senha-criptografada"
+        return new UsuarioModel(
+                id,
+                email,
+                "senha-criptografada",
+                StatusEnum.ATIVO
         );
-
-        ReflectionTestUtils.setField(
-                usuario,
-                "id",
-                id
-        );
-
-        return usuario;
     }
 }

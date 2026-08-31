@@ -6,10 +6,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -101,6 +102,12 @@ class UsuarioSubsidiariaModelTest {
                         "Organizacao Principal"
                 );
 
+        var usuarioOrganizacao =
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                );
+
         var empresa = new EmpresaModel(
                 organizacao,
                 new EmpresaRecord(
@@ -109,7 +116,7 @@ class UsuarioSubsidiariaModelTest {
         );
 
         return new UsuarioEmpresaModel(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 false
         );

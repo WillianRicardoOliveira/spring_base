@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.empresa.erp.domain.acesso.usuarioSessao.model.UsuarioSessaoModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
 public interface UsuarioSessaoRepository extends JpaRepository<UsuarioSessaoModel, Long> {

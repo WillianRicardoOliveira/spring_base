@@ -13,6 +13,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.empresa.erp.core.exception.AccessTokenException;
+import com.empresa.erp.core.security.record.AccessTokenValidadoSecurity;
 import com.empresa.erp.core.security.record.TokenGeradoSecurity;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
@@ -93,6 +95,15 @@ public class TokenSecurity {
         }
     }
 
+    public AccessTokenValidadoSecurity validarAccessToken(String tokenJWT) {
+        var tokenDecodificado = verificarToken(tokenJWT);
+
+        return new AccessTokenValidadoSecurity(
+                tokenDecodificado.getSubject(),
+                tokenDecodificado.getId()
+        );
+    }
+
     public String getSubject(String tokenJWT) {
         return verificarToken(tokenJWT).getSubject();
     }
@@ -105,12 +116,24 @@ public class TokenSecurity {
         try {
             var algoritmo = Algorithm.HMAC256(secret);
 
-            return JWT.require(algoritmo)
+            var tokenDecodificado = JWT.require(algoritmo)
                     .withIssuer(issuer)
                     .build()
                     .verify(tokenJWT);
+
+            if (!StringUtils.hasText(tokenDecodificado.getSubject())
+                    || !StringUtils.hasText(tokenDecodificado.getId())) {
+                throw new AccessTokenException(
+                        "Token JWT invalido: claims obrigatorias ausentes"
+                );
+            }
+
+            return tokenDecodificado;
         } catch (JWTVerificationException exception) {
-            throw new RuntimeException("Token JWT invalido ou expirado");
+            throw new AccessTokenException(
+                    "Token JWT invalido ou expirado",
+                    exception
+            );
         }
     }
 

@@ -1,18 +1,25 @@
 package com.empresa.erp.domain.usuario.record;
 
-import com.empresa.erp.domain.old.StatusEnum;
-import com.empresa.erp.domain.usuario.model.UsuarioModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 public record ListaUsuarioRecord(
-    Long id,
-    String email,
-    StatusEnum status
+        Long id,
+        String email,
+        StatusEnum status
 ) {
-    public ListaUsuarioRecord(UsuarioModel dados) {
+
+    public ListaUsuarioRecord(
+            UsuarioOrganizacaoModel usuarioOrganizacao
+    ) {
         this(
-        		dados.getId(),
-        		dados.getEmail(),
-        		dados.getStatus()
-        	);
+                usuarioOrganizacao
+                        .getUsuario()
+                        .getId(),
+                usuarioOrganizacao
+                        .getUsuario()
+                        .getEmail(),
+                usuarioOrganizacao.getStatus()
+        );
     }
 }

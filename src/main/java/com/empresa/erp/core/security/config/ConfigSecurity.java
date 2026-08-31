@@ -18,12 +18,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.empresa.erp.core.organizacao.filter.ContextoOrganizacaoFilter;
 import com.empresa.erp.core.organizacao.service.ContextoOrganizacaoService;
+import com.empresa.erp.core.security.filter.AutoridadesPlataformaFilter;
 import com.empresa.erp.core.security.filter.FilterSecurity;
 import com.empresa.erp.core.security.handler.AcessoNegadoHandler;
 import com.empresa.erp.core.security.handler.AutenticacaoEntryPoint;
-import tools.jackson.databind.ObjectMapper;
+import com.empresa.erp.core.security.service.AutoridadesOrganizacaoService;
+import com.empresa.erp.core.security.service.AutoridadesPlataformaService;
 
 import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableWebSecurity
@@ -50,11 +53,21 @@ public class ConfigSecurity {
             HttpSecurity http,
             ContextoOrganizacaoService
                     contextoOrganizacaoService,
+            AutoridadesOrganizacaoService
+                    autoridadesOrganizacaoService,
+            AutoridadesPlataformaService
+                    autoridadesPlataformaService,
             ObjectMapper objectMapper
     ) throws Exception {
+        var autoridadesPlataformaFilter =
+                new AutoridadesPlataformaFilter(
+                        autoridadesPlataformaService
+                );
+
         var contextoOrganizacaoFilter =
                 new ContextoOrganizacaoFilter(
                         contextoOrganizacaoService,
+                        autoridadesOrganizacaoService,
                         acessoNegadoHandler,
                         objectMapper
                 );
@@ -67,11 +80,10 @@ public class ConfigSecurity {
                                 SessionCreationPolicy.STATELESS
                         )
                 )
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(
+                .exceptionHandling(ex ->
+                        ex.authenticationEntryPoint(
                                 autenticacaoEntryPoint
-                        )
-                        .accessDeniedHandler(
+                        ).accessDeniedHandler(
                                 acessoNegadoHandler
                         )
                 )
@@ -96,6 +108,18 @@ public class ConfigSecurity {
                             "/login/sso"
                     ).permitAll();
 
+                    req.requestMatchers(
+                            HttpMethod.POST,
+                            "/plataforma/organizacao/"
+                                    + "convite/consulta"
+                    ).permitAll();
+
+                    req.requestMatchers(
+                            HttpMethod.POST,
+                            "/plataforma/organizacao/"
+                                    + "convite/aceite/novo-usuario"
+                    ).permitAll();
+
                     if (swaggerPublic) {
                         req.requestMatchers(
                                 "/v3/api-docs/**",
@@ -111,8 +135,12 @@ public class ConfigSecurity {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .addFilterAfter(
-                        contextoOrganizacaoFilter,
+                        autoridadesPlataformaFilter,
                         FilterSecurity.class
+                )
+                .addFilterAfter(
+                        contextoOrganizacaoFilter,
+                        AutoridadesPlataformaFilter.class
                 )
                 .build();
     }

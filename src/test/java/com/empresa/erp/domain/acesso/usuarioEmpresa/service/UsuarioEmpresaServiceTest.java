@@ -29,18 +29,18 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.empresa.service.EmpresaService;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
-import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioEmpresaServiceTest {
@@ -57,9 +57,6 @@ class UsuarioEmpresaServiceTest {
     @Mock
     private UsuarioSubsidiariaRepository
             usuarioSubsidiariaRepository;
-
-    @Mock
-    private UsuarioRepository usuarioRepository;
 
     @Mock
     private EmpresaRepository empresaRepository;
@@ -92,20 +89,23 @@ class UsuarioEmpresaServiceTest {
     )
     void deveCadastrarVinculoNaOrganizacaoAtual() {
         var usuario = criarUsuario(1L);
+        var organizacao = criarOrganizacao(ID_ORGANIZACAO);
+        var usuarioOrganizacao =
+                criarUsuarioOrganizacao(
+                        11L,
+                        usuario,
+                        organizacao
+                );
         var empresa = criarEmpresa(2L);
 
-        when(usuarioRepository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuario));
-
         when(usuarioOrganizacaoRepository
-                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         1L,
                         ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(true);
+        ).thenReturn(Optional.of(usuarioOrganizacao));
 
         when(empresaRepository
                 .findByIdAndOrganizacaoIdAndStatus(
@@ -116,9 +116,10 @@ class UsuarioEmpresaServiceTest {
         ).thenReturn(Optional.of(empresa));
 
         when(repository
-                .existsByUsuarioAndEmpresaAndStatus(
-                        usuario,
-                        empresa,
+                .existsByUsuarioOrganizacaoIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                        11L,
+                        2L,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(false);
@@ -138,8 +139,14 @@ class UsuarioEmpresaServiceTest {
                 )
         );
 
-        assertThat(resultado.getUsuario())
-                .isSameAs(usuario);
+        assertThat(resultado.getUsuarioOrganizacao())
+                .isSameAs(usuarioOrganizacao);
+
+        assertThat(
+                resultado
+                        .getUsuarioOrganizacao()
+                        .getUsuario()
+        ).isSameAs(usuario);
 
         assertThat(resultado.getEmpresa())
                 .isSameAs(empresa);
@@ -156,10 +163,14 @@ class UsuarioEmpresaServiceTest {
             "Deve bloquear cadastro para usuario inexistente"
     )
     void deveBloquearCadastroParaUsuarioInexistente() {
-        when(usuarioRepository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.empty());
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.cadastrar(
@@ -172,14 +183,7 @@ class UsuarioEmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "Usuario nao encontrado ou removido."
-                );
-
-        verify(usuarioOrganizacaoRepository, never())
-                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
-                        any(),
-                        any(),
-                        any()
+                        "Usuario nao encontrado na organizacao."
                 );
 
         verify(empresaRepository, never())
@@ -188,6 +192,9 @@ class UsuarioEmpresaServiceTest {
                         any(),
                         any()
                 );
+
+        verify(repository, never())
+                .save(any(UsuarioEmpresaModel.class));
     }
 
     @Test
@@ -195,20 +202,14 @@ class UsuarioEmpresaServiceTest {
             "Deve bloquear usuario sem vinculo com organizacao"
     )
     void deveBloquearUsuarioSemVinculoComOrganizacao() {
-        var usuario = criarUsuario(1L);
-
-        when(usuarioRepository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuario));
-
         when(usuarioOrganizacaoRepository
-                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         1L,
                         ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(false);
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 service.cadastrar(
@@ -221,7 +222,7 @@ class UsuarioEmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "Usuario nao pertence a organizacao atual."
+                        "Usuario nao encontrado na organizacao."
                 );
 
         verify(empresaRepository, never())
@@ -241,19 +242,22 @@ class UsuarioEmpresaServiceTest {
     )
     void deveBloquearEmpresaForaDaOrganizacao() {
         var usuario = criarUsuario(1L);
-
-        when(usuarioRepository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuario));
+        var organizacao = criarOrganizacao(ID_ORGANIZACAO);
+        var usuarioOrganizacao =
+                criarUsuarioOrganizacao(
+                        11L,
+                        usuario,
+                        organizacao
+                );
 
         when(usuarioOrganizacaoRepository
-                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         1L,
                         ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(true);
+        ).thenReturn(Optional.of(usuarioOrganizacao));
 
         when(empresaRepository
                 .findByIdAndOrganizacaoIdAndStatus(
@@ -285,20 +289,23 @@ class UsuarioEmpresaServiceTest {
     @DisplayName("Deve bloquear vinculo duplicado")
     void deveBloquearVinculoDuplicado() {
         var usuario = criarUsuario(1L);
+        var organizacao = criarOrganizacao(ID_ORGANIZACAO);
+        var usuarioOrganizacao =
+                criarUsuarioOrganizacao(
+                        11L,
+                        usuario,
+                        organizacao
+                );
         var empresa = criarEmpresa(2L);
 
-        when(usuarioRepository.findByIdAndStatus(
-                1L,
-                StatusEnum.ATIVO
-        )).thenReturn(Optional.of(usuario));
-
         when(usuarioOrganizacaoRepository
-                .existsByUsuarioIdAndOrganizacaoIdAndStatus(
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         1L,
                         ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(true);
+        ).thenReturn(Optional.of(usuarioOrganizacao));
 
         when(empresaRepository
                 .findByIdAndOrganizacaoIdAndStatus(
@@ -309,9 +316,10 @@ class UsuarioEmpresaServiceTest {
         ).thenReturn(Optional.of(empresa));
 
         when(repository
-                .existsByUsuarioAndEmpresaAndStatus(
-                        usuario,
-                        empresa,
+                .existsByUsuarioOrganizacaoIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                        11L,
+                        2L,
+                        ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(true);
@@ -343,9 +351,11 @@ class UsuarioEmpresaServiceTest {
         var usuarioEmpresa = criarUsuarioEmpresa();
 
         when(repository
-                .findAllByEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         paginacao,
                         ID_ORGANIZACAO,
+                        null,
+                        null,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(
@@ -373,12 +383,30 @@ class UsuarioEmpresaServiceTest {
     )
     void deveListarPorUsuarioEOrganizacao() {
         var paginacao = PageRequest.of(0, 10);
+        var usuario = criarUsuario(1L);
+        var organizacao = criarOrganizacao(ID_ORGANIZACAO);
+        var usuarioOrganizacao =
+                criarUsuarioOrganizacao(
+                        11L,
+                        usuario,
+                        organizacao
+                );
 
-        when(repository
-                .findAllByUsuarioIdAndEmpresaOrganizacaoIdAndStatus(
-                        paginacao,
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         1L,
                         ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(usuarioOrganizacao));
+
+        when(repository
+                .buscarAtivosDaOrganizacao(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        11L,
+                        null,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(
@@ -392,10 +420,11 @@ class UsuarioEmpresaServiceTest {
         );
 
         verify(repository)
-                .findAllByUsuarioIdAndEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         paginacao,
-                        1L,
                         ID_ORGANIZACAO,
+                        11L,
+                        null,
                         StatusEnum.ATIVO
                 );
     }
@@ -406,12 +435,22 @@ class UsuarioEmpresaServiceTest {
     )
     void deveListarPorEmpresaEOrganizacao() {
         var paginacao = PageRequest.of(0, 10);
+        var empresa = criarEmpresa(2L);
 
-        when(repository
-                .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
-                        paginacao,
+        when(empresaRepository
+                .findByIdAndOrganizacaoIdAndStatus(
                         2L,
                         ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
+
+        when(repository
+                .buscarAtivosDaOrganizacao(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        null,
+                        2L,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(
@@ -425,10 +464,11 @@ class UsuarioEmpresaServiceTest {
         );
 
         verify(repository)
-                .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         paginacao,
-                        2L,
                         ID_ORGANIZACAO,
+                        null,
+                        2L,
                         StatusEnum.ATIVO
                 );
     }
@@ -439,13 +479,39 @@ class UsuarioEmpresaServiceTest {
     )
     void deveListarPorUsuarioEmpresaEOrganizacao() {
         var paginacao = PageRequest.of(0, 10);
+        var usuario = criarUsuario(1L);
+        var organizacao = criarOrganizacao(ID_ORGANIZACAO);
+        var usuarioOrganizacao =
+                criarUsuarioOrganizacao(
+                        11L,
+                        usuario,
+                        organizacao
+                );
+        var empresa = criarEmpresa(2L);
 
-        when(repository
-                .findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
-                        paginacao,
+        when(usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         1L,
+                        ID_ORGANIZACAO,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(usuarioOrganizacao));
+
+        when(empresaRepository
+                .findByIdAndOrganizacaoIdAndStatus(
                         2L,
                         ID_ORGANIZACAO,
+                        StatusEnum.ATIVO
+                )
+        ).thenReturn(Optional.of(empresa));
+
+        when(repository
+                .buscarAtivosDaOrganizacao(
+                        paginacao,
+                        ID_ORGANIZACAO,
+                        11L,
+                        2L,
                         StatusEnum.ATIVO
                 )
         ).thenReturn(
@@ -459,11 +525,11 @@ class UsuarioEmpresaServiceTest {
         );
 
         verify(repository)
-                .findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         paginacao,
-                        1L,
-                        2L,
                         ID_ORGANIZACAO,
+                        11L,
+                        2L,
                         StatusEnum.ATIVO
                 );
     }
@@ -517,8 +583,9 @@ class UsuarioEmpresaServiceTest {
         var usuarioEmpresa = criarUsuarioEmpresa();
 
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -542,8 +609,9 @@ class UsuarioEmpresaServiceTest {
     )
     void deveBloquearDetalheDeOutraOrganizacao() {
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -567,8 +635,9 @@ class UsuarioEmpresaServiceTest {
         var usuarioEmpresa = criarUsuarioEmpresa();
 
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -594,8 +663,9 @@ class UsuarioEmpresaServiceTest {
                 criarUsuarioEmpresa(false);
 
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -628,8 +698,9 @@ class UsuarioEmpresaServiceTest {
                 criarUsuarioEmpresa(false);
 
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -667,8 +738,9 @@ class UsuarioEmpresaServiceTest {
     )
     void deveBloquearAtualizacaoDeOutraOrganizacao() {
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -703,8 +775,9 @@ class UsuarioEmpresaServiceTest {
         var usuarioEmpresa = criarUsuarioEmpresa();
 
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -741,8 +814,9 @@ class UsuarioEmpresaServiceTest {
                 criarUsuarioEmpresa(false);
 
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -778,8 +852,9 @@ class UsuarioEmpresaServiceTest {
     )
     void deveBloquearExclusaoDeOutraOrganizacao() {
         when(repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         3L,
+                        ID_ORGANIZACAO,
                         ID_ORGANIZACAO,
                         StatusEnum.ATIVO
                 )
@@ -822,7 +897,9 @@ class UsuarioEmpresaServiceTest {
         return usuario;
     }
 
-    private EmpresaModel criarEmpresa(Long id) {
+    private OrganizacaoModel criarOrganizacao(
+            Long id
+    ) {
         var organizacao =
                 new OrganizacaoModel(
                         "Organizacao Principal"
@@ -831,11 +908,36 @@ class UsuarioEmpresaServiceTest {
         ReflectionTestUtils.setField(
                 organizacao,
                 "id",
-                ID_ORGANIZACAO
+                id
         );
 
+        return organizacao;
+    }
+
+    private UsuarioOrganizacaoModel
+            criarUsuarioOrganizacao(
+                    Long id,
+                    UsuarioModel usuario,
+                    OrganizacaoModel organizacao
+            ) {
+        var usuarioOrganizacao =
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                );
+
+        ReflectionTestUtils.setField(
+                usuarioOrganizacao,
+                "id",
+                id
+        );
+
+        return usuarioOrganizacao;
+    }
+
+    private EmpresaModel criarEmpresa(Long id) {
         var empresa = new EmpresaModel(
-                organizacao,
+                criarOrganizacao(ID_ORGANIZACAO),
                 new EmpresaRecord(
                         "Empresa Exemplo"
                 )
@@ -859,9 +961,19 @@ class UsuarioEmpresaServiceTest {
             criarUsuarioEmpresa(
                     Boolean todasSubsidiarias
             ) {
+        var organizacao =
+                criarOrganizacao(ID_ORGANIZACAO);
+
+        var usuarioOrganizacao =
+                criarUsuarioOrganizacao(
+                        11L,
+                        criarUsuario(1L),
+                        organizacao
+                );
+
         var usuarioEmpresa =
                 new UsuarioEmpresaModel(
-                        criarUsuario(1L),
+                        usuarioOrganizacao,
                         criarEmpresa(2L),
                         todasSubsidiarias
                 );

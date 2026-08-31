@@ -10,10 +10,12 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
@@ -30,6 +32,10 @@ class UsuarioEmpresaRepositoryTest {
     private UsuarioEmpresaRepository repository;
 
     @Autowired
+    private UsuarioOrganizacaoRepository
+            usuarioOrganizacaoRepository;
+
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
@@ -42,6 +48,9 @@ class UsuarioEmpresaRepositoryTest {
     private OrganizacaoModel organizacao;
     private OrganizacaoModel outraOrganizacao;
     private UsuarioModel usuario;
+    private UsuarioOrganizacaoModel usuarioOrganizacao;
+    private UsuarioOrganizacaoModel
+            usuarioOrganizacaoDeOutraOrganizacao;
     private EmpresaModel empresa;
     private EmpresaModel empresaDeOutraOrganizacao;
 
@@ -69,6 +78,22 @@ class UsuarioEmpresaRepositoryTest {
                 )
         );
 
+        usuarioOrganizacao =
+                usuarioOrganizacaoRepository.save(
+                        new UsuarioOrganizacaoModel(
+                                usuario,
+                                organizacao
+                        )
+                );
+
+        usuarioOrganizacaoDeOutraOrganizacao =
+                usuarioOrganizacaoRepository.save(
+                        new UsuarioOrganizacaoModel(
+                                usuario,
+                                outraOrganizacao
+                        )
+                );
+
         empresa = empresaRepository.save(
                 new EmpresaModel(
                         organizacao,
@@ -95,13 +120,13 @@ class UsuarioEmpresaRepositoryTest {
     )
     void deveListarSomenteVinculosAtivosDaOrganizacao() {
         var ativo = criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
 
         var inativo = criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 false
         );
@@ -110,15 +135,17 @@ class UsuarioEmpresaRepositoryTest {
         repository.save(inativo);
 
         var externo = criarVinculo(
-                usuario,
+                usuarioOrganizacaoDeOutraOrganizacao,
                 empresaDeOutraOrganizacao,
                 false
         );
 
         var resultado = repository
-                .findAllByEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
                         organizacao.getId(),
+                        null,
+                        null,
                         StatusEnum.ATIVO
                 );
 
@@ -137,22 +164,23 @@ class UsuarioEmpresaRepositoryTest {
     )
     void deveListarVinculosPorUsuarioSomenteNaOrganizacao() {
         criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
 
         criarVinculo(
-                usuario,
+                usuarioOrganizacaoDeOutraOrganizacao,
                 empresaDeOutraOrganizacao,
                 false
         );
 
         var resultado = repository
-                .findAllByUsuarioIdAndEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
-                        usuario.getId(),
                         organizacao.getId(),
+                        usuarioOrganizacao.getId(),
+                        null,
                         StatusEnum.ATIVO
                 );
 
@@ -173,24 +201,26 @@ class UsuarioEmpresaRepositoryTest {
     )
     void deveListarPorEmpresaSomenteNaOrganizacao() {
         criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
 
         var resultadoCorreto = repository
-                .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
-                        empresa.getId(),
                         organizacao.getId(),
+                        null,
+                        empresa.getId(),
                         StatusEnum.ATIVO
                 );
 
         var resultadoOutraOrganizacao = repository
-                .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
-                        empresa.getId(),
                         outraOrganizacao.getId(),
+                        null,
+                        empresa.getId(),
                         StatusEnum.ATIVO
                 );
 
@@ -207,17 +237,17 @@ class UsuarioEmpresaRepositoryTest {
     )
     void deveListarPorUsuarioEmpresaEOrganizacao() {
         criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
 
         var resultado = repository
-                .findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
-                        usuario.getId(),
-                        empresa.getId(),
                         organizacao.getId(),
+                        usuarioOrganizacao.getId(),
+                        empresa.getId(),
                         StatusEnum.ATIVO
                 );
 
@@ -231,17 +261,17 @@ class UsuarioEmpresaRepositoryTest {
     )
     void naoDeveListarCombinacaoUsandoOutraOrganizacao() {
         criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
 
         var resultado = repository
-                .findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         PageRequest.of(0, 10),
-                        usuario.getId(),
-                        empresa.getId(),
                         outraOrganizacao.getId(),
+                        usuarioOrganizacao.getId(),
+                        empresa.getId(),
                         StatusEnum.ATIVO
                 );
 
@@ -255,21 +285,23 @@ class UsuarioEmpresaRepositoryTest {
     )
     void deveBuscarVinculoPorIdSomenteNaOrganizacao() {
         var vinculo = criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
 
         var resultadoCorreto = repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         vinculo.getId(),
+                        organizacao.getId(),
                         organizacao.getId(),
                         StatusEnum.ATIVO
                 );
 
         var resultadoOutraOrganizacao = repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         vinculo.getId(),
+                        outraOrganizacao.getId(),
                         outraOrganizacao.getId(),
                         StatusEnum.ATIVO
                 );
@@ -286,7 +318,7 @@ class UsuarioEmpresaRepositoryTest {
     )
     void naoDeveBuscarVinculoInativoNaOrganizacao() {
         var vinculo = criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
@@ -295,8 +327,9 @@ class UsuarioEmpresaRepositoryTest {
         repository.save(vinculo);
 
         var resultado = repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         vinculo.getId(),
+                        organizacao.getId(),
                         organizacao.getId(),
                         StatusEnum.ATIVO
                 );
@@ -310,17 +343,19 @@ class UsuarioEmpresaRepositoryTest {
     )
     void deveVerificarVinculoAtivoDuplicado() {
         criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
 
         boolean existe =
-                repository.existsByUsuarioAndEmpresaAndStatus(
-                        usuario,
-                        empresa,
-                        StatusEnum.ATIVO
-                );
+                repository
+                        .existsByUsuarioOrganizacaoIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                                usuarioOrganizacao.getId(),
+                                empresa.getId(),
+                                organizacao.getId(),
+                                StatusEnum.ATIVO
+                        );
 
         assertThat(existe).isTrue();
     }
@@ -331,7 +366,7 @@ class UsuarioEmpresaRepositoryTest {
     )
     void naoDeveConsiderarVinculoInativoComoDuplicado() {
         var vinculo = criarVinculo(
-                usuario,
+                usuarioOrganizacao,
                 empresa,
                 true
         );
@@ -340,23 +375,25 @@ class UsuarioEmpresaRepositoryTest {
         repository.save(vinculo);
 
         boolean existe =
-                repository.existsByUsuarioAndEmpresaAndStatus(
-                        usuario,
-                        empresa,
-                        StatusEnum.ATIVO
-                );
+                repository
+                        .existsByUsuarioOrganizacaoIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                                usuarioOrganizacao.getId(),
+                                empresa.getId(),
+                                organizacao.getId(),
+                                StatusEnum.ATIVO
+                        );
 
         assertThat(existe).isFalse();
     }
 
     private UsuarioEmpresaModel criarVinculo(
-            UsuarioModel usuario,
+            UsuarioOrganizacaoModel usuarioOrganizacao,
             EmpresaModel empresa,
             Boolean todasSubsidiarias
     ) {
         return repository.save(
                 new UsuarioEmpresaModel(
-                        usuario,
+                        usuarioOrganizacao,
                         empresa,
                         todasSubsidiarias
                 )

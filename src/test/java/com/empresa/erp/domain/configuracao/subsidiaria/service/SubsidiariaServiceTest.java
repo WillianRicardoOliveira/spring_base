@@ -25,6 +25,7 @@ import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.organizacao.contexto.ContextoOrganizacao;
 import com.empresa.erp.core.security.service.UsuarioLogadoService;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
@@ -32,7 +33,6 @@ import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
 import com.empresa.erp.domain.configuracao.subsidiaria.record.AtualizaSubsidiariaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.record.SubsidiariaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 @ExtendWith(MockitoExtension.class)

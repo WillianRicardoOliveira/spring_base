@@ -1,15 +1,34 @@
 package com.empresa.erp.domain.configuracao.subsidiaria.record;
 
+import com.empresa.erp.domain.base.model.StatusEnum;
+import com.empresa.erp.domain.base.record.AuditoriaRecord;
 import com.empresa.erp.domain.configuracao.subsidiaria.model.SubsidiariaModel;
-import com.empresa.erp.domain.old.StatusEnum;
 
 public record DetalheSubsidiariaRecord(
         Long id,
         Long idEmpresa,
         String empresa,
         String nome,
-        StatusEnum status
+        StatusEnum status,
+        AuditoriaRecord auditoria
 ) {
+
+    public DetalheSubsidiariaRecord(
+            Long id,
+            Long idEmpresa,
+            String empresa,
+            String nome,
+            StatusEnum status
+    ) {
+        this(
+                id,
+                idEmpresa,
+                empresa,
+                nome,
+                status,
+                null
+        );
+    }
 
     public DetalheSubsidiariaRecord(
             SubsidiariaModel subsidiaria
@@ -19,7 +38,8 @@ public record DetalheSubsidiariaRecord(
                 subsidiaria.getEmpresa().getId(),
                 subsidiaria.getEmpresa().getNome(),
                 subsidiaria.getNome(),
-                subsidiaria.getStatus()
+                subsidiaria.getStatus(),
+                new AuditoriaRecord(subsidiaria)
         );
     }
 }

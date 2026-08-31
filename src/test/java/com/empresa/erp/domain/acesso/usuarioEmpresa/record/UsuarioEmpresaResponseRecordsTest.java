@@ -7,9 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
-import com.empresa.erp.domain.old.StatusEnum;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -45,6 +46,9 @@ class UsuarioEmpresaResponseRecordsTest {
 
         assertThat(detalhe.status())
                 .isEqualTo(StatusEnum.ATIVO);
+        
+        assertThat(detalhe.auditoria())
+        		.isNotNull();
     }
 
     @Test
@@ -119,6 +123,18 @@ class UsuarioEmpresaResponseRecordsTest {
                 1L
         );
 
+        var usuarioOrganizacao =
+                new UsuarioOrganizacaoModel(
+                        usuario,
+                        organizacao
+                );
+
+        ReflectionTestUtils.setField(
+                usuarioOrganizacao,
+                "id",
+                10L
+        );
+
         var empresa = new EmpresaModel(
                 organizacao,
                 new EmpresaRecord(
@@ -132,11 +148,12 @@ class UsuarioEmpresaResponseRecordsTest {
                 2L
         );
 
-        var usuarioEmpresa = new UsuarioEmpresaModel(
-                usuario,
-                empresa,
-                true
-        );
+        var usuarioEmpresa =
+                new UsuarioEmpresaModel(
+                        usuarioOrganizacao,
+                        empresa,
+                        true
+                );
 
         ReflectionTestUtils.setField(
                 usuarioEmpresa,

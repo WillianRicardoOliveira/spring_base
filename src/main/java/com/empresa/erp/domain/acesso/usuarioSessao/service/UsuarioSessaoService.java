@@ -17,7 +17,7 @@ import com.empresa.erp.core.security.jwt.TokenSecurity;
 import com.empresa.erp.core.security.record.TokenJwtSecurity;
 import com.empresa.erp.domain.acesso.usuarioSessao.model.UsuarioSessaoModel;
 import com.empresa.erp.domain.acesso.usuarioSessao.repository.UsuarioSessaoRepository;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 
 import jakarta.annotation.PostConstruct;

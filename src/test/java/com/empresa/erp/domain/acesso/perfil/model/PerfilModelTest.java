@@ -7,52 +7,172 @@ import org.junit.jupiter.api.Test;
 
 import com.empresa.erp.domain.acesso.perfil.record.AtualizaPerfilRecord;
 import com.empresa.erp.domain.acesso.perfil.record.PerfilRecord;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
+import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 
 class PerfilModelTest {
 
     @Test
-    @DisplayName("Deve criar perfil ativo")
-    void deveCriarPerfilAtivo() {
-        var dados = new PerfilRecord("Administrador", "Perfil administrador");
+    @DisplayName(
+            "Deve criar perfil comum ativo vinculado à organização"
+    )
+    void deveCriarPerfilComumAtivoVinculadoAOrganizacao() {
+        OrganizacaoModel organizacao =
+                new OrganizacaoModel(
+                        "Organização Principal"
+                );
 
-        var perfil = new PerfilModel(dados);
+        PerfilRecord dados =
+                new PerfilRecord(
+                        "Financeiro",
+                        "Perfil do setor financeiro"
+                );
 
-        assertThat(perfil.getNome()).isEqualTo("Administrador");
-        assertThat(perfil.getDescricao()).isEqualTo("Perfil administrador");
-        assertThat(perfil.getStatus()).isEqualTo(StatusEnum.ATIVO);
+        PerfilModel perfil =
+                new PerfilModel(
+                        organizacao,
+                        dados
+                );
+
+        assertThat(perfil.getOrganizacao())
+                .isSameAs(organizacao);
+
+        assertThat(perfil.getNome())
+                .isEqualTo("Financeiro");
+
+        assertThat(perfil.getDescricao())
+                .isEqualTo(
+                        "Perfil do setor financeiro"
+                );
+
+        assertThat(perfil.getTipoSistema())
+                .isNull();
+
+        assertThat(perfil.getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
+
+        assertThat(perfil.isSistema())
+                .isFalse();
+
+        assertThat(perfil.isAdministradorSistema())
+                .isFalse();
     }
 
     @Test
-    @DisplayName("Deve atualizar perfil")
+    @DisplayName(
+            "Deve criar perfil administrador do sistema"
+    )
+    void deveCriarPerfilAdministradorDoSistema() {
+        OrganizacaoModel organizacao =
+                new OrganizacaoModel(
+                        "Organização Principal"
+                );
+
+        PerfilModel perfil =
+                PerfilModel
+                        .criarAdministradorSistema(
+                                organizacao
+                        );
+
+        assertThat(perfil.getOrganizacao())
+                .isSameAs(organizacao);
+
+        assertThat(perfil.getNome())
+                .isEqualTo("Administrador");
+
+        assertThat(perfil.getDescricao())
+                .isEqualTo(
+                        "Perfil com acesso total a organizacao"
+                );
+
+        assertThat(perfil.getTipoSistema())
+                .isEqualTo(
+                        TipoPerfilSistemaEnum.ADMINISTRADOR
+                );
+
+        assertThat(perfil.getStatus())
+                .isEqualTo(StatusEnum.ATIVO);
+
+        assertThat(perfil.isSistema())
+                .isTrue();
+
+        assertThat(perfil.isAdministradorSistema())
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName(
+            "Deve atualizar perfil"
+    )
     void deveAtualizarPerfil() {
-        var perfil = new PerfilModel(new PerfilRecord("Administrador", "Perfil administrador"));
+        PerfilModel perfil =
+                criarPerfil();
 
-        perfil.atualizar(new AtualizaPerfilRecord(1L, "Administrador Master", "Perfil atualizado"));
+        perfil.atualizar(
+                new AtualizaPerfilRecord(
+                        1L,
+                        "Financeiro Master",
+                        "Perfil atualizado"
+                )
+        );
 
-        assertThat(perfil.getNome()).isEqualTo("Administrador Master");
-        assertThat(perfil.getDescricao()).isEqualTo("Perfil atualizado");
+        assertThat(perfil.getNome())
+                .isEqualTo(
+                        "Financeiro Master"
+                );
+
+        assertThat(perfil.getDescricao())
+                .isEqualTo(
+                        "Perfil atualizado"
+                );
     }
 
     @Test
-    @DisplayName("Deve inativar perfil")
+    @DisplayName(
+            "Deve inativar perfil"
+    )
     void deveInativarPerfil() {
-        var perfil = new PerfilModel(new PerfilRecord("Administrador", "Perfil administrador"));
+        PerfilModel perfil =
+                criarPerfil();
 
         perfil.inativar();
 
-        assertThat(perfil.getStatus()).isEqualTo(StatusEnum.INATIVO);
+        assertThat(perfil.getStatus())
+                .isEqualTo(StatusEnum.INATIVO);
     }
 
     @Test
-    @DisplayName("Deve remover perfil registrando auditoria")
+    @DisplayName(
+            "Deve remover perfil registrando auditoria"
+    )
     void deveRemoverPerfilRegistrandoAuditoria() {
-        var perfil = new PerfilModel(new PerfilRecord("Administrador", "Perfil administrador"));
+        PerfilModel perfil =
+                criarPerfil();
 
         perfil.remover(10L);
 
-        assertThat(perfil.getStatus()).isEqualTo(StatusEnum.REMOVIDO);
-        assertThat(perfil.getRemovidoPor()).isEqualTo(10L);
-        assertThat(perfil.getRemovidoEm()).isNotNull();
+        assertThat(perfil.getStatus())
+                .isEqualTo(StatusEnum.REMOVIDO);
+
+        assertThat(perfil.getRemovidoPor())
+                .isEqualTo(10L);
+
+        assertThat(perfil.getRemovidoEm())
+                .isNotNull();
+    }
+
+    private PerfilModel criarPerfil() {
+        OrganizacaoModel organizacao =
+                new OrganizacaoModel(
+                        "Organização Principal"
+                );
+
+        return new PerfilModel(
+                organizacao,
+                new PerfilRecord(
+                        "Financeiro",
+                        "Perfil do setor financeiro"
+                )
+        );
     }
 }

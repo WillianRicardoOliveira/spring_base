@@ -35,13 +35,14 @@ class SpringDocConfigurationsTest {
         var openAPI = config.customOpenAPI();
         var info = openAPI.getInfo();
 
-        assertThat(info.getTitle()).isEqualTo("API Futuro");
-        assertThat(info.getDescription()).isEqualTo("API Rest da aplicação Futuro");
+        assertThat(info.getTitle()).isEqualTo("ERP API");
+        assertThat(info.getDescription()).isEqualTo("API REST do ERP SaaS.");
+        assertThat(info.getVersion()).isEqualTo("1.0.0");
 
+        assertThat(info.getContact()).isNotNull();
         assertThat(info.getContact().getName()).isEqualTo("Time Backend");
-        assertThat(info.getContact().getEmail()).isEqualTo("backend@gmail.com");
+        assertThat(info.getContact().getEmail()).isNull();
 
-        assertThat(info.getLicense().getName()).isEqualTo("Apache 2.0");
-        assertThat(info.getLicense().getUrl()).isEqualTo("http://home.office/api/licenca");
+        assertThat(info.getLicense()).isNull();
     }
 }

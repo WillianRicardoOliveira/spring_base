@@ -1,9 +1,15 @@
 package com.empresa.erp.core.organizacao.filter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -11,12 +17,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.empresa.erp.core.exception.ValidacaoException;
 import com.empresa.erp.core.organizacao.service.ContextoOrganizacaoService;
 import com.empresa.erp.core.security.model.UsuarioAutenticado;
-import tools.jackson.databind.ObjectMapper;
+import com.empresa.erp.core.security.service.AutoridadesOrganizacaoService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import tools.jackson.databind.ObjectMapper;
 
 public class ContextoOrganizacaoFilter
         extends OncePerRequestFilter {
@@ -27,6 +34,9 @@ public class ContextoOrganizacaoFilter
     private final ContextoOrganizacaoService
             contextoOrganizacaoService;
 
+    private final AutoridadesOrganizacaoService
+            autoridadesOrganizacaoService;
+
     private final AccessDeniedHandler
             acessoNegadoHandler;
 
@@ -34,14 +44,50 @@ public class ContextoOrganizacaoFilter
 
     public ContextoOrganizacaoFilter(
             ContextoOrganizacaoService contextoOrganizacaoService,
+            AutoridadesOrganizacaoService
+                    autoridadesOrganizacaoService,
             AccessDeniedHandler acessoNegadoHandler,
             ObjectMapper objectMapper
     ) {
         this.contextoOrganizacaoService =
                 contextoOrganizacaoService;
+
+        this.autoridadesOrganizacaoService =
+                autoridadesOrganizacaoService;
+
         this.acessoNegadoHandler =
                 acessoNegadoHandler;
-        this.objectMapper = objectMapper;
+
+        this.objectMapper =
+                objectMapper;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(
+            HttpServletRequest request
+    ) {
+        String caminho =
+                request.getServletPath();
+
+        if (caminho == null || caminho.isBlank()) {
+            caminho =
+                    request.getRequestURI();
+        }
+
+        String contextPath =
+                request.getContextPath();
+
+        if (contextPath != null
+                && !contextPath.isBlank()
+                && caminho.startsWith(contextPath)) {
+            caminho =
+                    caminho.substring(
+                            contextPath.length()
+                    );
+        }
+
+        return caminho.equals("/plataforma")
+                || caminho.startsWith("/plataforma/");
     }
 
     @Override
@@ -50,12 +96,33 @@ public class ContextoOrganizacaoFilter
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        String headerOrganizacao =
-                request.getHeader(HEADER_ORGANIZACAO);
+        Authentication authentication =
+                obterAutenticacao();
 
-        if (headerOrganizacao == null
-                || !possuiUsuarioAutenticado()) {
-            filterChain.doFilter(request, response);
+        if (!possuiUsuarioAutenticado(authentication)) {
+            filterChain.doFilter(
+                    request,
+                    response
+            );
+
+            return;
+        }
+
+        UsuarioAutenticado usuarioAutenticado =
+                (UsuarioAutenticado)
+                        authentication.getPrincipal();
+
+        String headerOrganizacao =
+                request.getHeader(
+                        HEADER_ORGANIZACAO
+                );
+
+        if (headerOrganizacao == null) {
+            filterChain.doFilter(
+                    request,
+                    response
+            );
+
             return;
         }
 
@@ -66,43 +133,115 @@ public class ContextoOrganizacaoFilter
             contextoOrganizacaoService.definir(
                     idOrganizacao
             );
+
+            Collection<? extends GrantedAuthority>
+                    autoridadesOrganizacao =
+                    autoridadesOrganizacaoService.buscar(
+                            usuarioAutenticado.getId(),
+                            idOrganizacao
+                    );
+
+            Collection<? extends GrantedAuthority>
+                    autoridadesCombinadas =
+                    combinarAutoridades(
+                            authentication.getAuthorities(),
+                            autoridadesOrganizacao
+                    );
+
+            substituirAutoridades(
+                    authentication,
+                    usuarioAutenticado,
+                    autoridadesCombinadas
+            );
         } catch (AccessDeniedException exception) {
             acessoNegadoHandler.handle(
                     request,
                     response,
                     exception
             );
+
             return;
         } catch (ValidacaoException exception) {
             escreverErro400(
                     response,
                     exception.getMessage()
             );
+
             return;
         }
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(
+                request,
+                response
+        );
     }
 
-    private boolean possuiUsuarioAutenticado() {
-        var authentication =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication();
+    private Authentication obterAutenticacao() {
+        return SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+    }
 
+    private boolean possuiUsuarioAutenticado(
+            Authentication authentication
+    ) {
         return authentication != null
                 && authentication.isAuthenticated()
                 && authentication.getPrincipal()
                         instanceof UsuarioAutenticado;
     }
 
-    private Long converterId(String valor) {
+    private Collection<? extends GrantedAuthority>
+            combinarAutoridades(
+                    Collection<? extends GrantedAuthority>
+                            autoridadesAtuais,
+                    Collection<? extends GrantedAuthority>
+                            autoridadesOrganizacao
+            ) {
+        Set<GrantedAuthority> autoridades =
+                new LinkedHashSet<>(
+                        autoridadesAtuais
+                );
+
+        autoridades.addAll(
+                autoridadesOrganizacao
+        );
+
+        return autoridades;
+    }
+
+    private void substituirAutoridades(
+            Authentication authenticationAtual,
+            UsuarioAutenticado usuarioAutenticado,
+            Collection<? extends GrantedAuthority> autoridades
+    ) {
+        var novaAutenticacao =
+                new UsernamePasswordAuthenticationToken(
+                        usuarioAutenticado,
+                        null,
+                        autoridades
+                );
+
+        novaAutenticacao.setDetails(
+                authenticationAtual.getDetails()
+        );
+
+        SecurityContextHolder
+                .getContext()
+                .setAuthentication(novaAutenticacao);
+    }
+
+    private Long converterId(
+            String valor
+    ) {
         if (valor.isBlank()) {
             throw organizacaoInvalida();
         }
 
         try {
-            return Long.valueOf(valor.trim());
+            return Long.valueOf(
+                    valor.trim()
+            );
         } catch (NumberFormatException exception) {
             throw organizacaoInvalida();
         }
@@ -121,10 +260,14 @@ public class ContextoOrganizacaoFilter
         response.setStatus(
                 HttpServletResponse.SC_BAD_REQUEST
         );
+
         response.setContentType(
                 MediaType.APPLICATION_JSON_VALUE
         );
-        response.setCharacterEncoding("UTF-8");
+
+        response.setCharacterEncoding(
+                "UTF-8"
+        );
 
         objectMapper.writeValue(
                 response.getWriter(),

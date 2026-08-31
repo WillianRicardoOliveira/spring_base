@@ -1,7 +1,7 @@
 package com.empresa.erp.domain.acesso.usuarioSubsidiaria.record;
 
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.model.UsuarioSubsidiariaModel;
-import com.empresa.erp.domain.old.StatusEnum;
+import com.empresa.erp.domain.base.model.StatusEnum;
 
 public record ListaUsuarioSubsidiariaRecord(
         Long id,
@@ -25,10 +25,12 @@ public record ListaUsuarioSubsidiariaRecord(
                         .getId(),
                 usuarioSubsidiaria
                         .getUsuarioEmpresa()
+                        .getUsuarioOrganizacao()
                         .getUsuario()
                         .getId(),
                 usuarioSubsidiaria
                         .getUsuarioEmpresa()
+                        .getUsuarioOrganizacao()
                         .getUsuario()
                         .getEmail(),
                 usuarioSubsidiaria

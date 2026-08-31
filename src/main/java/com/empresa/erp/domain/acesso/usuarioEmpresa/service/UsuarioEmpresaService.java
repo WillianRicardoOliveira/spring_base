@@ -14,15 +14,14 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.record.DetalheUsuarioEmpresa
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.ListaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
+import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
 import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
 import com.empresa.erp.domain.configuracao.empresa.service.EmpresaService;
-import com.empresa.erp.domain.old.StatusEnum;
-import com.empresa.erp.domain.usuario.model.UsuarioModel;
-import com.empresa.erp.domain.usuario.repository.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,11 +37,11 @@ public class UsuarioEmpresaService {
     private final UsuarioSubsidiariaRepository
             usuarioSubsidiariaRepository;
 
-    private final UsuarioRepository usuarioRepository;
+    private final EmpresaRepository
+            empresaRepository;
 
-    private final EmpresaRepository empresaRepository;
-
-    private final EmpresaService empresaService;
+    private final EmpresaService
+            empresaService;
 
     private final UsuarioLogadoService
             usuarioLogadoService;
@@ -57,38 +56,23 @@ public class UsuarioEmpresaService {
         Long idOrganizacao =
                 contextoOrganizacao.getIdOrganizacao();
 
-        UsuarioModel usuario = usuarioRepository
-                .findByIdAndStatus(
+        UsuarioOrganizacaoModel usuarioOrganizacao =
+                buscarUsuarioAtivoNaOrganizacao(
                         dados.idUsuario(),
-                        StatusEnum.ATIVO
-                )
-                .orElseThrow(() ->
-                        new ValidacaoException(
-                                "Usuario nao encontrado ou removido."
-                        )
+                        idOrganizacao
                 );
 
-        validarUsuarioNaOrganizacao(
-                usuario.getId(),
-                idOrganizacao
-        );
-
-        EmpresaModel empresa = empresaRepository
-                .findByIdAndOrganizacaoIdAndStatus(
+        EmpresaModel empresa =
+                buscarEmpresaAtiva(
                         dados.idEmpresa(),
-                        idOrganizacao,
-                        StatusEnum.ATIVO
-                )
-                .orElseThrow(() ->
-                        new ValidacaoException(
-                                "Empresa nao encontrada ou removida."
-                        )
+                        idOrganizacao
                 );
 
         if (repository
-                .existsByUsuarioAndEmpresaAndStatus(
-                        usuario,
-                        empresa,
+                .existsByUsuarioOrganizacaoIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                        usuarioOrganizacao.getId(),
+                        empresa.getId(),
+                        idOrganizacao,
                         StatusEnum.ATIVO
                 )
         ) {
@@ -99,7 +83,7 @@ public class UsuarioEmpresaService {
 
         UsuarioEmpresaModel usuarioEmpresa =
                 new UsuarioEmpresaModel(
-                        usuario,
+                        usuarioOrganizacao,
                         empresa,
                         dados.todasSubsidiarias()
                 );
@@ -116,50 +100,40 @@ public class UsuarioEmpresaService {
         Long idOrganizacao =
                 contextoOrganizacao.getIdOrganizacao();
 
-        boolean possuiUsuario =
-                idUsuario != null;
+        Long idUsuarioOrganizacao =
+                null;
 
-        boolean possuiEmpresa =
-                idEmpresa != null;
-
-        if (possuiUsuario && possuiEmpresa) {
-            return repository
-                    .findAllByUsuarioIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
-                            paginacao,
+        if (idUsuario != null) {
+            UsuarioOrganizacaoModel usuarioOrganizacao =
+                    buscarUsuarioAtivoNaOrganizacao(
                             idUsuario,
-                            idEmpresa,
-                            idOrganizacao,
-                            StatusEnum.ATIVO
-                    )
-                    .map(ListaUsuarioEmpresaRecord::new);
+                            idOrganizacao
+                    );
+
+            idUsuarioOrganizacao =
+                    usuarioOrganizacao.getId();
         }
 
-        if (possuiUsuario) {
-            return repository
-                    .findAllByUsuarioIdAndEmpresaOrganizacaoIdAndStatus(
-                            paginacao,
-                            idUsuario,
-                            idOrganizacao,
-                            StatusEnum.ATIVO
-                    )
-                    .map(ListaUsuarioEmpresaRecord::new);
-        }
+        Long idEmpresaValidada =
+                null;
 
-        if (possuiEmpresa) {
-            return repository
-                    .findAllByEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
-                            paginacao,
+        if (idEmpresa != null) {
+            EmpresaModel empresa =
+                    buscarEmpresaAtiva(
                             idEmpresa,
-                            idOrganizacao,
-                            StatusEnum.ATIVO
-                    )
-                    .map(ListaUsuarioEmpresaRecord::new);
+                            idOrganizacao
+                    );
+
+            idEmpresaValidada =
+                    empresa.getId();
         }
 
         return repository
-                .findAllByEmpresaOrganizacaoIdAndStatus(
+                .buscarAtivosDaOrganizacao(
                         paginacao,
                         idOrganizacao,
+                        idUsuarioOrganizacao,
+                        idEmpresaValidada,
                         StatusEnum.ATIVO
                 )
                 .map(ListaUsuarioEmpresaRecord::new);
@@ -207,7 +181,9 @@ public class UsuarioEmpresaService {
     }
 
     @Transactional
-    public void excluir(Long id) {
+    public void excluir(
+            Long id
+    ) {
         UsuarioEmpresaModel usuarioEmpresa =
                 buscarVinculoAtivo(id);
 
@@ -219,25 +195,6 @@ public class UsuarioEmpresaService {
                 usuarioLogadoService.getId();
 
         usuarioEmpresa.remover(idUsuario);
-    }
-
-    private void validarUsuarioNaOrganizacao(
-            Long idUsuario,
-            Long idOrganizacao
-    ) {
-        boolean usuarioPertenceAOrganizacao =
-                usuarioOrganizacaoRepository
-                        .existsByUsuarioIdAndOrganizacaoIdAndStatus(
-                                idUsuario,
-                                idOrganizacao,
-                                StatusEnum.ATIVO
-                        );
-
-        if (!usuarioPertenceAOrganizacao) {
-            throw new ValidacaoException(
-                    "Usuario nao pertence a organizacao atual."
-            );
-        }
     }
 
     private void validarAlteracaoParaTodasSubsidiarias(
@@ -294,8 +251,9 @@ public class UsuarioEmpresaService {
                 contextoOrganizacao.getIdOrganizacao();
 
         return repository
-                .findByIdAndEmpresaOrganizacaoIdAndStatus(
+                .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
                         id,
+                        idOrganizacao,
                         idOrganizacao,
                         StatusEnum.ATIVO
                 )
@@ -303,6 +261,43 @@ public class UsuarioEmpresaService {
                         new ValidacaoException(
                                 "Vinculo entre usuario e empresa "
                                         + "nao encontrado ou removido."
+                        )
+                );
+    }
+
+    private UsuarioOrganizacaoModel
+            buscarUsuarioAtivoNaOrganizacao(
+                    Long idUsuario,
+                    Long idOrganizacao
+            ) {
+        return usuarioOrganizacaoRepository
+                .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
+                        idUsuario,
+                        idOrganizacao,
+                        StatusEnum.ATIVO,
+                        StatusEnum.ATIVO
+                )
+                .orElseThrow(() ->
+                        new ValidacaoException(
+                                "Usuario nao encontrado "
+                                        + "na organizacao."
+                        )
+                );
+    }
+
+    private EmpresaModel buscarEmpresaAtiva(
+            Long idEmpresa,
+            Long idOrganizacao
+    ) {
+        return empresaRepository
+                .findByIdAndOrganizacaoIdAndStatus(
+                        idEmpresa,
+                        idOrganizacao,
+                        StatusEnum.ATIVO
+                )
+                .orElseThrow(() ->
+                        new ValidacaoException(
+                                "Empresa nao encontrada ou removida."
                         )
                 );
     }

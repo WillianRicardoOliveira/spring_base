@@ -144,11 +144,12 @@ class TokenSecurityTest {
     }
 
     @Test
-    @DisplayName("Deve configurar issuer local no profile dev")
-    void deveConfigurarIssuerLocalNoProfileDev() throws Exception {
+    @DisplayName("Deve manter issuer local configuravel no profile dev")
+    void deveManterIssuerLocalConfiguravelNoProfileDev() throws Exception {
         var properties = carregarProperties("application-dev.properties");
 
-        assertThat(properties.getProperty("api.security.token.issuer")).isEqualTo("erp-api-dev");
+        assertThat(properties.getProperty("api.security.token.issuer"))
+                .isEqualTo("${JWT_ISSUER:erp-api-dev}");
     }
 
     @Test
@@ -168,11 +169,12 @@ class TokenSecurityTest {
     }
 
     @Test
-    @DisplayName("Deve configurar expiracao local no profile dev")
-    void deveConfigurarExpiracaoLocalNoProfileDev() throws Exception {
+    @DisplayName("Deve manter expiracao local configuravel no profile dev")
+    void deveManterExpiracaoLocalConfiguravelNoProfileDev() throws Exception {
         var properties = carregarProperties("application-dev.properties");
 
-        assertThat(properties.getProperty("api.security.token.expiration-minutes")).isEqualTo("480");
+        assertThat(properties.getProperty("api.security.token.expiration-minutes"))
+                .isEqualTo("${JWT_EXPIRATION_MINUTES:480}");
     }
 
     @Test
@@ -289,7 +291,7 @@ class TokenSecurityTest {
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Token JWT invalido ou expirado");
     }
-    
+
     @Test
     @DisplayName("Deve bloquear token JWT invalido")
     void deveBloquearTokenJwtInvalido() {
@@ -330,7 +332,11 @@ class TokenSecurityTest {
                 .hasMessage("Token JWT invalido ou expirado");
     }
 
-    private TokenSecurity criarTokenSecurity(String secret, String issuer, Long expirationMinutes) {
+    private TokenSecurity criarTokenSecurity(
+            String secret,
+            String issuer,
+            Long expirationMinutes
+    ) {
         var tokenSecurity = new TokenSecurity();
 
         ReflectionTestUtils.setField(tokenSecurity, "secret", secret);

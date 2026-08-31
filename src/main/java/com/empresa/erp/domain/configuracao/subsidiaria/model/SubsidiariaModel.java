@@ -1,9 +1,9 @@
 package com.empresa.erp.domain.configuracao.subsidiaria.model;
 
 import com.empresa.erp.domain.base.model.AuditoriaModel;
+import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.subsidiaria.record.AtualizaSubsidiariaRecord;
-import com.empresa.erp.domain.old.StatusEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
