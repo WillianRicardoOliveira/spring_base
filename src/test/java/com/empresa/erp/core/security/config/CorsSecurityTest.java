@@ -26,7 +26,7 @@ class CorsSecurityTest {
         assertThat(config).isNotNull();
         assertThat(config.getAllowedOrigins()).containsExactly("http://localhost:4200");
         assertThat(config.getAllowedMethods())
-                .containsExactly("GET", "POST", "PUT", "DELETE", "OPTIONS");
+        		.containsExactly("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
         assertThat(config.getAllowedHeaders()).containsExactly("*");
     }
 
