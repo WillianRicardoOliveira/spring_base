@@ -389,13 +389,13 @@ class UsuarioEmpresaRepositoryTest {
     private UsuarioEmpresaModel criarVinculo(
             UsuarioOrganizacaoModel usuarioOrganizacao,
             EmpresaModel empresa,
-            Boolean todasSubsidiarias
+            Boolean todosEstabelecimentos
     ) {
         return repository.save(
                 new UsuarioEmpresaModel(
                         usuarioOrganizacao,
                         empresa,
-                        todasSubsidiarias
+                        todosEstabelecimentos
                 )
         );
     }

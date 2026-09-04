@@ -30,7 +30,7 @@ import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.AtualizaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
-import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
+import com.empresa.erp.domain.configuracao.estabelecimento.repository.EstabelecimentoRepository;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 
@@ -43,24 +43,19 @@ class EmpresaServiceTest {
     private EmpresaRepository repository;
 
     @Mock
-    private OrganizacaoRepository
-            organizacaoRepository;
+    private OrganizacaoRepository organizacaoRepository;
 
     @Mock
-    private SubsidiariaRepository
-            subsidiariaRepository;
+    private EstabelecimentoRepository estabelecimentoRepository;
 
     @Mock
-    private UsuarioEmpresaRepository
-            usuarioEmpresaRepository;
+    private UsuarioEmpresaRepository usuarioEmpresaRepository;
 
     @Mock
-    private UsuarioLogadoService
-            usuarioLogadoService;
+    private UsuarioLogadoService usuarioLogadoService;
 
     @Mock
-    private ContextoOrganizacao
-            contextoOrganizacao;
+    private ContextoOrganizacao contextoOrganizacao;
 
     @InjectMocks
     private EmpresaService service;
@@ -497,7 +492,7 @@ class EmpresaServiceTest {
                 )
         ).thenReturn(Optional.of(empresa));
 
-        when(subsidiariaRepository
+        when(estabelecimentoRepository
                 .existsByEmpresaIdAndStatus(
                         1L,
                         StatusEnum.ATIVO
@@ -528,9 +523,9 @@ class EmpresaServiceTest {
 
     @Test
     @DisplayName(
-            "Deve bloquear exclusao de empresa com subsidiarias ativas"
+            "Deve bloquear exclusao de empresa com estabelecimentos ativos"
     )
-    void deveBloquearExclusaoDeEmpresaComSubsidiariasAtivas() {
+    void deveBloquearExclusaoDeEmpresaComEstabelecimentosAtivos() {
         var empresa = criarEmpresa(
                 1L,
                 "Empresa Exemplo"
@@ -544,7 +539,7 @@ class EmpresaServiceTest {
                 )
         ).thenReturn(Optional.of(empresa));
 
-        when(subsidiariaRepository
+        when(estabelecimentoRepository
                 .existsByEmpresaIdAndStatus(
                         1L,
                         StatusEnum.ATIVO
@@ -556,8 +551,7 @@ class EmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "Empresa possui subsidiarias ativas "
-                                + "e nao pode ser removida."
+                        "Empresa possui estabelecimentos ativos e nao pode ser removida."
                 );
 
         assertThat(empresa.getStatus())
@@ -591,7 +585,7 @@ class EmpresaServiceTest {
                 )
         ).thenReturn(Optional.of(empresa));
 
-        when(subsidiariaRepository
+        when(estabelecimentoRepository
                 .existsByEmpresaIdAndStatus(
                         1L,
                         StatusEnum.ATIVO
@@ -610,8 +604,7 @@ class EmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "Empresa possui usuarios vinculados "
-                                + "e nao pode ser removida."
+                        "Empresa possui usuarios vinculados e nao pode ser removida."
                 );
 
         assertThat(empresa.getStatus())
@@ -642,7 +635,7 @@ class EmpresaServiceTest {
                         "Empresa nao encontrada ou removida."
                 );
 
-        verify(subsidiariaRepository, never())
+        verify(estabelecimentoRepository, never())
                 .existsByEmpresaIdAndStatus(
                         1L,
                         StatusEnum.ATIVO

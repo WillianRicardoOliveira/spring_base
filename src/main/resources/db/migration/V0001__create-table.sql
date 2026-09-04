@@ -368,7 +368,7 @@ ON empresa (
     status
 );
 
-CREATE TABLE subsidiaria (
+CREATE TABLE estabelecimento (
     id BIGINT NOT NULL AUTO_INCREMENT,
     id_empresa BIGINT NOT NULL,
     nome VARCHAR(100) NOT NULL,
@@ -380,13 +380,13 @@ CREATE TABLE subsidiaria (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
-    CONSTRAINT fk_subsidiaria_empresa
+    CONSTRAINT fk_estabelecimento_empresa
         FOREIGN KEY (id_empresa)
         REFERENCES empresa (id)
 );
 
-CREATE INDEX idx_subsidiaria_empresa_nome_status
-ON subsidiaria (
+CREATE INDEX idx_estabelecimento_empresa_nome_status
+ON estabelecimento (
     id_empresa,
     nome,
     status
@@ -396,7 +396,7 @@ CREATE TABLE usuario_empresa (
     id BIGINT NOT NULL AUTO_INCREMENT,
     id_usuario_organizacao BIGINT NOT NULL,
     id_empresa BIGINT NOT NULL,
-    todas_subsidiarias BOOLEAN NOT NULL DEFAULT FALSE,
+    todos_estabelecimentos BOOLEAN NOT NULL DEFAULT FALSE,
     status TINYINT NOT NULL DEFAULT 0,
     criado_em DATETIME,
     criado_por BIGINT,
@@ -426,10 +426,10 @@ ON usuario_empresa (
     status
 );
 
-CREATE TABLE usuario_subsidiaria (
+CREATE TABLE usuario_estabelecimento (
     id BIGINT NOT NULL AUTO_INCREMENT,
     id_usuario_empresa BIGINT NOT NULL,
-    id_subsidiaria BIGINT NOT NULL,
+    id_estabelecimento BIGINT NOT NULL,
     status TINYINT NOT NULL DEFAULT 0,
     criado_em DATETIME,
     criado_por BIGINT,
@@ -438,30 +438,30 @@ CREATE TABLE usuario_subsidiaria (
     removido_em DATETIME,
     removido_por BIGINT,
     PRIMARY KEY (id),
-    CONSTRAINT fk_usuario_subsidiaria_usuario_empresa
+    CONSTRAINT fk_usuario_estabelecimento_usuario_empresa
         FOREIGN KEY (id_usuario_empresa)
         REFERENCES usuario_empresa (id),
-    CONSTRAINT fk_usuario_subsidiaria_subsidiaria
-        FOREIGN KEY (id_subsidiaria)
-        REFERENCES subsidiaria (id)
+    CONSTRAINT fk_usuario_estabelecimento_estabelecimento
+        FOREIGN KEY (id_estabelecimento)
+        REFERENCES estabelecimento (id)
 );
 
-CREATE INDEX idx_usuario_subsidiaria_usuario_empresa_status
-ON usuario_subsidiaria (
+CREATE INDEX idx_usuario_estabelecimento_usuario_empresa_status
+ON usuario_estabelecimento (
     id_usuario_empresa,
     status
 );
 
-CREATE INDEX idx_usuario_subsidiaria_subsidiaria_status
-ON usuario_subsidiaria (
-    id_subsidiaria,
+CREATE INDEX idx_usuario_estabelecimento_estabelecimento_status
+ON usuario_estabelecimento (
+    id_estabelecimento,
     status
 );
 
-CREATE INDEX idx_usuario_subsidiaria_vinculo_status
-ON usuario_subsidiaria (
+CREATE INDEX idx_usuario_estabelecimento_vinculo_status
+ON usuario_estabelecimento (
     id_usuario_empresa,
-    id_subsidiaria,
+    id_estabelecimento,
     status
 );
 
@@ -521,126 +521,126 @@ INSERT INTO permissao (
 ),
 (
     7,
-    'Listar permissões',
+    'Listar permissoes',
     'ACESSO_PERMISSAO_LISTAR',
-    'Permite listar permissões',
+    'Permite listar permissoes',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     8,
-    'Detalhar permissão',
+    'Detalhar permissao',
     'ACESSO_PERMISSAO_DETALHAR',
-    'Permite detalhar permissão',
+    'Permite detalhar permissao',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     11,
-    'Vincular permissão ao perfil',
+    'Vincular permissao ao perfil',
     'ACESSO_PERFIL_PERMISSAO_CRIAR',
-    'Permite vincular permissão ao perfil',
+    'Permite vincular permissao ao perfil',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     12,
-    'Listar permissões do perfil',
+    'Listar permissoes do perfil',
     'ACESSO_PERFIL_PERMISSAO_LISTAR',
-    'Permite listar permissões vinculadas ao perfil',
+    'Permite listar permissoes vinculadas ao perfil',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     13,
-    'Detalhar vínculo perfil permissão',
+    'Detalhar vinculo perfil permissao',
     'ACESSO_PERFIL_PERMISSAO_DETALHAR',
-    'Permite detalhar vínculo entre perfil e permissão',
+    'Permite detalhar vinculo entre perfil e permissao',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     14,
-    'Remover permissão do perfil',
+    'Remover permissao do perfil',
     'ACESSO_PERFIL_PERMISSAO_EXCLUIR',
-    'Permite remover permissão vinculada ao perfil',
+    'Permite remover permissao vinculada ao perfil',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     15,
-    'Vincular perfil ao usuário',
+    'Vincular perfil ao usuario',
     'ACESSO_USUARIO_PERFIL_CRIAR',
-    'Permite vincular perfil ao usuário',
+    'Permite vincular perfil ao usuario',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     16,
-    'Listar perfis do usuário',
+    'Listar perfis do usuario',
     'ACESSO_USUARIO_PERFIL_LISTAR',
-    'Permite listar perfis vinculados ao usuário',
+    'Permite listar perfis vinculados ao usuario',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     17,
-    'Detalhar vínculo usuário perfil',
+    'Detalhar vinculo usuario perfil',
     'ACESSO_USUARIO_PERFIL_DETALHAR',
-    'Permite detalhar vínculo entre usuário e perfil',
+    'Permite detalhar vinculo entre usuario e perfil',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     18,
-    'Remover perfil do usuário',
+    'Remover perfil do usuario',
     'ACESSO_USUARIO_PERFIL_EXCLUIR',
-    'Permite remover perfil vinculado ao usuário',
+    'Permite remover perfil vinculado ao usuario',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     19,
-    'Criar usuários',
+    'Criar usuarios',
     'ACESSO_USUARIO_CRIAR',
-    'Permite criar usuários na organização',
+    'Permite criar usuarios na organizacao',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     20,
-    'Listar usuários',
+    'Listar usuarios',
     'ACESSO_USUARIO_LISTAR',
-    'Permite listar usuários da organização',
+    'Permite listar usuarios da organizacao',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     21,
-    'Detalhar usuário',
+    'Detalhar usuario',
     'ACESSO_USUARIO_DETALHAR',
-    'Permite detalhar usuário da organização',
+    'Permite detalhar usuario da organizacao',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
     22,
-    'Excluir usuário',
+    'Excluir usuario',
     'ACESSO_USUARIO_EXCLUIR',
-    'Permite remover o acesso do usuário à organização',
+    'Permite remover o acesso do usuario a organizacao',
     0,
     TRUE,
     'ORGANIZACAO'
@@ -695,113 +695,113 @@ INSERT INTO permissao (
     'ORGANIZACAO'
 ),
 (
-    'Criar subsidiárias',
-    'CONFIGURACAO_SUBSIDIARIA_CRIAR',
-    'Permite criar subsidiárias',
+    'Criar estabelecimentos',
+    'CONFIGURACAO_ESTABELECIMENTO_CRIAR',
+    'Permite criar estabelecimentos',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Listar subsidiárias',
-    'CONFIGURACAO_SUBSIDIARIA_LISTAR',
-    'Permite listar subsidiárias',
+    'Listar estabelecimentos',
+    'CONFIGURACAO_ESTABELECIMENTO_LISTAR',
+    'Permite listar estabelecimentos',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Detalhar subsidiária',
-    'CONFIGURACAO_SUBSIDIARIA_DETALHAR',
-    'Permite detalhar subsidiárias',
+    'Detalhar estabelecimento',
+    'CONFIGURACAO_ESTABELECIMENTO_DETALHAR',
+    'Permite detalhar estabelecimentos',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Editar subsidiárias',
-    'CONFIGURACAO_SUBSIDIARIA_EDITAR',
-    'Permite editar subsidiárias',
+    'Editar estabelecimentos',
+    'CONFIGURACAO_ESTABELECIMENTO_EDITAR',
+    'Permite editar estabelecimentos',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Excluir subsidiárias',
-    'CONFIGURACAO_SUBSIDIARIA_EXCLUIR',
-    'Permite remover subsidiárias',
+    'Excluir estabelecimentos',
+    'CONFIGURACAO_ESTABELECIMENTO_EXCLUIR',
+    'Permite remover estabelecimentos',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Vincular usuário a empresa',
+    'Vincular usuario a empresa',
     'ACESSO_USUARIO_EMPRESA_CRIAR',
-    'Permite vincular usuários a empresas',
+    'Permite vincular usuarios a empresas',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Listar empresas do usuário',
+    'Listar empresas do usuario',
     'ACESSO_USUARIO_EMPRESA_LISTAR',
-    'Permite listar os vínculos entre usuários e empresas',
+    'Permite listar os vinculos entre usuarios e empresas',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Detalhar empresa do usuário',
+    'Detalhar empresa do usuario',
     'ACESSO_USUARIO_EMPRESA_DETALHAR',
-    'Permite detalhar o vínculo entre usuário e empresa',
+    'Permite detalhar o vinculo entre usuario e empresa',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Editar empresa do usuário',
+    'Editar empresa do usuario',
     'ACESSO_USUARIO_EMPRESA_EDITAR',
-    'Permite editar o acesso do usuário à empresa',
+    'Permite editar o acesso do usuario a empresa',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Remover empresa do usuário',
+    'Remover empresa do usuario',
     'ACESSO_USUARIO_EMPRESA_EXCLUIR',
-    'Permite remover o vínculo entre usuário e empresa',
+    'Permite remover o vinculo entre usuario e empresa',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Vincular usuário a subsidiária',
-    'ACESSO_USUARIO_SUBSIDIARIA_CRIAR',
-    'Permite vincular usuários a subsidiárias',
+    'Vincular usuario a estabelecimento',
+    'ACESSO_USUARIO_ESTABELECIMENTO_CRIAR',
+    'Permite vincular usuarios a estabelecimentos',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Listar subsidiárias do usuário',
-    'ACESSO_USUARIO_SUBSIDIARIA_LISTAR',
-    'Permite listar os vínculos entre usuários e subsidiárias',
+    'Listar estabelecimentos do usuario',
+    'ACESSO_USUARIO_ESTABELECIMENTO_LISTAR',
+    'Permite listar os vinculos entre usuarios e estabelecimentos',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Detalhar subsidiária do usuário',
-    'ACESSO_USUARIO_SUBSIDIARIA_DETALHAR',
-    'Permite detalhar o vínculo entre usuário e subsidiária',
+    'Detalhar estabelecimento do usuario',
+    'ACESSO_USUARIO_ESTABELECIMENTO_DETALHAR',
+    'Permite detalhar o vinculo entre usuario e estabelecimento',
     0,
     TRUE,
     'ORGANIZACAO'
 ),
 (
-    'Remover subsidiária do usuário',
-    'ACESSO_USUARIO_SUBSIDIARIA_EXCLUIR',
-    'Permite remover o vínculo entre usuário e subsidiária',
+    'Remover estabelecimento do usuario',
+    'ACESSO_USUARIO_ESTABELECIMENTO_EXCLUIR',
+    'Permite remover o vinculo entre usuario e estabelecimento',
     0,
     TRUE,
     'ORGANIZACAO'
@@ -816,407 +816,50 @@ INSERT INTO permissao (
     escopo
 ) VALUES
 (
-    'Criar organizações',
+    'Criar organizacoes',
     'PLATAFORMA_ORGANIZACAO_CRIAR',
-    'Permite criar organizações na plataforma',
+    'Permite criar organizacoes na plataforma',
     0,
     TRUE,
     'PLATAFORMA'
 ),
 (
-    'Listar organizações',
+    'Listar organizacoes',
     'PLATAFORMA_ORGANIZACAO_LISTAR',
-    'Permite listar organizações na plataforma',
+    'Permite listar organizacoes na plataforma',
     0,
     TRUE,
     'PLATAFORMA'
 ),
 (
-    'Detalhar organização',
+    'Detalhar organizacao',
     'PLATAFORMA_ORGANIZACAO_DETALHAR',
-    'Permite detalhar organizações na plataforma',
+    'Permite detalhar organizacoes na plataforma',
     0,
     TRUE,
     'PLATAFORMA'
 ),
 (
-    'Editar organizações',
+    'Editar organizacoes',
     'PLATAFORMA_ORGANIZACAO_EDITAR',
-    'Permite editar organizações na plataforma',
+    'Permite editar organizacoes na plataforma',
     0,
     TRUE,
     'PLATAFORMA'
 ),
 (
-    'Alterar status de organizações',
+    'Alterar status de organizacoes',
     'PLATAFORMA_ORGANIZACAO_STATUS',
-    'Permite inativar e reativar organizações',
+    'Permite inativar e reativar organizacoes',
     0,
     TRUE,
     'PLATAFORMA'
 ),
 (
-    'Excluir organizações',
+    'Excluir organizacoes',
     'PLATAFORMA_ORGANIZACAO_EXCLUIR',
-    'Permite remover organizações logicamente',
+    'Permite remover organizacoes logicamente',
     0,
     TRUE,
     'PLATAFORMA'
 );
-
--- ##################################################### --
--- ESTRUTURAS COMENTADAS PARA DESENVOLVIMENTO FUTURO     --
--- ##################################################### --
-
-/*
--- Criação da tabela RegimeTributacaoFederal
-CREATE TABLE regime_tributacao_federal (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    ativo TINYINT(1) NOT NULL DEFAULT 1,
-    removido TINYINT(1) NOT NULL DEFAULT 0
-);
-*/
-/*
--- Criação da tabela SetorAtividade
-CREATE TABLE setor_atividade (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    ativo TINYINT(1) NOT NULL DEFAULT 1,
-    removido TINYINT(1) NOT NULL DEFAULT 0
-);
-*/
-
-
-
-/*
-create table endereco(
-    id bigint not null auto_increment,
-    cep varchar(10) not null,
-    localidade varchar(100) not null,
-    uf varchar(2) not null,
-    bairro varchar(100) not null,
-    logradouro varchar(150) not null,
-    numero varchar(10) not null,
-    complemento varchar(50),
-    ativo tinyint(1) not null,
-    primary key(id)
-);
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
--- Criação da tabela Entidade
-CREATE TABLE entidade (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    pessoa_juridica TINYINT NOT NULL,
-    nome_completo VARCHAR(255) NOT NULL,    
-    numero_documento VARCHAR(20) NOT NULL,
-    inscricao_estadual VARCHAR(15),
-    inscricao_municipal VARCHAR(15),    
-    cliente TINYINT NOT NULL,
-    fornecedor TINYINT NOT NULL,
-    parceiro TINYINT NOT NULL,
-    transportador TINYINT NOT NULL,    
-    id_regime_tributacao_federal BIGINT NOT NULL,
-    id_setor_atividade BIGINT NOT NULL,
-    id_endereco BIGINT NOT NULL,   
-    contato_principal VARCHAR(255) NOT NULL,
-    email_nfe VARCHAR(255) NOT NULL,    
-    email_comercial VARCHAR(255) NOT NULL,
-    primeiro_telefone VARCHAR(20) NOT NULL,
-    segundo_telefone VARCHAR(20) NOT NULL,
-    nacional TINYINT NOT NULL,    
-    id_matriz BIGINT,
-    status TINYINT,
-    FOREIGN KEY (id_regime_tributacao_federal) REFERENCES regime_tributacao_federal(id),
-    FOREIGN KEY (id_setor_atividade) REFERENCES setor_atividade(id),
-    FOREIGN KEY (id_endereco) REFERENCES endereco(id),
-    FOREIGN KEY (id_matriz) REFERENCES entidade(id)
-);
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-create table pessoa(
-    id bigint not null auto_increment,
-    nome varchar(100) not null,
-    nascimento date not null,
-    genero varchar(50) not null,
-    cpf varchar(20) not null,
-    telefone varchar(20) not null,
-    id_endereco bigint not null,
-    id_usuario bigint not null,
-    aceitar_termos TINYINT(1) not null,
-    tipo_pessoa varchar(50) not null,
-    ativo TINYINT(1) not null,
-    primary key(id),
-    constraint fk_pessoa_endereco_id foreign key(id_endereco) references endereco(id),
-    constraint fk_pessoa_usuario_id foreign key(id_usuario) references usuario(id)
-);
-*/
-
-
-
-
-
-
-
-
-/*
-
--- #################### --
--- ATENDIMENTO          --
--- #################### --
-create table cliente(
-    id bigint not null auto_increment,
-    nome varchar(100) not null,
-    telefone varchar(15) not null,
-    ativo TINYINT(1) not null,
-    primary key(id)
-);
--- #################### --
--- ESTOQUE              --
--- #################### --
-create table produto(
-    id bigint not null auto_increment,
-    nome varchar(100) not null,
-    descricao varchar(250),
-    quantidade int not null,
-    minimo int not null,
-    maximo int not null,
-    ativo tinyint not null,
-    primary key(id)
-);
-
-create table compra(
-    id bigint not null auto_increment,
-    nome varchar(100) not null,
-    descricao varchar(250) not null,
-    status varchar(30) not null,
-    data date not null,
-    ativo TINYINT(1) not null,
-    primary key(id)
-);
-create table compra_item(
-    id bigint not null auto_increment,
-    id_compra bigint not null,
-    id_fornecedor bigint not null,
-    id_produto bigint not null,
-    quantidade integer not null,
-    valor decimal(8, 2) not null,
-    total decimal(8, 2) not null,
-    controle integer not null,
-    ativo TINYINT(1) not null,
-    primary key(id),
-    constraint fk_compra_item_compra_id foreign key(id_compra) references compra(id),
-    constraint fk_compra_item_fornecedor_id foreign key(id_fornecedor) references fornecedor(id),
-    constraint fk_compra_item_produto_id foreign key(id_produto) references produto(id)
-);
-create table tipo_movimentacao(
-    id bigint not null auto_increment,
-    nome varchar(20) not null,
-    ativo TINYINT(1) not null,
-    primary key(id)
-);
-create table movimentacao(
-    id bigint not null auto_increment,
-    id_tipo_movimentacao bigint not null,
-    id_compra bigint,
-    id_produto bigint not null,
-    quantidade integer not null,
-    total integer not null,
-    data datetime not null,
-    ativo TINYINT(1) not null,
-    primary key(id),
-    constraint fk_movimentacao_tipo_movimentacao_id foreign key(id_tipo_movimentacao) references tipo_movimentacao(id),
-    constraint fk_movimentacao_compra_id foreign key(id_compra) references compra(id),
-    constraint fk_movimentacao_produto_id foreign key(id_produto) references produto(id)
-);
--- #################### --
--- FINANCEIRO           --
--- #################### --
-create table categoria_conta (
-  id bigint NOT NULL AUTO_INCREMENT,
-  nome varchar(100) NOT NULL,
-  ativo TINYINT(1) not null,
-  primary key(id)
-);
-create table forma_pagamento (
-  id bigint NOT NULL AUTO_INCREMENT,
-  nome varchar(100) NOT NULL,
-  ativo TINYINT(1) not null,
-  primary key(id)
-);
-create table status_pagamento (
-  id bigint NOT NULL AUTO_INCREMENT,
-  nome varchar(100) NOT NULL,
-  ativo TINYINT(1) not null,
-  primary key(id)
-);
-create table banco (
-  id bigint NOT NULL AUTO_INCREMENT,
-  nome varchar(100) NOT NULL,
-  ativo TINYINT(1) NOT NULL,
-  primary key(id)
-);
-create table conta (
-  id bigint NOT NULL AUTO_INCREMENT,
-  id_banco bigint NOT NULL,
-  agencia varchar(5) NOT NULL,
-  conta varchar(6) NOT NULL,
-  digito varchar(2) NOT NULL,
-  pix varchar(50),
-  ativo TINYINT(1) NOT NULL,
-  primary key(id),
-  constraint fk_conta_banco_id foreign key(id_banco) references banco(id)
-);
-create table cartao (
-  id bigint NOT NULL AUTO_INCREMENT,
-  id_conta bigint NOT NULL,
-  id_forma_pagamento bigint NOT NULL,
-  numero_cartao varchar(20) NOT NULL,
-  validade_mes varchar(2) NOT NULL,
-  validade_ano varchar(4) NOT NULL,
-  ativo TINYINT(1) not null,  
-  primary key(id),
-  constraint fk_cartao_conta_id foreign key(id_conta) references conta(id),
-  constraint fk_cartao_forma_pagamento_id foreign key(id_forma_pagamento) references forma_pagamento(id)
-);
-create table sub_categoria_conta (
-  id bigint NOT NULL AUTO_INCREMENT,
-  nome varchar(100) NOT NULL,
-  ativo TINYINT(1) not null,
-  id_categoria_conta bigint NOT NULL,  
-  primary key(id),
-  constraint fk_sub_categoria_conta_categoria_id foreign key(id_categoria_conta) references categoria_conta(id)
-);
-create table conta_pagar (
-  id bigint NOT NULL AUTO_INCREMENT,
-  id_fornecedor bigint NOT NULL,
-  id_sub_categoria bigint NOT NULL,
-  id_status_pagamento bigint NOT NULL, 
-  id_forma_pagamento bigint NOT NULL, 
-  descricao varchar(250) DEFAULT NULL,
-  valor decimal(8,2) NOT NULL,
-  parcelas int NOT NULL,
-  ativo TINYINT(1) not null,
-  primary key(id),
-  constraint fk_conta_pagar_fornecedor_id foreign key(id_fornecedor) references fornecedor(id),
-  constraint fk_conta_pagar_sub_categoria foreign key(id_sub_categoria) references sub_categoria_conta(id),
-  constraint fk_status_pagamento_pagamento_status_id foreign key(id_status_pagamento) references status_pagamento(id),
-  constraint fk_forma_pagamento_pagamento_forma_id foreign key(id_forma_pagamento) references forma_pagamento(id)
-);
-create table conta_pagar_parcelas (
-  id bigint NOT NULL AUTO_INCREMENT,
-  id_conta_pagar bigint NOT NULL,
-  parcela int NOT NULL,
-  vencimento date NOT NULL,
-  pagamento datetime DEFAULT NULL,
-  valor decimal(8,2) NOT NULL,
-  id_status_pagamento bigint NOT NULL, 
-  ativo TINYINT(1) not null,
-  primary key(id),
-  constraint fk_conta_pagar_parcelas_conta_pagar_id foreign key(id_conta_pagar) references conta_pagar(id),
-  constraint fk_conta_pagar_parcelas_status_pagamento_id foreign key(id_status_pagamento) references status_pagamento(id)
-);*/
--- #################### --
--- DADOS BASICOS        --
--- #################### --
-/*
-
-insert into categoria_conta (id, nome, ativo) values (1, 'Despesas Operacionais', 1);
-insert into sub_categoria_conta (id, nome, id_categoria_conta, ativo) values (1, 'Água', 1, 1);
-insert into sub_categoria_conta (id, nome, id_categoria_conta, ativo) values (2, 'Luz', 1, 1);
-
-insert into regime_tributacao_federal(id, nome, ativo) values (1, 'a', 1)
-
-insert into setor_atividade(id, nome, ativo) values (1, 'a', 1)
-
-INSERT INTO endereco (id, cep, localidade, uf, bairro, logradouro, numero, complemento, ativo) VALUES (1, '00000000', 'abc', 'PR', 'abc', 'abc', 'ab', 'ab', 1);
-
-
-
-
-INSERT INTO pessoa (id, nome, nascimento, genero, cpf, telefone, id_endereco, id_usuario, aceitar_termos, tipo_pessoa, ativo)
-VALUES (1, 'adm', '19900212', 'masculino', '06488383906', '988755471', 1, 1, 1, 'CLIENTE', 1);
-*/

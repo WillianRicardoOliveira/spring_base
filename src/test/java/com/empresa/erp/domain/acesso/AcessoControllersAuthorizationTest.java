@@ -17,10 +17,10 @@ import com.empresa.erp.domain.acesso.permissao.controller.PermissaoController;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.controller.UsuarioEmpresaController;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
+import com.empresa.erp.domain.acesso.usuarioEstabelecimento.controller.UsuarioEstabelecimentoController;
+import com.empresa.erp.domain.acesso.usuarioEstabelecimento.record.UsuarioEstabelecimentoRecord;
 import com.empresa.erp.domain.acesso.usuarioPerfil.controller.UsuarioPerfilController;
 import com.empresa.erp.domain.acesso.usuarioPerfil.record.UsuarioPerfilRecord;
-import com.empresa.erp.domain.acesso.usuarioSubsidiaria.controller.UsuarioSubsidiariaController;
-import com.empresa.erp.domain.acesso.usuarioSubsidiaria.record.UsuarioSubsidiariaRecord;
 import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.usuario.controller.UsuarioController;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
@@ -111,19 +111,19 @@ class AcessoControllersAuthorizationTest {
     }
 
     @Test
-    @DisplayName("Deve validar permissoes do UsuarioSubsidiariaController")
-    void deveValidarPermissoesDoUsuarioSubsidiariaController() throws Exception {
-        assertThat(preAuthorize(UsuarioSubsidiariaController.class, "cadastrar", UsuarioSubsidiariaRecord.class, UriComponentsBuilder.class))
-                .isEqualTo("hasAuthority('ACESSO_USUARIO_SUBSIDIARIA_CRIAR')");
+    @DisplayName("Deve validar permissoes do UsuarioEstabelecimentoController")
+    void deveValidarPermissoesDoUsuarioEstabelecimentoController() throws Exception {
+        assertThat(preAuthorize(UsuarioEstabelecimentoController.class, "cadastrar", UsuarioEstabelecimentoRecord.class, UriComponentsBuilder.class))
+                .isEqualTo("hasAuthority('ACESSO_USUARIO_ESTABELECIMENTO_CRIAR')");
 
-        assertThat(preAuthorize(UsuarioSubsidiariaController.class, "listar", Pageable.class, Long.class))
-                .isEqualTo("hasAuthority('ACESSO_USUARIO_SUBSIDIARIA_LISTAR')");
+        assertThat(preAuthorize(UsuarioEstabelecimentoController.class, "listar", Pageable.class, Long.class))
+                .isEqualTo("hasAuthority('ACESSO_USUARIO_ESTABELECIMENTO_LISTAR')");
 
-        assertThat(preAuthorize(UsuarioSubsidiariaController.class, "detalhar", Long.class))
-                .isEqualTo("hasAuthority('ACESSO_USUARIO_SUBSIDIARIA_DETALHAR')");
+        assertThat(preAuthorize(UsuarioEstabelecimentoController.class, "detalhar", Long.class))
+                .isEqualTo("hasAuthority('ACESSO_USUARIO_ESTABELECIMENTO_DETALHAR')");
 
-        assertThat(preAuthorize(UsuarioSubsidiariaController.class, "excluir", Long.class))
-                .isEqualTo("hasAuthority('ACESSO_USUARIO_SUBSIDIARIA_EXCLUIR')");
+        assertThat(preAuthorize(UsuarioEstabelecimentoController.class, "excluir", Long.class))
+                .isEqualTo("hasAuthority('ACESSO_USUARIO_ESTABELECIMENTO_EXCLUIR')");
     }
 
     @Test

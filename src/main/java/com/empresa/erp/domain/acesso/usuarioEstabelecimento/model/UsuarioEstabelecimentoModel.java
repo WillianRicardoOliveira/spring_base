@@ -1,10 +1,9 @@
-package com.empresa.erp.domain.acesso.usuarioEmpresa.model;
+package com.empresa.erp.domain.acesso.usuarioEstabelecimento.model;
 
-import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
-import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
+import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.base.model.AuditoriaModel;
 import com.empresa.erp.domain.base.model.StatusEnum;
-import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
+import com.empresa.erp.domain.configuracao.estabelecimento.model.EstabelecimentoModel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,46 +21,43 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "usuario_empresa")
-@Entity(name = "UsuarioEmpresaModel")
+@Table(name = "usuario_estabelecimento")
+@Entity(name = "UsuarioEstabelecimentoModel")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id", callSuper = false)
-public class UsuarioEmpresaModel extends AuditoriaModel {
+public class UsuarioEstabelecimentoModel extends AuditoriaModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_usuario_organizacao", nullable = false)
-    private UsuarioOrganizacaoModel usuarioOrganizacao;
+    @JoinColumn(
+            name = "id_usuario_empresa",
+            nullable = false
+    )
+    private UsuarioEmpresaModel usuarioEmpresa;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_empresa", nullable = false)
-    private EmpresaModel empresa;
-
-    @Column(name = "todos_estabelecimentos", nullable = false)
-    private Boolean todosEstabelecimentos;
+    @JoinColumn(
+            name = "id_estabelecimento",
+            nullable = false
+    )
+    private EstabelecimentoModel estabelecimento;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private StatusEnum status;
 
-    public UsuarioEmpresaModel(
-            UsuarioOrganizacaoModel usuarioOrganizacao,
-            EmpresaModel empresa,
-            Boolean todosEstabelecimentos
+    public UsuarioEstabelecimentoModel(
+            UsuarioEmpresaModel usuarioEmpresa,
+            EstabelecimentoModel estabelecimento
     ) {
-        this.usuarioOrganizacao = usuarioOrganizacao;
-        this.empresa = empresa;
-        this.todosEstabelecimentos = todosEstabelecimentos;
+        this.usuarioEmpresa = usuarioEmpresa;
+        this.estabelecimento = estabelecimento;
         this.status = StatusEnum.ATIVO;
-    }
-
-    public void atualizar(AtualizaUsuarioEmpresaRecord dados) {
-        this.todosEstabelecimentos = dados.todosEstabelecimentos();
     }
 
     public void inativar() {

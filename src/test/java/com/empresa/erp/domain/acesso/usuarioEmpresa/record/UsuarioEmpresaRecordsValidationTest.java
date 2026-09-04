@@ -61,9 +61,9 @@ class UsuarioEmpresaRecordsValidationTest {
 
     @Test
     @DisplayName(
-            "Deve rejeitar cadastro sem definicao de subsidiarias"
+            "Deve rejeitar cadastro sem definicao de estabelecimentos"
     )
-    void deveRejeitarCadastroSemDefinicaoDeSubsidiarias() {
+    void deveRejeitarCadastroSemDefinicaoDeEstabelecimentos() {
         var dados = new UsuarioEmpresaRecord(
                 1L,
                 2L,
@@ -100,9 +100,9 @@ class UsuarioEmpresaRecordsValidationTest {
 
     @Test
     @DisplayName(
-            "Deve rejeitar atualizacao sem definicao de subsidiarias"
+            "Deve rejeitar atualizacao sem definicao de estabelecimentos"
     )
-    void deveRejeitarAtualizacaoSemDefinicaoDeSubsidiarias() {
+    void deveRejeitarAtualizacaoSemDefinicaoDeEstabelecimentos() {
         var dados = new AtualizaUsuarioEmpresaRecord(
                 1L,
                 null

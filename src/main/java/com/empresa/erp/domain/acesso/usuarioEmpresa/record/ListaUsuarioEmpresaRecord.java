@@ -9,7 +9,7 @@ public record ListaUsuarioEmpresaRecord(
         String usuario,
         Long idEmpresa,
         String empresa,
-        Boolean todasSubsidiarias,
+        Boolean todosEstabelecimentos,
         StatusEnum status
 ) {
 
@@ -28,7 +28,7 @@ public record ListaUsuarioEmpresaRecord(
                         .getEmail(),
                 usuarioEmpresa.getEmpresa().getId(),
                 usuarioEmpresa.getEmpresa().getNome(),
-                usuarioEmpresa.getTodasSubsidiarias(),
+                usuarioEmpresa.getTodosEstabelecimentos(),
                 usuarioEmpresa.getStatus()
         );
     }

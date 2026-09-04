@@ -20,22 +20,19 @@ import com.empresa.erp.domain.base.model.StatusEnum;
 @ExtendWith(MockitoExtension.class)
 class AutoridadesOrganizacaoServiceTest {
 
-    private static final Long ID_USUARIO =
-            10L;
+    private static final Long ID_USUARIO = 10L;
 
-    private static final Long ID_ORGANIZACAO =
-            20L;
+    private static final Long ID_ORGANIZACAO = 20L;
 
     @Mock
-    private UsuarioPerfilRepository
-            usuarioPerfilRepository;
+    private UsuarioPerfilRepository usuarioPerfilRepository;
 
     @InjectMocks
     private AutoridadesOrganizacaoService service;
 
     @Test
     @DisplayName(
-            "Deve buscar autoridades ativas da organização selecionada"
+            "Deve buscar autoridades ativas da organizacao selecionada"
     )
     void deveBuscarAutoridadesAtivasDaOrganizacaoSelecionada() {
         when(usuarioPerfilRepository
@@ -49,7 +46,7 @@ class AutoridadesOrganizacaoServiceTest {
                 Set.of(
                         "EMPRESA_LISTAR",
                         "EMPRESA_CRIAR",
-                        "SUBSIDIARIA_LISTAR"
+                        "CONFIGURACAO_ESTABELECIMENTO_LISTAR"
                 )
         );
 
@@ -67,7 +64,7 @@ class AutoridadesOrganizacaoServiceTest {
                 .containsExactlyInAnyOrder(
                         "EMPRESA_LISTAR",
                         "EMPRESA_CRIAR",
-                        "SUBSIDIARIA_LISTAR"
+                        "CONFIGURACAO_ESTABELECIMENTO_LISTAR"
                 );
 
         verify(usuarioPerfilRepository)
@@ -81,7 +78,7 @@ class AutoridadesOrganizacaoServiceTest {
 
     @Test
     @DisplayName(
-            "Deve retornar lista vazia quando usuário não possui autoridades"
+            "Deve retornar lista vazia quando usuario nao possui autoridades"
     )
     void deveRetornarListaVaziaQuandoUsuarioNaoPossuiAutoridades() {
         when(usuarioPerfilRepository
@@ -113,7 +110,7 @@ class AutoridadesOrganizacaoServiceTest {
 
     @Test
     @DisplayName(
-            "Deve criar autoridades compatíveis com Spring Security"
+            "Deve criar autoridades compativeis com Spring Security"
     )
     void deveCriarAutoridadesCompativeisComSpringSecurity() {
         when(usuarioPerfilRepository

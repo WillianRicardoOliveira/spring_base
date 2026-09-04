@@ -29,9 +29,9 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.AtualizaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
+import com.empresa.erp.domain.acesso.usuarioEstabelecimento.repository.UsuarioEstabelecimentoRepository;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
-import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
 import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
@@ -51,12 +51,10 @@ class UsuarioEmpresaServiceTest {
     private UsuarioEmpresaRepository repository;
 
     @Mock
-    private UsuarioOrganizacaoRepository
-            usuarioOrganizacaoRepository;
+    private UsuarioOrganizacaoRepository usuarioOrganizacaoRepository;
 
     @Mock
-    private UsuarioSubsidiariaRepository
-            usuarioSubsidiariaRepository;
+    private UsuarioEstabelecimentoRepository usuarioEstabelecimentoRepository;
 
     @Mock
     private EmpresaRepository empresaRepository;
@@ -76,26 +74,17 @@ class UsuarioEmpresaServiceTest {
     @BeforeEach
     void setUp() {
         lenient()
-                .when(
-                        contextoOrganizacao
-                                .getIdOrganizacao()
-                )
+                .when(contextoOrganizacao.getIdOrganizacao())
                 .thenReturn(ID_ORGANIZACAO);
     }
 
     @Test
-    @DisplayName(
-            "Deve cadastrar vinculo na organizacao atual"
-    )
+    @DisplayName("Deve cadastrar vinculo na organizacao atual")
     void deveCadastrarVinculoNaOrganizacaoAtual() {
         var usuario = criarUsuario(1L);
         var organizacao = criarOrganizacao(ID_ORGANIZACAO);
         var usuarioOrganizacao =
-                criarUsuarioOrganizacao(
-                        11L,
-                        usuario,
-                        organizacao
-                );
+                criarUsuarioOrganizacao(11L, usuario, organizacao);
         var empresa = criarEmpresa(2L);
 
         when(usuarioOrganizacaoRepository
@@ -124,12 +113,8 @@ class UsuarioEmpresaServiceTest {
                 )
         ).thenReturn(false);
 
-        when(repository.save(
-                any(UsuarioEmpresaModel.class)
-        )).thenAnswer(
-                invocacao ->
-                        invocacao.getArgument(0)
-        );
+        when(repository.save(any(UsuarioEmpresaModel.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
 
         var resultado = service.cadastrar(
                 new UsuarioEmpresaRecord(
@@ -142,16 +127,13 @@ class UsuarioEmpresaServiceTest {
         assertThat(resultado.getUsuarioOrganizacao())
                 .isSameAs(usuarioOrganizacao);
 
-        assertThat(
-                resultado
-                        .getUsuarioOrganizacao()
-                        .getUsuario()
-        ).isSameAs(usuario);
+        assertThat(resultado.getUsuarioOrganizacao().getUsuario())
+                .isSameAs(usuario);
 
         assertThat(resultado.getEmpresa())
                 .isSameAs(empresa);
 
-        assertThat(resultado.getTodasSubsidiarias())
+        assertThat(resultado.getTodosEstabelecimentos())
                 .isTrue();
 
         assertThat(resultado.getStatus())
@@ -159,9 +141,7 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear cadastro para usuario inexistente"
-    )
+    @DisplayName("Deve bloquear cadastro para usuario inexistente")
     void deveBloquearCadastroParaUsuarioInexistente() {
         when(usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
@@ -182,9 +162,7 @@ class UsuarioEmpresaServiceTest {
                 )
         )
                 .isInstanceOf(ValidacaoException.class)
-                .hasMessage(
-                        "Usuario nao encontrado na organizacao."
-                );
+                .hasMessage("Usuario nao encontrado na organizacao.");
 
         verify(empresaRepository, never())
                 .findByIdAndOrganizacaoIdAndStatus(
@@ -198,9 +176,7 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear usuario sem vinculo com organizacao"
-    )
+    @DisplayName("Deve bloquear usuario sem vinculo com organizacao")
     void deveBloquearUsuarioSemVinculoComOrganizacao() {
         when(usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
@@ -221,9 +197,7 @@ class UsuarioEmpresaServiceTest {
                 )
         )
                 .isInstanceOf(ValidacaoException.class)
-                .hasMessage(
-                        "Usuario nao encontrado na organizacao."
-                );
+                .hasMessage("Usuario nao encontrado na organizacao.");
 
         verify(empresaRepository, never())
                 .findByIdAndOrganizacaoIdAndStatus(
@@ -237,18 +211,12 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear empresa fora da organizacao"
-    )
+    @DisplayName("Deve bloquear empresa fora da organizacao")
     void deveBloquearEmpresaForaDaOrganizacao() {
         var usuario = criarUsuario(1L);
         var organizacao = criarOrganizacao(ID_ORGANIZACAO);
         var usuarioOrganizacao =
-                criarUsuarioOrganizacao(
-                        11L,
-                        usuario,
-                        organizacao
-                );
+                criarUsuarioOrganizacao(11L, usuario, organizacao);
 
         when(usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
@@ -277,9 +245,7 @@ class UsuarioEmpresaServiceTest {
                 )
         )
                 .isInstanceOf(ValidacaoException.class)
-                .hasMessage(
-                        "Empresa nao encontrada ou removida."
-                );
+                .hasMessage("Empresa nao encontrada ou removida.");
 
         verify(repository, never())
                 .save(any(UsuarioEmpresaModel.class));
@@ -291,11 +257,7 @@ class UsuarioEmpresaServiceTest {
         var usuario = criarUsuario(1L);
         var organizacao = criarOrganizacao(ID_ORGANIZACAO);
         var usuarioOrganizacao =
-                criarUsuarioOrganizacao(
-                        11L,
-                        usuario,
-                        organizacao
-                );
+                criarUsuarioOrganizacao(11L, usuario, organizacao);
         var empresa = criarEmpresa(2L);
 
         when(usuarioOrganizacaoRepository
@@ -334,18 +296,14 @@ class UsuarioEmpresaServiceTest {
                 )
         )
                 .isInstanceOf(ValidacaoException.class)
-                .hasMessage(
-                        "Usuario ja vinculado a esta empresa."
-                );
+                .hasMessage("Usuario ja vinculado a esta empresa.");
 
         verify(repository, never())
                 .save(any(UsuarioEmpresaModel.class));
     }
 
     @Test
-    @DisplayName(
-            "Deve listar vinculos da organizacao sem filtros"
-    )
+    @DisplayName("Deve listar vinculos da organizacao sem filtros")
     void deveListarVinculosDaOrganizacaoSemFiltros() {
         var paginacao = PageRequest.of(0, 10);
         var usuarioEmpresa = criarUsuarioEmpresa();
@@ -358,11 +316,7 @@ class UsuarioEmpresaServiceTest {
                         null,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(
-                new PageImpl<>(
-                        List.of(usuarioEmpresa)
-                )
-        );
+        ).thenReturn(new PageImpl<>(List.of(usuarioEmpresa)));
 
         var resultado = service.listar(
                 paginacao,
@@ -378,19 +332,13 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar por usuario e organizacao"
-    )
+    @DisplayName("Deve listar por usuario e organizacao")
     void deveListarPorUsuarioEOrganizacao() {
         var paginacao = PageRequest.of(0, 10);
         var usuario = criarUsuario(1L);
         var organizacao = criarOrganizacao(ID_ORGANIZACAO);
         var usuarioOrganizacao =
-                criarUsuarioOrganizacao(
-                        11L,
-                        usuario,
-                        organizacao
-                );
+                criarUsuarioOrganizacao(11L, usuario, organizacao);
 
         when(usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
@@ -409,9 +357,7 @@ class UsuarioEmpresaServiceTest {
                         null,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(
-                new PageImpl<>(List.of())
-        );
+        ).thenReturn(new PageImpl<>(List.of()));
 
         service.listar(
                 paginacao,
@@ -430,9 +376,7 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar por empresa e organizacao"
-    )
+    @DisplayName("Deve listar por empresa e organizacao")
     void deveListarPorEmpresaEOrganizacao() {
         var paginacao = PageRequest.of(0, 10);
         var empresa = criarEmpresa(2L);
@@ -453,9 +397,7 @@ class UsuarioEmpresaServiceTest {
                         2L,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(
-                new PageImpl<>(List.of())
-        );
+        ).thenReturn(new PageImpl<>(List.of()));
 
         service.listar(
                 paginacao,
@@ -474,19 +416,13 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar por usuario empresa e organizacao"
-    )
+    @DisplayName("Deve listar por usuario empresa e organizacao")
     void deveListarPorUsuarioEmpresaEOrganizacao() {
         var paginacao = PageRequest.of(0, 10);
         var usuario = criarUsuario(1L);
         var organizacao = criarOrganizacao(ID_ORGANIZACAO);
         var usuarioOrganizacao =
-                criarUsuarioOrganizacao(
-                        11L,
-                        usuario,
-                        organizacao
-                );
+                criarUsuarioOrganizacao(11L, usuario, organizacao);
         var empresa = criarEmpresa(2L);
 
         when(usuarioOrganizacaoRepository
@@ -514,9 +450,7 @@ class UsuarioEmpresaServiceTest {
                         2L,
                         StatusEnum.ATIVO
                 )
-        ).thenReturn(
-                new PageImpl<>(List.of())
-        );
+        ).thenReturn(new PageImpl<>(List.of()));
 
         service.listar(
                 paginacao,
@@ -535,9 +469,7 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve listar empresas pelo servico isolado"
-    )
+    @DisplayName("Deve listar empresas pelo servico isolado")
     void deveListarEmpresasPeloServicoIsolado() {
         var paginacao = PageRequest.of(0, 10);
 
@@ -576,9 +508,7 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve detalhar vinculo da organizacao"
-    )
+    @DisplayName("Deve detalhar vinculo da organizacao")
     void deveDetalharVinculoDaOrganizacao() {
         var usuarioEmpresa = criarUsuarioEmpresa();
 
@@ -604,9 +534,7 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear detalhe de outra organizacao"
-    )
+    @DisplayName("Deve bloquear detalhe de outra organizacao")
     void deveBloquearDetalheDeOutraOrganizacao() {
         when(repository
                 .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
@@ -622,16 +550,13 @@ class UsuarioEmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "Vinculo entre usuario e empresa "
-                                + "nao encontrado ou removido."
+                        "Vinculo entre usuario e empresa nao encontrado ou removido."
                 );
     }
 
     @Test
-    @DisplayName(
-            "Deve atualizar acesso a todas subsidiarias"
-    )
-    void deveAtualizarAcessoATodasSubsidiarias() {
+    @DisplayName("Deve atualizar acesso a todos estabelecimentos")
+    void deveAtualizarAcessoATodosEstabelecimentos() {
         var usuarioEmpresa = criarUsuarioEmpresa();
 
         when(repository
@@ -650,15 +575,13 @@ class UsuarioEmpresaServiceTest {
                 )
         );
 
-        assertThat(resultado.todasSubsidiarias())
+        assertThat(resultado.todosEstabelecimentos())
                 .isFalse();
     }
 
     @Test
-    @DisplayName(
-            "Deve permitir habilitar todas sem vinculos"
-    )
-    void devePermitirHabilitarTodasSemVinculos() {
+    @DisplayName("Deve permitir habilitar todos sem vinculos")
+    void devePermitirHabilitarTodosSemVinculos() {
         var usuarioEmpresa =
                 criarUsuarioEmpresa(false);
 
@@ -671,7 +594,7 @@ class UsuarioEmpresaServiceTest {
                 )
         ).thenReturn(Optional.of(usuarioEmpresa));
 
-        when(usuarioSubsidiariaRepository
+        when(usuarioEstabelecimentoRepository
                 .existsByUsuarioEmpresaIdAndStatus(
                         3L,
                         StatusEnum.ATIVO
@@ -685,14 +608,12 @@ class UsuarioEmpresaServiceTest {
                 )
         );
 
-        assertThat(resultado.todasSubsidiarias())
+        assertThat(resultado.todosEstabelecimentos())
                 .isTrue();
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear habilitacao com vinculos"
-    )
+    @DisplayName("Deve bloquear habilitacao com vinculos")
     void deveBloquearHabilitacaoComVinculos() {
         var usuarioEmpresa =
                 criarUsuarioEmpresa(false);
@@ -706,7 +627,7 @@ class UsuarioEmpresaServiceTest {
                 )
         ).thenReturn(Optional.of(usuarioEmpresa));
 
-        when(usuarioSubsidiariaRepository
+        when(usuarioEstabelecimentoRepository
                 .existsByUsuarioEmpresaIdAndStatus(
                         3L,
                         StatusEnum.ATIVO
@@ -723,19 +644,15 @@ class UsuarioEmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "Remova os vinculos com subsidiarias "
-                                + "antes de habilitar o acesso "
-                                + "a todas as subsidiarias."
+                        "Remova os vinculos com estabelecimentos antes de habilitar o acesso a todos os estabelecimentos."
                 );
 
-        assertThat(usuarioEmpresa.getTodasSubsidiarias())
+        assertThat(usuarioEmpresa.getTodosEstabelecimentos())
                 .isFalse();
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear atualizacao de outra organizacao"
-    )
+    @DisplayName("Deve bloquear atualizacao de outra organizacao")
     void deveBloquearAtualizacaoDeOutraOrganizacao() {
         when(repository
                 .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
@@ -756,11 +673,10 @@ class UsuarioEmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "Vinculo entre usuario e empresa "
-                                + "nao encontrado ou removido."
+                        "Vinculo entre usuario e empresa nao encontrado ou removido."
                 );
 
-        verify(usuarioSubsidiariaRepository, never())
+        verify(usuarioEstabelecimentoRepository, never())
                 .existsByUsuarioEmpresaIdAndStatus(
                         any(),
                         any()
@@ -768,9 +684,7 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve remover vinculo da organizacao com auditoria"
-    )
+    @DisplayName("Deve remover vinculo da organizacao com auditoria")
     void deveRemoverVinculoDaOrganizacaoComAuditoria() {
         var usuarioEmpresa = criarUsuarioEmpresa();
 
@@ -783,7 +697,7 @@ class UsuarioEmpresaServiceTest {
                 )
         ).thenReturn(Optional.of(usuarioEmpresa));
 
-        when(usuarioSubsidiariaRepository
+        when(usuarioEstabelecimentoRepository
                 .existsByUsuarioEmpresaIdAndStatus(
                         3L,
                         StatusEnum.ATIVO
@@ -806,10 +720,8 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear exclusao com subsidiarias vinculadas"
-    )
-    void deveBloquearExclusaoComSubsidiariasVinculadas() {
+    @DisplayName("Deve bloquear exclusao com estabelecimentos vinculados")
+    void deveBloquearExclusaoComEstabelecimentosVinculados() {
         var usuarioEmpresa =
                 criarUsuarioEmpresa(false);
 
@@ -822,7 +734,7 @@ class UsuarioEmpresaServiceTest {
                 )
         ).thenReturn(Optional.of(usuarioEmpresa));
 
-        when(usuarioSubsidiariaRepository
+        when(usuarioEstabelecimentoRepository
                 .existsByUsuarioEmpresaIdAndStatus(
                         3L,
                         StatusEnum.ATIVO
@@ -834,9 +746,7 @@ class UsuarioEmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "O vinculo entre usuario e empresa "
-                                + "possui subsidiarias vinculadas "
-                                + "e nao pode ser removido."
+                        "O vinculo entre usuario e empresa possui estabelecimentos vinculados e nao pode ser removido."
                 );
 
         assertThat(usuarioEmpresa.getStatus())
@@ -847,9 +757,7 @@ class UsuarioEmpresaServiceTest {
     }
 
     @Test
-    @DisplayName(
-            "Deve bloquear exclusao de outra organizacao"
-    )
+    @DisplayName("Deve bloquear exclusao de outra organizacao")
     void deveBloquearExclusaoDeOutraOrganizacao() {
         when(repository
                 .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
@@ -865,11 +773,10 @@ class UsuarioEmpresaServiceTest {
         )
                 .isInstanceOf(ValidacaoException.class)
                 .hasMessage(
-                        "Vinculo entre usuario e empresa "
-                                + "nao encontrado ou removido."
+                        "Vinculo entre usuario e empresa nao encontrado ou removido."
                 );
 
-        verify(usuarioSubsidiariaRepository, never())
+        verify(usuarioEstabelecimentoRepository, never())
                 .existsByUsuarioEmpresaIdAndStatus(
                         any(),
                         any()
@@ -897,9 +804,7 @@ class UsuarioEmpresaServiceTest {
         return usuario;
     }
 
-    private OrganizacaoModel criarOrganizacao(
-            Long id
-    ) {
+    private OrganizacaoModel criarOrganizacao(Long id) {
         var organizacao =
                 new OrganizacaoModel(
                         "Organizacao Principal"
@@ -914,12 +819,11 @@ class UsuarioEmpresaServiceTest {
         return organizacao;
     }
 
-    private UsuarioOrganizacaoModel
-            criarUsuarioOrganizacao(
-                    Long id,
-                    UsuarioModel usuario,
-                    OrganizacaoModel organizacao
-            ) {
+    private UsuarioOrganizacaoModel criarUsuarioOrganizacao(
+            Long id,
+            UsuarioModel usuario,
+            OrganizacaoModel organizacao
+    ) {
         var usuarioOrganizacao =
                 new UsuarioOrganizacaoModel(
                         usuario,
@@ -952,15 +856,13 @@ class UsuarioEmpresaServiceTest {
         return empresa;
     }
 
-    private UsuarioEmpresaModel
-            criarUsuarioEmpresa() {
+    private UsuarioEmpresaModel criarUsuarioEmpresa() {
         return criarUsuarioEmpresa(true);
     }
 
-    private UsuarioEmpresaModel
-            criarUsuarioEmpresa(
-                    Boolean todasSubsidiarias
-            ) {
+    private UsuarioEmpresaModel criarUsuarioEmpresa(
+            Boolean todosEstabelecimentos
+    ) {
         var organizacao =
                 criarOrganizacao(ID_ORGANIZACAO);
 
@@ -975,7 +877,7 @@ class UsuarioEmpresaServiceTest {
                 new UsuarioEmpresaModel(
                         usuarioOrganizacao,
                         criarEmpresa(2L),
-                        todasSubsidiarias
+                        todosEstabelecimentos
                 );
 
         ReflectionTestUtils.setField(

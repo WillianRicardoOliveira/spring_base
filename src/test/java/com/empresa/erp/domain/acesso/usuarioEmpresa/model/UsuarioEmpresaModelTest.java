@@ -46,7 +46,7 @@ class UsuarioEmpresaModelTest {
         assertThat(usuarioEmpresa.getEmpresa())
                 .isSameAs(empresa);
 
-        assertThat(usuarioEmpresa.getTodasSubsidiarias())
+        assertThat(usuarioEmpresa.getTodosEstabelecimentos())
                 .isTrue();
 
         assertThat(usuarioEmpresa.getStatus())
@@ -54,8 +54,8 @@ class UsuarioEmpresaModelTest {
     }
 
     @Test
-    @DisplayName("Deve atualizar acesso a todas subsidiarias")
-    void deveAtualizarAcessoATodasSubsidiarias() {
+    @DisplayName("Deve atualizar acesso a todos estabelecimentos")
+    void deveAtualizarAcessoATodosEstabelecimentos() {
         var usuarioEmpresa = criarUsuarioEmpresa(false);
 
         usuarioEmpresa.atualizar(
@@ -65,7 +65,7 @@ class UsuarioEmpresaModelTest {
                 )
         );
 
-        assertThat(usuarioEmpresa.getTodasSubsidiarias())
+        assertThat(usuarioEmpresa.getTodosEstabelecimentos())
                 .isTrue();
     }
 
@@ -98,7 +98,7 @@ class UsuarioEmpresaModelTest {
     }
 
     private UsuarioEmpresaModel criarUsuarioEmpresa(
-            Boolean todasSubsidiarias
+            Boolean todosEstabelecimentos
     ) {
         var organizacao = criarOrganizacao();
 
@@ -108,7 +108,7 @@ class UsuarioEmpresaModelTest {
                         organizacao
                 ),
                 criarEmpresa(organizacao),
-                todasSubsidiarias
+                todosEstabelecimentos
         );
     }
 

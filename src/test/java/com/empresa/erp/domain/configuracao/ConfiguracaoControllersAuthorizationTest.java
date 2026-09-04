@@ -11,9 +11,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.empresa.erp.domain.configuracao.empresa.controller.EmpresaController;
 import com.empresa.erp.domain.configuracao.empresa.record.AtualizaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
-import com.empresa.erp.domain.configuracao.subsidiaria.controller.SubsidiariaController;
-import com.empresa.erp.domain.configuracao.subsidiaria.record.AtualizaSubsidiariaRecord;
-import com.empresa.erp.domain.configuracao.subsidiaria.record.SubsidiariaRecord;
+import com.empresa.erp.domain.configuracao.estabelecimento.controller.EstabelecimentoController;
+import com.empresa.erp.domain.configuracao.estabelecimento.record.AtualizaEstabelecimentoRecord;
+import com.empresa.erp.domain.configuracao.estabelecimento.record.EstabelecimentoRecord;
 
 class ConfiguracaoControllersAuthorizationTest {
 
@@ -89,27 +89,27 @@ class ConfiguracaoControllersAuthorizationTest {
 
     @Test
     @DisplayName(
-            "Deve validar permissoes do SubsidiariaController"
+            "Deve validar permissoes do EstabelecimentoController"
     )
-    void deveValidarPermissoesDoSubsidiariaController()
+    void deveValidarPermissoesDoEstabelecimentoController()
             throws Exception {
 
         assertThat(
                 preAuthorize(
-                        SubsidiariaController.class,
+                        EstabelecimentoController.class,
                         "cadastrar",
-                        SubsidiariaRecord.class,
+                        EstabelecimentoRecord.class,
                         UriComponentsBuilder.class
                 )
         ).isEqualTo(
                 "hasAuthority("
-                        + "'CONFIGURACAO_SUBSIDIARIA_CRIAR'"
+                        + "'CONFIGURACAO_ESTABELECIMENTO_CRIAR'"
                         + ")"
         );
 
         assertThat(
                 preAuthorize(
-                        SubsidiariaController.class,
+                        EstabelecimentoController.class,
                         "listar",
                         Pageable.class,
                         Long.class,
@@ -117,43 +117,43 @@ class ConfiguracaoControllersAuthorizationTest {
                 )
         ).isEqualTo(
                 "hasAuthority("
-                        + "'CONFIGURACAO_SUBSIDIARIA_LISTAR'"
+                        + "'CONFIGURACAO_ESTABELECIMENTO_LISTAR'"
                         + ")"
         );
 
         assertThat(
                 preAuthorize(
-                        SubsidiariaController.class,
+                        EstabelecimentoController.class,
                         "detalhar",
                         Long.class
                 )
         ).isEqualTo(
                 "hasAuthority("
-                        + "'CONFIGURACAO_SUBSIDIARIA_DETALHAR'"
+                        + "'CONFIGURACAO_ESTABELECIMENTO_DETALHAR'"
                         + ")"
         );
 
         assertThat(
                 preAuthorize(
-                        SubsidiariaController.class,
+                        EstabelecimentoController.class,
                         "atualizar",
-                        AtualizaSubsidiariaRecord.class
+                        AtualizaEstabelecimentoRecord.class
                 )
         ).isEqualTo(
                 "hasAuthority("
-                        + "'CONFIGURACAO_SUBSIDIARIA_EDITAR'"
+                        + "'CONFIGURACAO_ESTABELECIMENTO_EDITAR'"
                         + ")"
         );
 
         assertThat(
                 preAuthorize(
-                        SubsidiariaController.class,
+                        EstabelecimentoController.class,
                         "excluir",
                         Long.class
                 )
         ).isEqualTo(
                 "hasAuthority("
-                        + "'CONFIGURACAO_SUBSIDIARIA_EXCLUIR'"
+                        + "'CONFIGURACAO_ESTABELECIMENTO_EXCLUIR'"
                         + ")"
         );
     }

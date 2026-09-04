@@ -14,9 +14,9 @@ import com.empresa.erp.domain.acesso.usuarioEmpresa.record.DetalheUsuarioEmpresa
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.ListaUsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.record.UsuarioEmpresaRecord;
 import com.empresa.erp.domain.acesso.usuarioEmpresa.repository.UsuarioEmpresaRepository;
+import com.empresa.erp.domain.acesso.usuarioEstabelecimento.repository.UsuarioEstabelecimentoRepository;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.repository.UsuarioOrganizacaoRepository;
-import com.empresa.erp.domain.acesso.usuarioSubsidiaria.repository.UsuarioSubsidiariaRepository;
 import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
@@ -30,31 +30,16 @@ import lombok.RequiredArgsConstructor;
 public class UsuarioEmpresaService {
 
     private final UsuarioEmpresaRepository repository;
-
-    private final UsuarioOrganizacaoRepository
-            usuarioOrganizacaoRepository;
-
-    private final UsuarioSubsidiariaRepository
-            usuarioSubsidiariaRepository;
-
-    private final EmpresaRepository
-            empresaRepository;
-
-    private final EmpresaService
-            empresaService;
-
-    private final UsuarioLogadoService
-            usuarioLogadoService;
-
-    private final ContextoOrganizacao
-            contextoOrganizacao;
+    private final UsuarioOrganizacaoRepository usuarioOrganizacaoRepository;
+    private final UsuarioEstabelecimentoRepository usuarioEstabelecimentoRepository;
+    private final EmpresaRepository empresaRepository;
+    private final EmpresaService empresaService;
+    private final UsuarioLogadoService usuarioLogadoService;
+    private final ContextoOrganizacao contextoOrganizacao;
 
     @Transactional
-    public UsuarioEmpresaModel cadastrar(
-            UsuarioEmpresaRecord dados
-    ) {
-        Long idOrganizacao =
-                contextoOrganizacao.getIdOrganizacao();
+    public UsuarioEmpresaModel cadastrar(UsuarioEmpresaRecord dados) {
+        Long idOrganizacao = contextoOrganizacao.getIdOrganizacao();
 
         UsuarioOrganizacaoModel usuarioOrganizacao =
                 buscarUsuarioAtivoNaOrganizacao(
@@ -62,20 +47,17 @@ public class UsuarioEmpresaService {
                         idOrganizacao
                 );
 
-        EmpresaModel empresa =
-                buscarEmpresaAtiva(
-                        dados.idEmpresa(),
-                        idOrganizacao
-                );
+        EmpresaModel empresa = buscarEmpresaAtiva(
+                dados.idEmpresa(),
+                idOrganizacao
+        );
 
-        if (repository
-                .existsByUsuarioOrganizacaoIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
-                        usuarioOrganizacao.getId(),
-                        empresa.getId(),
-                        idOrganizacao,
-                        StatusEnum.ATIVO
-                )
-        ) {
+        if (repository.existsByUsuarioOrganizacaoIdAndEmpresaIdAndEmpresaOrganizacaoIdAndStatus(
+                usuarioOrganizacao.getId(),
+                empresa.getId(),
+                idOrganizacao,
+                StatusEnum.ATIVO
+        )) {
             throw new ValidacaoException(
                     "Usuario ja vinculado a esta empresa."
             );
@@ -85,7 +67,7 @@ public class UsuarioEmpresaService {
                 new UsuarioEmpresaModel(
                         usuarioOrganizacao,
                         empresa,
-                        dados.todasSubsidiarias()
+                        dados.todosEstabelecimentos()
                 );
 
         return repository.save(usuarioEmpresa);
@@ -97,11 +79,9 @@ public class UsuarioEmpresaService {
             Long idUsuario,
             Long idEmpresa
     ) {
-        Long idOrganizacao =
-                contextoOrganizacao.getIdOrganizacao();
+        Long idOrganizacao = contextoOrganizacao.getIdOrganizacao();
 
-        Long idUsuarioOrganizacao =
-                null;
+        Long idUsuarioOrganizacao = null;
 
         if (idUsuario != null) {
             UsuarioOrganizacaoModel usuarioOrganizacao =
@@ -110,22 +90,18 @@ public class UsuarioEmpresaService {
                             idOrganizacao
                     );
 
-            idUsuarioOrganizacao =
-                    usuarioOrganizacao.getId();
+            idUsuarioOrganizacao = usuarioOrganizacao.getId();
         }
 
-        Long idEmpresaValidada =
-                null;
+        Long idEmpresaValidada = null;
 
         if (idEmpresa != null) {
-            EmpresaModel empresa =
-                    buscarEmpresaAtiva(
-                            idEmpresa,
-                            idOrganizacao
-                    );
+            EmpresaModel empresa = buscarEmpresaAtiva(
+                    idEmpresa,
+                    idOrganizacao
+            );
 
-            idEmpresaValidada =
-                    empresa.getId();
+            idEmpresaValidada = empresa.getId();
         }
 
         return repository
@@ -144,16 +120,11 @@ public class UsuarioEmpresaService {
             Pageable paginacao,
             String filtro
     ) {
-        return empresaService.listar(
-                paginacao,
-                filtro
-        );
+        return empresaService.listar(paginacao, filtro);
     }
 
     @Transactional(readOnly = true)
-    public DetalheUsuarioEmpresaRecord detalhar(
-            Long id
-    ) {
+    public DetalheUsuarioEmpresaRecord detalhar(Long id) {
         return new DetalheUsuarioEmpresaRecord(
                 buscarVinculoAtivo(id)
         );
@@ -164,91 +135,71 @@ public class UsuarioEmpresaService {
             AtualizaUsuarioEmpresaRecord dados
     ) {
         UsuarioEmpresaModel usuarioEmpresa =
-                buscarVinculoAtivo(
-                        dados.id()
-                );
+                buscarVinculoAtivo(dados.id());
 
-        validarAlteracaoParaTodasSubsidiarias(
+        validarAlteracaoParaTodosEstabelecimentos(
                 usuarioEmpresa,
                 dados
         );
 
         usuarioEmpresa.atualizar(dados);
 
-        return new DetalheUsuarioEmpresaRecord(
-                usuarioEmpresa
-        );
+        return new DetalheUsuarioEmpresaRecord(usuarioEmpresa);
     }
 
     @Transactional
-    public void excluir(
-            Long id
-    ) {
+    public void excluir(Long id) {
         UsuarioEmpresaModel usuarioEmpresa =
                 buscarVinculoAtivo(id);
 
-        validarAusenciaDeSubsidiariasVinculadas(
+        validarAusenciaDeEstabelecimentosVinculados(
                 usuarioEmpresa
         );
 
-        Long idUsuario =
-                usuarioLogadoService.getId();
-
-        usuarioEmpresa.remover(idUsuario);
+        usuarioEmpresa.remover(usuarioLogadoService.getId());
     }
 
-    private void validarAlteracaoParaTodasSubsidiarias(
+    private void validarAlteracaoParaTodosEstabelecimentos(
             UsuarioEmpresaModel usuarioEmpresa,
             AtualizaUsuarioEmpresaRecord dados
     ) {
-        boolean habilitandoTodasSubsidiarias =
+        boolean habilitandoTodosEstabelecimentos =
                 Boolean.FALSE.equals(
-                        usuarioEmpresa.getTodasSubsidiarias()
+                        usuarioEmpresa.getTodosEstabelecimentos()
                 )
                 && Boolean.TRUE.equals(
-                        dados.todasSubsidiarias()
+                        dados.todosEstabelecimentos()
                 );
 
-        if (!habilitandoTodasSubsidiarias) {
+        if (!habilitandoTodosEstabelecimentos) {
             return;
         }
 
-        if (usuarioSubsidiariaRepository
-                .existsByUsuarioEmpresaIdAndStatus(
-                        usuarioEmpresa.getId(),
-                        StatusEnum.ATIVO
-                )
-        ) {
+        if (usuarioEstabelecimentoRepository.existsByUsuarioEmpresaIdAndStatus(
+                usuarioEmpresa.getId(),
+                StatusEnum.ATIVO
+        )) {
             throw new ValidacaoException(
-                    "Remova os vinculos com subsidiarias "
-                            + "antes de habilitar o acesso "
-                            + "a todas as subsidiarias."
+                    "Remova os vinculos com estabelecimentos antes de habilitar o acesso a todos os estabelecimentos."
             );
         }
     }
 
-    private void validarAusenciaDeSubsidiariasVinculadas(
+    private void validarAusenciaDeEstabelecimentosVinculados(
             UsuarioEmpresaModel usuarioEmpresa
     ) {
-        if (usuarioSubsidiariaRepository
-                .existsByUsuarioEmpresaIdAndStatus(
-                        usuarioEmpresa.getId(),
-                        StatusEnum.ATIVO
-                )
-        ) {
+        if (usuarioEstabelecimentoRepository.existsByUsuarioEmpresaIdAndStatus(
+                usuarioEmpresa.getId(),
+                StatusEnum.ATIVO
+        )) {
             throw new ValidacaoException(
-                    "O vinculo entre usuario e empresa "
-                            + "possui subsidiarias vinculadas "
-                            + "e nao pode ser removido."
+                    "O vinculo entre usuario e empresa possui estabelecimentos vinculados e nao pode ser removido."
             );
         }
     }
 
-    private UsuarioEmpresaModel buscarVinculoAtivo(
-            Long id
-    ) {
-        Long idOrganizacao =
-                contextoOrganizacao.getIdOrganizacao();
+    private UsuarioEmpresaModel buscarVinculoAtivo(Long id) {
+        Long idOrganizacao = contextoOrganizacao.getIdOrganizacao();
 
         return repository
                 .findByIdAndUsuarioOrganizacaoOrganizacaoIdAndEmpresaOrganizacaoIdAndStatus(
@@ -259,17 +210,15 @@ public class UsuarioEmpresaService {
                 )
                 .orElseThrow(() ->
                         new ValidacaoException(
-                                "Vinculo entre usuario e empresa "
-                                        + "nao encontrado ou removido."
+                                "Vinculo entre usuario e empresa nao encontrado ou removido."
                         )
                 );
     }
 
-    private UsuarioOrganizacaoModel
-            buscarUsuarioAtivoNaOrganizacao(
-                    Long idUsuario,
-                    Long idOrganizacao
-            ) {
+    private UsuarioOrganizacaoModel buscarUsuarioAtivoNaOrganizacao(
+            Long idUsuario,
+            Long idOrganizacao
+    ) {
         return usuarioOrganizacaoRepository
                 .findByUsuarioIdAndOrganizacaoIdAndStatusAndUsuarioStatus(
                         idUsuario,
@@ -279,8 +228,7 @@ public class UsuarioEmpresaService {
                 )
                 .orElseThrow(() ->
                         new ValidacaoException(
-                                "Usuario nao encontrado "
-                                        + "na organizacao."
+                                "Usuario nao encontrado na organizacao."
                         )
                 );
     }

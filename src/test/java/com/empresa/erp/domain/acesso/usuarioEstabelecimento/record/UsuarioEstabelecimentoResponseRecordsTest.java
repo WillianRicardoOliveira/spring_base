@@ -1,4 +1,4 @@
-package com.empresa.erp.domain.acesso.usuarioEmpresa.record;
+package com.empresa.erp.domain.acesso.usuarioEstabelecimento.record;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,26 +7,33 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.empresa.erp.domain.acesso.usuarioEmpresa.model.UsuarioEmpresaModel;
+import com.empresa.erp.domain.acesso.usuarioEstabelecimento.model.UsuarioEstabelecimentoModel;
 import com.empresa.erp.domain.acesso.usuarioOrganizacao.model.UsuarioOrganizacaoModel;
 import com.empresa.erp.domain.base.model.StatusEnum;
 import com.empresa.erp.domain.configuracao.empresa.model.EmpresaModel;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
+import com.empresa.erp.domain.configuracao.estabelecimento.model.EstabelecimentoModel;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.usuario.model.UsuarioModel;
 import com.empresa.erp.domain.usuario.record.UsuarioRecord;
 
-class UsuarioEmpresaResponseRecordsTest {
+class UsuarioEstabelecimentoResponseRecordsTest {
 
     @Test
     @DisplayName("Deve criar detalhe a partir do model")
     void deveCriarDetalheAPartirDoModel() {
-        var usuarioEmpresa = criarUsuarioEmpresa();
+        var usuarioEstabelecimento =
+                criarUsuarioEstabelecimento();
 
-        var detalhe = new DetalheUsuarioEmpresaRecord(
-                usuarioEmpresa
-        );
+        var detalhe =
+                new DetalheUsuarioEstabelecimentoRecord(
+                        usuarioEstabelecimento
+                );
 
         assertThat(detalhe.id())
+                .isEqualTo(4L);
+
+        assertThat(detalhe.idUsuarioEmpresa())
                 .isEqualTo(3L);
 
         assertThat(detalhe.idUsuario())
@@ -41,8 +48,11 @@ class UsuarioEmpresaResponseRecordsTest {
         assertThat(detalhe.empresa())
                 .isEqualTo("Empresa Exemplo");
 
-        assertThat(detalhe.todosEstabelecimentos())
-                .isTrue();
+        assertThat(detalhe.idEstabelecimento())
+                .isEqualTo(5L);
+
+        assertThat(detalhe.estabelecimento())
+                .isEqualTo("Filial Curitiba");
 
         assertThat(detalhe.status())
                 .isEqualTo(StatusEnum.ATIVO);
@@ -52,15 +62,22 @@ class UsuarioEmpresaResponseRecordsTest {
     }
 
     @Test
-    @DisplayName("Deve criar item de listagem a partir do model")
+    @DisplayName(
+            "Deve criar item de listagem a partir do model"
+    )
     void deveCriarItemDeListagemAPartirDoModel() {
-        var usuarioEmpresa = criarUsuarioEmpresa();
+        var usuarioEstabelecimento =
+                criarUsuarioEstabelecimento();
 
-        var lista = new ListaUsuarioEmpresaRecord(
-                usuarioEmpresa
-        );
+        var lista =
+                new ListaUsuarioEstabelecimentoRecord(
+                        usuarioEstabelecimento
+                );
 
         assertThat(lista.id())
+                .isEqualTo(4L);
+
+        assertThat(lista.idUsuarioEmpresa())
                 .isEqualTo(3L);
 
         assertThat(lista.idUsuario())
@@ -75,8 +92,11 @@ class UsuarioEmpresaResponseRecordsTest {
         assertThat(lista.empresa())
                 .isEqualTo("Empresa Exemplo");
 
-        assertThat(lista.todosEstabelecimentos())
-                .isTrue();
+        assertThat(lista.idEstabelecimento())
+                .isEqualTo(5L);
+
+        assertThat(lista.estabelecimento())
+                .isEqualTo("Filial Curitiba");
 
         assertThat(lista.status())
                 .isEqualTo(StatusEnum.ATIVO);
@@ -85,19 +105,22 @@ class UsuarioEmpresaResponseRecordsTest {
     @Test
     @DisplayName("Deve refletir status inativo")
     void deveRefletirStatusInativo() {
-        var usuarioEmpresa = criarUsuarioEmpresa();
+        var usuarioEstabelecimento =
+                criarUsuarioEstabelecimento();
 
-        usuarioEmpresa.inativar();
+        usuarioEstabelecimento.inativar();
 
-        var detalhe = new DetalheUsuarioEmpresaRecord(
-                usuarioEmpresa
-        );
+        var detalhe =
+                new DetalheUsuarioEstabelecimentoRecord(
+                        usuarioEstabelecimento
+                );
 
         assertThat(detalhe.status())
                 .isEqualTo(StatusEnum.INATIVO);
     }
 
-    private UsuarioEmpresaModel criarUsuarioEmpresa() {
+    private UsuarioEstabelecimentoModel
+            criarUsuarioEstabelecimento() {
         var usuario = new UsuarioModel(
                 new UsuarioRecord(
                         "usuario@teste.com",
@@ -152,7 +175,7 @@ class UsuarioEmpresaResponseRecordsTest {
                 new UsuarioEmpresaModel(
                         usuarioOrganizacao,
                         empresa,
-                        true
+                        false
                 );
 
         ReflectionTestUtils.setField(
@@ -161,6 +184,29 @@ class UsuarioEmpresaResponseRecordsTest {
                 3L
         );
 
-        return usuarioEmpresa;
+        var estabelecimento = new EstabelecimentoModel(
+                empresa,
+                "Filial Curitiba"
+        );
+
+        ReflectionTestUtils.setField(
+                estabelecimento,
+                "id",
+                5L
+        );
+
+        var usuarioEstabelecimento =
+                new UsuarioEstabelecimentoModel(
+                        usuarioEmpresa,
+                        estabelecimento
+                );
+
+        ReflectionTestUtils.setField(
+                usuarioEstabelecimento,
+                "id",
+                4L
+        );
+
+        return usuarioEstabelecimento;
     }
 }

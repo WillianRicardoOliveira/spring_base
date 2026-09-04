@@ -4,20 +4,14 @@ import jakarta.validation.constraints.NotNull;
 
 public record UsuarioEmpresaRecord(
 
-        @NotNull(
-                message = "{usuario.empresa.usuario.obrigatorio}"
-        )
+        @NotNull(message = "{usuario.empresa.usuario.obrigatorio}")
         Long idUsuario,
 
-        @NotNull(
-                message = "{usuario.empresa.empresa.obrigatoria}"
-        )
+        @NotNull(message = "{usuario.empresa.empresa.obrigatoria}")
         Long idEmpresa,
 
-        @NotNull(
-                message = "{usuario.empresa.todas_subsidiarias.obrigatorio}"
-        )
-        Boolean todasSubsidiarias
+        @NotNull(message = "{usuario.empresa.todos_estabelecimentos.obrigatorio}")
+        Boolean todosEstabelecimentos
 
 ) {
 }

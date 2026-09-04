@@ -131,7 +131,7 @@ class UsuarioEmpresaControllerTest {
                 )
                 .andExpect(
                         jsonPath(
-                                "$.todasSubsidiarias"
+                                "$.todosEstabelecimentos"
                         ).value(true)
                 )
                 .andExpect(
@@ -227,7 +227,7 @@ class UsuarioEmpresaControllerTest {
                 .andExpect(
                         jsonPath(
                                 "$.content[0]"
-                                        + ".todasSubsidiarias"
+                                        + ".todosEstabelecimentos"
                         ).value(true)
                 )
                 .andExpect(
@@ -436,7 +436,7 @@ class UsuarioEmpresaControllerTest {
                 )
                 .andExpect(
                         jsonPath(
-                                "$.todasSubsidiarias"
+                                "$.todosEstabelecimentos"
                         ).value(true)
                 )
                 .andExpect(
@@ -491,7 +491,7 @@ class UsuarioEmpresaControllerTest {
                 )
                 .andExpect(
                         jsonPath(
-                                "$.todasSubsidiarias"
+                                "$.todosEstabelecimentos"
                         ).value(false)
                 )
                 .andExpect(

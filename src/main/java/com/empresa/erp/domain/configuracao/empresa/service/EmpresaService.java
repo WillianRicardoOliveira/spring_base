@@ -16,7 +16,7 @@ import com.empresa.erp.domain.configuracao.empresa.record.DetalheEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.EmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.record.ListaEmpresaRecord;
 import com.empresa.erp.domain.configuracao.empresa.repository.EmpresaRepository;
-import com.empresa.erp.domain.configuracao.subsidiaria.repository.SubsidiariaRepository;
+import com.empresa.erp.domain.configuracao.estabelecimento.repository.EstabelecimentoRepository;
 import com.empresa.erp.domain.organizacao.model.OrganizacaoModel;
 import com.empresa.erp.domain.organizacao.repository.OrganizacaoRepository;
 
@@ -27,47 +27,27 @@ import lombok.RequiredArgsConstructor;
 public class EmpresaService {
 
     private final EmpresaRepository repository;
-
-    private final OrganizacaoRepository
-            organizacaoRepository;
-
-    private final SubsidiariaRepository
-            subsidiariaRepository;
-
-    private final UsuarioEmpresaRepository
-            usuarioEmpresaRepository;
-
-    private final UsuarioLogadoService
-            usuarioLogadoService;
-
-    private final ContextoOrganizacao
-            contextoOrganizacao;
+    private final OrganizacaoRepository organizacaoRepository;
+    private final EstabelecimentoRepository estabelecimentoRepository;
+    private final UsuarioEmpresaRepository usuarioEmpresaRepository;
+    private final UsuarioLogadoService usuarioLogadoService;
+    private final ContextoOrganizacao contextoOrganizacao;
 
     @Transactional
-    public EmpresaModel cadastrar(
-            EmpresaRecord dados
-    ) {
-        Long idOrganizacao =
-                contextoOrganizacao.getIdOrganizacao();
-
+    public EmpresaModel cadastrar(EmpresaRecord dados) {
+        Long idOrganizacao = contextoOrganizacao.getIdOrganizacao();
         String nome = normalizarNome(dados.nome());
 
-        if (repository
-                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
-                        idOrganizacao,
-                        nome,
-                        StatusEnum.ATIVO
-                )
-        ) {
-            throw new ValidacaoException(
-                    "Empresa ja cadastrada."
-            );
+        if (repository.existsByOrganizacaoIdAndNomeIgnoreCaseAndStatus(
+                idOrganizacao,
+                nome,
+                StatusEnum.ATIVO
+        )) {
+            throw new ValidacaoException("Empresa ja cadastrada.");
         }
 
         OrganizacaoModel organizacao =
-                organizacaoRepository.getReferenceById(
-                        idOrganizacao
-                );
+                organizacaoRepository.getReferenceById(idOrganizacao);
 
         EmpresaModel empresa = new EmpresaModel(
                 organizacao,
@@ -82,8 +62,7 @@ public class EmpresaService {
             Pageable paginacao,
             String filtro
     ) {
-        Long idOrganizacao =
-                contextoOrganizacao.getIdOrganizacao();
+        Long idOrganizacao = contextoOrganizacao.getIdOrganizacao();
 
         if (filtro != null && !filtro.isBlank()) {
             return repository
@@ -106,101 +85,65 @@ public class EmpresaService {
     }
 
     @Transactional(readOnly = true)
-    public DetalheEmpresaRecord detalhar(
-            Long id
-    ) {
-        EmpresaModel empresa =
-                buscarEmpresaAtiva(id);
-
-        return new DetalheEmpresaRecord(empresa);
+    public DetalheEmpresaRecord detalhar(Long id) {
+        return new DetalheEmpresaRecord(buscarEmpresaAtiva(id));
     }
 
     @Transactional
-    public DetalheEmpresaRecord atualizar(
-            AtualizaEmpresaRecord dados
-    ) {
-        Long idOrganizacao =
-                contextoOrganizacao.getIdOrganizacao();
-
+    public DetalheEmpresaRecord atualizar(AtualizaEmpresaRecord dados) {
+        Long idOrganizacao = contextoOrganizacao.getIdOrganizacao();
         String nome = normalizarNome(dados.nome());
 
-        EmpresaModel empresa =
-                buscarEmpresaAtiva(dados.id());
+        EmpresaModel empresa = buscarEmpresaAtiva(dados.id());
 
-        if (repository
-                .existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
-                        idOrganizacao,
-                        nome,
-                        StatusEnum.ATIVO,
-                        empresa.getId()
-                )
-        ) {
-            throw new ValidacaoException(
-                    "Empresa ja cadastrada."
-            );
+        if (repository.existsByOrganizacaoIdAndNomeIgnoreCaseAndStatusAndIdNot(
+                idOrganizacao,
+                nome,
+                StatusEnum.ATIVO,
+                empresa.getId()
+        )) {
+            throw new ValidacaoException("Empresa ja cadastrada.");
         }
 
-        empresa.atualizar(
-                new AtualizaEmpresaRecord(
-                        empresa.getId(),
-                        nome
-                )
-        );
+        empresa.atualizar(new AtualizaEmpresaRecord(empresa.getId(), nome));
 
         return new DetalheEmpresaRecord(empresa);
     }
 
     @Transactional
     public void excluir(Long id) {
-        EmpresaModel empresa =
-                buscarEmpresaAtiva(id);
+        EmpresaModel empresa = buscarEmpresaAtiva(id);
 
-        validarAusenciaDeSubsidiarias(empresa);
+        validarAusenciaDeEstabelecimentos(empresa);
         validarAusenciaDeUsuarios(empresa);
 
-        Long idUsuario =
-                usuarioLogadoService.getId();
-
-        empresa.remover(idUsuario);
+        empresa.remover(usuarioLogadoService.getId());
     }
 
-    private void validarAusenciaDeSubsidiarias(
-            EmpresaModel empresa
-    ) {
-        if (subsidiariaRepository
-                .existsByEmpresaIdAndStatus(
-                        empresa.getId(),
-                        StatusEnum.ATIVO
-                )
-        ) {
+    private void validarAusenciaDeEstabelecimentos(EmpresaModel empresa) {
+        if (estabelecimentoRepository.existsByEmpresaIdAndStatus(
+                empresa.getId(),
+                StatusEnum.ATIVO
+        )) {
             throw new ValidacaoException(
-                    "Empresa possui subsidiarias ativas "
-                            + "e nao pode ser removida."
+                    "Empresa possui estabelecimentos ativos e nao pode ser removida."
             );
         }
     }
 
-    private void validarAusenciaDeUsuarios(
-            EmpresaModel empresa
-    ) {
-        if (usuarioEmpresaRepository
-                .existsByEmpresaIdAndStatus(
-                        empresa.getId(),
-                        StatusEnum.ATIVO
-                )
-        ) {
+    private void validarAusenciaDeUsuarios(EmpresaModel empresa) {
+        if (usuarioEmpresaRepository.existsByEmpresaIdAndStatus(
+                empresa.getId(),
+                StatusEnum.ATIVO
+        )) {
             throw new ValidacaoException(
-                    "Empresa possui usuarios vinculados "
-                            + "e nao pode ser removida."
+                    "Empresa possui usuarios vinculados e nao pode ser removida."
             );
         }
     }
 
-    private EmpresaModel buscarEmpresaAtiva(
-            Long id
-    ) {
-        Long idOrganizacao =
-                contextoOrganizacao.getIdOrganizacao();
+    private EmpresaModel buscarEmpresaAtiva(Long id) {
+        Long idOrganizacao = contextoOrganizacao.getIdOrganizacao();
 
         return repository
                 .findByIdAndOrganizacaoIdAndStatus(

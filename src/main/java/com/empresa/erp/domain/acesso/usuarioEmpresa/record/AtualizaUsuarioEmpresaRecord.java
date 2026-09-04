@@ -4,15 +4,11 @@ import jakarta.validation.constraints.NotNull;
 
 public record AtualizaUsuarioEmpresaRecord(
 
-        @NotNull(
-                message = "{usuario.empresa.id.obrigatorio}"
-        )
+        @NotNull(message = "{usuario.empresa.id.obrigatorio}")
         Long id,
 
-        @NotNull(
-                message = "{usuario.empresa.todas_subsidiarias.obrigatorio}"
-        )
-        Boolean todasSubsidiarias
+        @NotNull(message = "{usuario.empresa.todos_estabelecimentos.obrigatorio}")
+        Boolean todosEstabelecimentos
 
 ) {
 }

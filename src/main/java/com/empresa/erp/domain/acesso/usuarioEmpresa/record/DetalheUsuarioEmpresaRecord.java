@@ -10,7 +10,7 @@ public record DetalheUsuarioEmpresaRecord(
         String usuario,
         Long idEmpresa,
         String empresa,
-        Boolean todasSubsidiarias,
+        Boolean todosEstabelecimentos,
         StatusEnum status,
         AuditoriaRecord auditoria
 ) {
@@ -21,7 +21,7 @@ public record DetalheUsuarioEmpresaRecord(
             String usuario,
             Long idEmpresa,
             String empresa,
-            Boolean todasSubsidiarias,
+            Boolean todosEstabelecimentos,
             StatusEnum status
     ) {
         this(
@@ -30,7 +30,7 @@ public record DetalheUsuarioEmpresaRecord(
                 usuario,
                 idEmpresa,
                 empresa,
-                todasSubsidiarias,
+                todosEstabelecimentos,
                 status,
                 null
         );
@@ -51,7 +51,7 @@ public record DetalheUsuarioEmpresaRecord(
                         .getEmail(),
                 usuarioEmpresa.getEmpresa().getId(),
                 usuarioEmpresa.getEmpresa().getNome(),
-                usuarioEmpresa.getTodasSubsidiarias(),
+                usuarioEmpresa.getTodosEstabelecimentos(),
                 usuarioEmpresa.getStatus(),
                 new AuditoriaRecord(usuarioEmpresa)
         );
