@@ -46,4 +46,9 @@ public interface EmpresaRepository
                     Long idOrganizacao,
                     StatusEnum status
             );
+
+    boolean existsByOrganizacaoIdAndStatus(
+            Long idOrganizacao,
+            StatusEnum status
+    );
 }
